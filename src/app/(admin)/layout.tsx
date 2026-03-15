@@ -1,4 +1,5 @@
 import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { ProtectedArea } from "@/components/layout/protected-area";
 
 type AdminLayoutProps = Readonly<{
   children: React.ReactNode;
@@ -14,13 +15,15 @@ const adminLinks = [
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <DashboardShell
-      title="Admin Dashboard"
-      description="Manage operations, applications, events, notices, and platform settings."
-      sidebarHeading="Admin Panel"
-      links={adminLinks}
-    >
-      {children}
-    </DashboardShell>
+    <ProtectedArea allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
+      <DashboardShell
+        title="Admin Dashboard"
+        description="Manage operations, applications, events, notices, and platform settings."
+        sidebarHeading="Admin Panel"
+        links={adminLinks}
+      >
+        {children}
+      </DashboardShell>
+    </ProtectedArea>
   );
 }

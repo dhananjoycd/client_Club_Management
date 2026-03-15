@@ -1,4 +1,5 @@
 import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { ProtectedArea } from "@/components/layout/protected-area";
 
 type MemberLayoutProps = Readonly<{
   children: React.ReactNode;
@@ -13,13 +14,15 @@ const memberLinks = [
 
 export default function MemberLayout({ children }: MemberLayoutProps) {
   return (
-    <DashboardShell
-      title="Member Dashboard"
-      description="Access your club profile, registrations, and membership information."
-      sidebarHeading="Member Area"
-      links={memberLinks}
-    >
-      {children}
-    </DashboardShell>
+    <ProtectedArea allowedRoles={["MEMBER", "ADMIN", "SUPER_ADMIN", "EVENT_MANAGER"]}>
+      <DashboardShell
+        title="Member Dashboard"
+        description="Access your club profile, registrations, and membership information."
+        sidebarHeading="Member Area"
+        links={memberLinks}
+      >
+        {children}
+      </DashboardShell>
+    </ProtectedArea>
   );
 }
