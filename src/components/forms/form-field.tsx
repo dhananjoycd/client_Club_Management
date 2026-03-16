@@ -17,13 +17,13 @@ export function FormField({ label, error, className, id, ...props }: FormFieldPr
 
   return (
     <label htmlFor={fieldId} className="grid gap-2">
-      <span className="text-sm font-medium text-[var(--color-primary)]">{label}</span>
+      <span className="text-sm font-medium text-[var(--color-primary-strong)]">{label}</span>
       <input
         id={fieldId}
         className={cn(
-          "h-11 rounded-2xl border border-[var(--color-border)] bg-white px-4 text-sm text-[var(--color-foreground)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[#dbeafe] disabled:cursor-not-allowed disabled:bg-slate-100",
-          error ? "border-rose-400 focus:ring-rose-100" : "",
-          className
+          "input-base h-12 px-4 text-sm",
+          error ? "border-rose-400 focus:border-rose-400 focus:shadow-[0_0_0_4px_rgba(244,63,94,0.12)]" : "",
+          className,
         )}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${fieldId}-error` : undefined}
@@ -43,13 +43,13 @@ export function FormTextarea({ label, error, className, id, ...props }: FormText
 
   return (
     <label htmlFor={fieldId} className="grid gap-2">
-      <span className="text-sm font-medium text-[var(--color-primary)]">{label}</span>
+      <span className="text-sm font-medium text-[var(--color-primary-strong)]">{label}</span>
       <textarea
         id={fieldId}
         className={cn(
-          "min-h-28 rounded-2xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm text-[var(--color-foreground)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[#dbeafe] disabled:cursor-not-allowed disabled:bg-slate-100",
-          error ? "border-rose-400 focus:ring-rose-100" : "",
-          className
+          "input-base min-h-32 px-4 py-3 text-sm",
+          error ? "border-rose-400 focus:border-rose-400 focus:shadow-[0_0_0_4px_rgba(244,63,94,0.12)]" : "",
+          className,
         )}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${fieldId}-error` : undefined}

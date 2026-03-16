@@ -33,7 +33,27 @@ export function AdminSettingsManager() {
   if (settingsQuery.isError) return <EmptyState title="Unable to load settings" description={getApiErrorMessage(settingsQuery.error, "Please verify your admin session.")} />;
 
   return (
-    <form className="grid gap-4" onSubmit={handleSubmit((values) => saveMutation.mutate({ organizationName: values.organizationName, logoUrl: values.logoUrl || undefined, contactEmail: values.contactEmail || undefined, phone: values.phone || undefined, aboutText: values.aboutText || undefined, socialLinks: { facebook: values.facebook || "", linkedin: values.linkedin || "" } }))} noValidate>
+    <form
+      className="grid gap-4"
+      onSubmit={handleSubmit((values) => {
+        const socialLinks = Object.fromEntries(
+          Object.entries({
+            facebook: values.facebook?.trim(),
+            linkedin: values.linkedin?.trim(),
+          }).filter(([, href]) => href),
+        );
+
+        saveMutation.mutate({
+          organizationName: values.organizationName,
+          logoUrl: values.logoUrl || undefined,
+          contactEmail: values.contactEmail || undefined,
+          phone: values.phone || undefined,
+          aboutText: values.aboutText || undefined,
+          socialLinks: Object.keys(socialLinks).length > 0 ? socialLinks : undefined,
+        });
+      })}
+      noValidate
+    >
       <FormField label="Organization name" error={errors.organizationName} disabled={saveMutation.isPending} {...register("organizationName")} />
       <FormField label="Logo URL" error={errors.logoUrl} disabled={saveMutation.isPending} {...register("logoUrl")} />
       <FormField label="Contact email" error={errors.contactEmail} disabled={saveMutation.isPending} {...register("contactEmail")} />

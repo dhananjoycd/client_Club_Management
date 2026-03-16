@@ -3,28 +3,32 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { queryKeys } from "@/lib/query-keys";
 import { authService } from "@/services/auth.service";
+import { settingsService } from "@/services/settings.service";
 
 const publicLinks = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
   { href: "/events", label: "Events" },
-  { href: "/notices", label: "Notices" },
-  { href: "/apply", label: "Apply" },
+  { href: "/notices", label: "Resources" },
+  { href: "/#team", label: "Team" },
+  { href: "/#contact", label: "Contact" },
 ];
 
 export function PublicNavbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeHash, setActiveHash] = useState("");
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
   const sessionQuery = useQuery({ queryKey: queryKeys.auth.session, queryFn: authService.getSession, retry: false });
+  const settingsQuery = useQuery({ queryKey: queryKeys.settings.detail, queryFn: settingsService.getSettings, retry: false });
   const logoutMutation = useMutation({
     mutationFn: authService.logout,
     onSuccess: async (response) => {
@@ -36,37 +40,99 @@ export function PublicNavbar() {
   });
 
   const user = sessionQuery.data?.data?.user;
+  const settings = settingsQuery.data?.data;
+  const organizationName = settings?.organizationName?.trim() || "XYZ Tech Club";
   const dashboardHref = user?.role === "MEMBER" ? "/member" : user ? "/admin" : null;
-  const navLinks = [...publicLinks, ...(user ? [] : [{ href: "/login", label: "Login" }])];
+
+  useEffect(() => {
+    const updateHash = () => setActiveHash(window.location.hash);
+
+    updateHash();
+    window.addEventListener("hashchange", updateHash);
+
+    return () => window.removeEventListener("hashchange", updateHash);
+  }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-white/95 backdrop-blur">
-      <div className="mx-auto flex min-h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="text-lg font-semibold tracking-tight text-[var(--color-primary)]">Club Management</Link>
+    <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[rgba(249,251,254,0.78)] backdrop-blur-xl supports-[backdrop-filter]:bg-[rgba(249,251,254,0.68)]">
+      <div className="mx-auto flex min-h-[4.75rem] w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="flex items-center gap-3 text-[var(--color-primary-strong)]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,var(--color-primary-strong),var(--color-primary))] text-sm font-semibold text-white shadow-[0_16px_32px_rgba(15,76,189,0.24)]">
+            {organizationName.slice(0, 2).toUpperCase()}
+          </span>
+          <span className="hidden min-w-0 text-left sm:block">
+            <span className="block text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--color-secondary)]">Build / Learn / Lead</span>
+            <span className="block truncate text-xl font-semibold tracking-tight text-[var(--color-primary-strong)]">{organizationName}</span>
+          </span>
+        </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">
-          {navLinks.map((link) => {
-            const isActive = pathname === link.href;
-            return <Link key={link.href} href={link.href} className={cn("text-sm font-medium transition-colors", isActive ? "text-[var(--color-primary)]" : "text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)]")}>{link.label}</Link>;
+        <nav className="surface-card hidden items-center gap-1 rounded-full px-2 py-2 md:flex">
+          {publicLinks.map((link) => {
+            const isAnchorLink = link.href.startsWith("/#");
+            const linkHash = isAnchorLink ? link.href.slice(1) : "";
+            const isActive = isAnchorLink ? pathname === "/" && activeHash === linkHash : pathname === link.href;
+
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]"
+                    : "text-[var(--color-muted-foreground)] hover:text-[var(--color-primary-strong)]",
+                )}
+              >
+                {link.label}
+              </Link>
+            );
           })}
-          {dashboardHref ? <Link href={dashboardHref} className="text-sm font-medium text-[var(--color-primary)]">Dashboard</Link> : null}
-          {user ? <button type="button" onClick={() => logoutMutation.mutate()} className="rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm font-medium text-[var(--color-primary)]">Logout</button> : null}
         </nav>
 
-        <button type="button" aria-label={isOpen ? "Close navigation" : "Open navigation"} aria-expanded={isOpen} onClick={() => setIsOpen((current) => !current)} className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--color-border)] text-[var(--color-primary)] md:hidden">
+        <div className="hidden items-center gap-3 md:flex">
+          {dashboardHref ? <Link href={dashboardHref} className="secondary-button h-11 px-5 text-sm">Dashboard</Link> : null}
+          {!user ? <Link href="/login" className="secondary-button h-11 px-5 text-sm">Login</Link> : null}
+          <Link href="/apply" className="primary-button h-11 px-5 text-sm">Join Now</Link>
+          {user ? <button type="button" onClick={() => logoutMutation.mutate()} className="secondary-button h-11 px-5 text-sm">Logout</button> : null}
+        </div>
+
+        <button
+          type="button"
+          aria-label={isOpen ? "Close navigation" : "Open navigation"}
+          aria-expanded={isOpen}
+          onClick={() => setIsOpen((current) => !current)}
+          className="secondary-button h-11 w-11 md:hidden"
+        >
           {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
       {isOpen ? (
-        <div className="border-t border-[var(--color-border)] bg-white md:hidden">
-          <nav className="mx-auto grid w-full max-w-6xl gap-1 px-4 py-3 sm:px-6">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return <Link key={link.href} href={link.href} onClick={() => setIsOpen(false)} className={cn("rounded-xl px-3 py-3 text-sm font-medium transition-colors", isActive ? "bg-[var(--color-primary)] text-white" : "text-[var(--color-muted-foreground)] hover:bg-[var(--color-page)] hover:text-[var(--color-primary)]")}>{link.label}</Link>;
+        <div className="border-t border-[var(--color-border)] bg-[rgba(249,251,254,0.96)] md:hidden">
+          <nav className="mx-auto grid w-full max-w-7xl gap-2 px-4 py-4 sm:px-6">
+            {publicLinks.map((link) => {
+              const isAnchorLink = link.href.startsWith("/#");
+              const linkHash = isAnchorLink ? link.href.slice(1) : "";
+              const isActive = isAnchorLink ? pathname === "/" && activeHash === linkHash : pathname === link.href;
+
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setIsOpen(false)}
+                  className={cn(
+                    "surface-card rounded-2xl px-4 py-3 text-sm font-medium",
+                    isActive ? "text-[var(--color-primary-strong)]" : "text-[var(--color-muted-foreground)]",
+                  )}
+                >
+                  {link.label}
+                </Link>
+              );
             })}
-            {dashboardHref ? <Link href={dashboardHref} onClick={() => setIsOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-page)]">Dashboard</Link> : null}
-            {user ? <button type="button" onClick={() => { setIsOpen(false); logoutMutation.mutate(); }} className="rounded-xl border border-[var(--color-border)] px-3 py-3 text-left text-sm font-medium text-[var(--color-primary)]">Logout</button> : null}
+            {dashboardHref ? <Link href={dashboardHref} onClick={() => setIsOpen(false)} className="secondary-button h-12 px-5 text-sm">Dashboard</Link> : null}
+            {!user ? <Link href="/login" onClick={() => setIsOpen(false)} className="secondary-button h-12 px-5 text-sm">Login</Link> : null}
+            <Link href="/apply" onClick={() => setIsOpen(false)} className="primary-button h-12 px-5 text-sm">Join Now</Link>
+            {user ? <button type="button" onClick={() => { setIsOpen(false); logoutMutation.mutate(); }} className="secondary-button h-12 px-5 text-sm">Logout</button> : null}
           </nav>
         </div>
       ) : null}
