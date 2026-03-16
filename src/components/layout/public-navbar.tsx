@@ -18,7 +18,7 @@ const publicLinks = [
   { href: "/about", label: "About" },
   { href: "/events", label: "Events" },
   { href: "/notices", label: "Notices" },
-  { href: "/team", label: "Team" },
+  { href: "/committee", label: "Committee" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -156,3 +156,4 @@ export function PublicNavbar() {
     </header>
   );
 }
+

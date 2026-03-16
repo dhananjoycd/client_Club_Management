@@ -9,16 +9,18 @@ import { useEffect, useState } from "react";
 import { StatCard } from "@/components/cards/stat-card";
 import { CountUpNumber } from "@/components/motion/count-up-number";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
+import { CommitteeMemberCard } from "@/components/committee/committee-member-card";
+import { FaqAccordion } from "@/components/faq/faq-accordion";
 import {
   activityItems,
   benefitItems,
   faqItems,
-  teamPreview,
+  committeePreview,
   testimonialItems,
 } from "@/features/home/home-content";
 import { EventItem } from "@/types/event.types";
 import { NoticeItem } from "@/types/notice.types";
-import { SiteImpactStats, SiteSettings } from "@/types/settings.types";
+import { SiteCommitteeMember, SiteFaqItem, SiteImpactStats, SiteSettings, SiteTestimonial } from "@/types/settings.types";
 
 type HomePageViewProps = {
   settings: SiteSettings | null;
@@ -34,6 +36,9 @@ type HeroSlide = {
 };
 
 const trustItems = ["Student community", "Workshop-led learning", "Project-based collaboration", "Event-driven growth"];
+
+const defaultCommitteeGroupPhotoUrl = "https://media.istockphoto.com/id/1400051391/photo/portrait-of-successful-team-at-the-office.jpg?s=612x612&w=0&k=20&c=-JPTGPOpKyIgvFymzYRg1XecuUJsXgdY0k5DeDMBi30=";
+const defaultAboutSectionPhotoUrl = "https://www.faulkner.edu/wp-content/uploads/college-students-working-on-a-group-project-Faulkner-University.jpg";
 
 const defaultImpactStats: Required<SiteImpactStats> = {
   activeMembers: 500,
@@ -93,6 +98,11 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
   const configLinks = settings?.socialLinks ?? {};
   const configuredHeroSlides = settings?.heroSlides ?? [];
   const configuredImpactStats = settings?.impactStats ?? {};
+  const configuredFaqs = settings?.faqs ?? [];
+  const configuredTestimonials = settings?.testimonials ?? [];
+  const configuredCommitteeMembers = settings?.committeeMembers ?? [];
+  const committeeGroupPhotoUrl = settings?.committeeGroupPhotoUrl?.trim() || defaultCommitteeGroupPhotoUrl;
+  const aboutSectionPhotoUrl = settings?.aboutSectionPhotoUrl?.trim() || defaultAboutSectionPhotoUrl;
   const heroSlides = defaultHeroSlides.map((slide, index) => ({
     ...slide,
     image: configuredHeroSlides[index]?.image?.trim() || configLinks[`heroSlide${index + 1}Image`]?.trim() || slide.image,
@@ -100,6 +110,9 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
     description: configuredHeroSlides[index]?.description?.trim() || configLinks[`heroSlide${index + 1}Description`]?.trim() || slide.description,
     tag: configuredHeroSlides[index]?.tag?.trim() || slide.tag,
   }));
+  const displayFaqs: SiteFaqItem[] = configuredFaqs.length > 0 ? configuredFaqs : faqItems;
+  const displayTestimonials: SiteTestimonial[] = configuredTestimonials.length > 0 ? configuredTestimonials : testimonialItems;
+  const displayCommitteeMembers: SiteCommitteeMember[] = configuredCommitteeMembers.length > 0 ? configuredCommitteeMembers : committeePreview;
   const impactStats = [
     {
       label: "Active members",
@@ -350,6 +363,24 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
               <p className="text-sm font-medium uppercase tracking-[0.22em] text-[rgba(214,240,255,0.82)]">About XYZ Tech Club</p>
               <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white">A student technology community built around learning, events, teamwork, and visible contribution.</h2>
               <p className="mt-4 max-w-2xl text-base leading-8 text-[rgba(236,244,255,0.88)]">{aboutText || "XYZ Tech Club helps students learn practical skills, join workshops, participate in events, collaborate on projects, and grow through an active campus tech community."}</p>
+              {aboutSectionPhotoUrl ? (
+                <motion.div
+                  className="mt-6 overflow-hidden rounded-[1.5rem] border border-white/14 bg-white/8 shadow-[0_18px_40px_rgba(7,16,32,0.2)]"
+                  animate={{ y: [0, -6, 0], scale: [1, 1.012, 1] }}
+                  transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <div className="relative aspect-[16/9] w-full">
+                    <Image
+                      src={aboutSectionPhotoUrl}
+                      alt={`${organizationName} about section photo`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 100vw, 32vw"
+                      unoptimized
+                    />
+                  </div>
+                </motion.div>
+              ) : null}
               <Link href="/about" className="secondary-button mt-6 inline-flex h-11 items-center gap-2 self-start border-white/18 bg-white/12 px-5 text-sm text-white shadow-[0_16px_36px_rgba(8,39,90,0.22)] backdrop-blur hover:border-white/26 hover:bg-white/18 hover:text-white">
                 Learn more about XYZ Tech Club
                 <ArrowRight className="h-4 w-4" />
@@ -477,7 +508,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
             )}
           </div>
           <div className="mt-6 flex justify-end">
-            <Link href="/events" className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-primary)]">
+            <Link href="/events" className="primary-button inline-flex h-11 items-center gap-2 px-5 text-sm">
               View all events
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -495,18 +526,18 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
                 <div>
                   <p className="text-sm font-medium uppercase tracking-[0.22em] text-[rgba(214,240,255,0.82)]">Member voices</p>
                   <p className="mt-5 text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl">
-                    &ldquo;{testimonialItems[0]?.quote}&rdquo;
+                    &ldquo;{displayTestimonials[0]?.quote}&rdquo;
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-base font-semibold text-white">{testimonialItems[0]?.author}</p>
-                  <p className="text-xs uppercase tracking-[0.2em] text-[rgba(214,240,255,0.78)]">{testimonialItems[0]?.meta}</p>
+                  <p className="text-base font-semibold text-white">{displayTestimonials[0]?.author}</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-[rgba(214,240,255,0.78)]">{displayTestimonials[0]?.meta}</p>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {testimonialItems.slice(1).map((item) => (
+              {displayTestimonials.slice(1).map((item) => (
                 <article key={item.author} className="surface-card flex h-full flex-col justify-between rounded-[1.75rem] p-5 sm:p-6">
                   <p className="text-sm leading-7 text-[var(--color-foreground)] sm:text-base">&ldquo;{item.quote}&rdquo;</p>
                   <div className="mt-6 border-t border-[var(--color-border)] pt-4">
@@ -520,32 +551,51 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
                 <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-muted-foreground)] sm:text-base">
                   Testimonials give social proof. They help new visitors understand that XYZ Tech Club is active, useful, and trusted by real students and mentors.
                 </p>
+                <Link href="/testimonials" className="secondary-button mt-5 inline-flex h-11 items-center gap-2 px-5 text-sm">
+                  See All Testimonials
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
             </div>
           </div>
         </SectionWrapper>
 
-        <section id="team" className="grid grid-cols-1 gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <SectionWrapper
-            title="Executive team preview"
-            description="Showing faces and roles adds accountability and makes the organization feel real."
-          >
-            <p className="text-sm leading-7 text-[var(--color-muted-foreground)]">
-              This preview can later be replaced by a fully dynamic committee module, but even a compact section makes the club more trustworthy for visitors and applicants.
-            </p>
-          </SectionWrapper>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {teamPreview.map((member) => (
-              <div key={member.name} className="surface-card rounded-[1.75rem] p-5">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--color-accent-soft)] text-[var(--color-secondary)]">
-                  <Users className="h-5 w-5" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold text-[var(--color-primary-strong)]">{member.name}</h3>
-                <p className="mt-1 text-sm font-medium text-[var(--color-foreground)]">{member.role}</p>
-                <p className="mt-2 text-sm leading-6 text-[var(--color-muted-foreground)]">{member.department}</p>
-              </div>
+        <section id="committee" className="grid grid-cols-1 gap-6 lg:grid-cols-[1.16fr_0.84fr]">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:order-1">
+            {displayCommitteeMembers.slice(0, 4).map((member) => (
+              <CommitteeMemberCard key={`${member.name}-${member.role}`} member={member} compact />
             ))}
+          </div>
+
+          <div className="relative overflow-hidden rounded-[2rem] border border-[rgba(125,211,252,0.22)] bg-[linear-gradient(145deg,#08275a_0%,#0b3b88_52%,#0ea5b7_100%)] p-6 text-white shadow-[0_24px_60px_rgba(8,39,90,0.24)] sm:p-8 lg:order-2">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(34,199,214,0.14),transparent_24%)]" />
+            <div className="relative flex h-full flex-col justify-between gap-6">
+              <div className="space-y-3">
+                <p className="text-sm font-medium uppercase tracking-[0.22em] text-[rgba(214,240,255,0.82)]">Executive Committee</p>
+                <h2 className="text-3xl font-semibold tracking-tight text-white">Meet the people leading {organizationName}.</h2>
+                <p className="max-w-md text-sm leading-7 text-[rgba(236,244,255,0.84)]">Leadership and coordinators of {organizationName}.</p>
+              </div>
+              <motion.div
+                className="relative overflow-hidden rounded-[1.5rem] border border-white/14 bg-white/8 shadow-[0_18px_40px_rgba(7,16,32,0.2)]"
+                animate={{ y: [0, -8, 0], scale: [1, 1.015, 1] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <div className="relative aspect-[16/10] w-full">
+                  <Image
+                    src={committeeGroupPhotoUrl}
+                    alt={`${organizationName} committee group photo`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 32vw"
+                  />
+                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,18,40,0.02),rgba(6,18,40,0.22))]" />
+                </div>
+              </motion.div>
+              <Link href="/committee" className="secondary-button inline-flex h-11 items-center gap-2 self-start border-white/18 bg-white/12 px-5 text-sm text-white shadow-[0_16px_36px_rgba(8,39,90,0.22)] backdrop-blur hover:border-white/26 hover:bg-white/18 hover:text-white">
+                See Full Committee Members
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -554,14 +604,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
             title="Frequently asked questions"
             description="FAQ helps reduce hesitation before applying and removes common uncertainty quickly."
           >
-            <div className="space-y-4">
-              {faqItems.map((item) => (
-                <div key={item.question} className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/60 p-5">
-                  <h3 className="text-base font-semibold text-[var(--color-primary-strong)]">{item.question}</h3>
-                  <p className="mt-3 text-sm leading-6 text-[var(--color-muted-foreground)]">{item.answer}</p>
-                </div>
-              ))}
-            </div>
+            <FaqAccordion items={displayFaqs} />
           </SectionWrapper>
 
           <div className="space-y-6">
@@ -580,29 +623,21 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
                 </Link>
               </div>
             </section>
-
-            <SectionWrapper title="Contact and connect" description="A strong landing page should close with a clear path to communicate.">
-              <div id="contact" className="space-y-4 text-sm leading-6 text-[var(--color-muted-foreground)]">
-                <div className="flex items-start gap-3">
-                  <Mail className="mt-1 h-4 w-4 text-[var(--color-secondary)]" />
-                  <span>{email}</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Phone className="mt-1 h-4 w-4 text-[var(--color-secondary)]" />
-                  <span>{phone}</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <MapPin className="mt-1 h-4 w-4 text-[var(--color-secondary)]" />
-                  <span>Main campus activity zone, member and event updates available through the platform.</span>
-                </div>
-              </div>
-            </SectionWrapper>
           </div>
         </section>
       </div>
     </main>
   );
 }
+
+
+
+
+
+
+
+
+
 
 
 

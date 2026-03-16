@@ -1,4 +1,4 @@
-﻿import { BriefcaseBusiness, Code2, Lightbulb, Network, Rocket, Trophy, Users2, Wrench } from "lucide-react";
+import { BriefcaseBusiness, Code2, Lightbulb, Network, Rocket, Trophy, Users2, Wrench } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export type HomeContentItem = {
@@ -12,10 +12,16 @@ export type HomeFaqItem = {
   answer: string;
 };
 
-export type HomeTeamItem = {
+export type HomeCommitteeItem = {
   name: string;
   role: string;
   department: string;
+  bio?: string;
+  photoUrl?: string;
+  facebookUrl?: string;
+  linkedinUrl?: string;
+  whatsapp?: string;
+  email?: string;
 };
 
 export type HomeTestimonialItem = {
@@ -86,11 +92,11 @@ export const benefitItems: HomeContentItem[] = [
   },
 ];
 
-export const teamPreview: HomeTeamItem[] = [
-  { name: "Ayesha Rahman", role: "President", department: "Computer Science & Engineering" },
-  { name: "Nafis Ahmed", role: "Vice President", department: "Information Technology" },
-  { name: "Mahin Chowdhury", role: "General Secretary", department: "Software Engineering" },
-  { name: "Tasnim Islam", role: "Technical Secretary", department: "Computer Science & Engineering" },
+export const committeePreview: HomeCommitteeItem[] = [
+  { name: "Ayesha Rahman", role: "President", department: "Computer Science & Engineering", bio: "Leads club planning, partnerships, and the execution of major student activities.", email: "ayesha@xyztechclub.org", linkedinUrl: "https://linkedin.com", facebookUrl: "https://facebook.com", whatsapp: "+8801711000001" },
+  { name: "Nafis Ahmed", role: "Vice President", department: "Information Technology", bio: "Supports operations, coordination, and continuity across committees and event cycles.", email: "nafis@xyztechclub.org", linkedinUrl: "https://linkedin.com", facebookUrl: "https://facebook.com", whatsapp: "+8801711000002" },
+  { name: "Mahin Chowdhury", role: "General Secretary", department: "Software Engineering", bio: "Handles internal communication, records, and workflow alignment for the club team.", email: "mahin@xyztechclub.org", linkedinUrl: "https://linkedin.com", facebookUrl: "https://facebook.com", whatsapp: "+8801711000003" },
+  { name: "Tasnim Islam", role: "Technical Secretary", department: "Computer Science & Engineering", bio: "Supports technical sessions, workshop structure, and hands-on learning initiatives.", email: "tasnim@xyztechclub.org", linkedinUrl: "https://linkedin.com", facebookUrl: "https://facebook.com", whatsapp: "+8801711000004" },
 ];
 
 export const testimonialItems: HomeTestimonialItem[] = [
@@ -129,4 +135,3 @@ export const faqItems: HomeFaqItem[] = [
     answer: "Yes. Early participation is encouraged because it helps students build skill and network from the beginning of university life.",
   },
 ];
-
