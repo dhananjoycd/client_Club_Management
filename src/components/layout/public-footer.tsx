@@ -5,6 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-keys";
 import { settingsService } from "@/services/settings.service";
 
+const socialLabels = ["facebook", "linkedin", "github"] as const;
+
 export function PublicFooter() {
   const settingsQuery = useQuery({ queryKey: queryKeys.settings.detail, queryFn: settingsService.getSettings, retry: false });
   const settings = settingsQuery.data?.data;
@@ -12,7 +14,9 @@ export function PublicFooter() {
   const email = settings?.contactEmail?.trim() || "hello@xyztechclub.org";
   const phone = settings?.phone?.trim() || "+880 1234-567890";
   const socialLinks = settings?.socialLinks ?? {};
-  const activeSocialLinks = Object.entries(socialLinks).filter(([, href]) => typeof href === "string" && href.trim().length > 0);
+  const activeSocialLinks = socialLabels
+    .map((label) => [label, socialLinks[label]] as const)
+    .filter(([, href]) => typeof href === "string" && href.trim().length > 0);
 
   return (
     <footer className="mt-12 border-t border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,#091429,#071020)] text-[rgba(237,244,255,0.92)] sm:mt-16">
@@ -47,7 +51,7 @@ export function PublicFooter() {
                   href={href}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="inline-flex h-10 items-center justify-center rounded-full border border-white/12 bg-white/6 px-4 text-sm font-semibold text-white transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+                  className="inline-flex h-10 items-center justify-center rounded-full border border-white/12 bg-white/6 px-4 text-sm font-semibold capitalize text-white transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
                 >
                   {label}
                 </a>

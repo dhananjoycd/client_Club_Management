@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 import { DashboardTopbar } from "@/components/layout/dashboard-topbar";
+import { MotionPage } from "@/components/motion/motion-shell";
 
 type NavigationLink = {
   href: string;
@@ -27,7 +28,9 @@ export function DashboardShell({
       <DashboardSidebar heading={sidebarHeading} links={links} />
       <div className="flex min-h-screen flex-1 flex-col">
         <DashboardTopbar title={title} description={description} />
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+          <MotionPage>{children}</MotionPage>
+        </main>
       </div>
     </div>
   );

@@ -1,3 +1,10 @@
+export type SiteHeroSlide = {
+  image: string;
+  title: string;
+  description: string;
+  tag?: string;
+};
+
 export type SiteSettings = {
   id?: string;
   organizationName: string;
@@ -5,5 +12,6 @@ export type SiteSettings = {
   contactEmail?: string | null;
   phone?: string | null;
   socialLinks?: Record<string, string> | null;
+  heroSlides?: SiteHeroSlide[] | null;
   aboutText?: string | null;
 };

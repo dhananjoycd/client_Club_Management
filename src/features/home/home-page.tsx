@@ -1,6 +1,11 @@
+"use client";
+
+import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
-import { ArrowRight, CalendarDays, ChevronRight, Mail, MapPin, Phone, Sparkles, Users } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, ArrowRight, CalendarDays, ChevronRight, Mail, MapPin, Phone, Sparkles, Users } from "lucide-react";
+import { useEffect, useState } from "react";
 import { StatCard } from "@/components/cards/stat-card";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
 import {
@@ -20,6 +25,13 @@ type HomePageViewProps = {
   latestNotices: NoticeItem[];
 };
 
+type HeroSlide = {
+  title: string;
+  description: string;
+  image: string;
+  tag: string;
+};
+
 const trustItems = ["Student community", "Workshop-led learning", "Project-based collaboration", "Event-driven growth"];
 
 const impactStats = [
@@ -29,13 +41,63 @@ const impactStats = [
   { label: "Mentors and seniors", value: "12+" },
 ];
 
+const heroContainerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.12,
+      delayChildren: 0.08,
+    },
+  },
+};
+
+const heroItemVariants = {
+  hidden: { opacity: 0, y: 28 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" as const },
+  },
+};
+
+const defaultHeroSlides: HeroSlide[] = [
+  {
+    title: "Coding Team Sprint",
+    description: "Collaborative product build review with live coding, feedback, and rapid iteration.",
+    image: "/hero/coding-team.svg",
+    tag: "Coding team",
+  },
+  {
+    title: "Campus Lab Session",
+    description: "A practical environment for workshops, experimentation, and guided technical practice.",
+    image: "/hero/campus-lab.svg",
+    tag: "Campus lab",
+  },
+  {
+    title: "Collaboration Scene",
+    description: "Planning, discussion, and peer execution across teams and project groups.",
+    image: "/hero/collaboration-scene.svg",
+    tag: "Teamwork",
+  },
+];
+
 export function HomePageView({ settings, featuredEvents, latestNotices }: HomePageViewProps) {
+  const [activeSlide, setActiveSlide] = useState(0);
   const organizationName = settings?.organizationName?.trim() || "XYZ Tech Club";
   const aboutText =
     settings?.aboutText?.trim() ||
     `${organizationName} is a student-led technology community focused on practical learning, collaborative execution, and building a stronger campus tech culture.`;
   const email = settings?.contactEmail?.trim() || "hello@xyztechclub.org";
   const phone = settings?.phone?.trim() || "+880 1234-567890";
+  const configLinks = settings?.socialLinks ?? {};
+  const configuredHeroSlides = settings?.heroSlides ?? [];
+  const heroSlides = defaultHeroSlides.map((slide, index) => ({
+    ...slide,
+    image: configuredHeroSlides[index]?.image?.trim() || configLinks[`heroSlide${index + 1}Image`]?.trim() || slide.image,
+    title: configuredHeroSlides[index]?.title?.trim() || configLinks[`heroSlide${index + 1}Title`]?.trim() || slide.title,
+    description: configuredHeroSlides[index]?.description?.trim() || configLinks[`heroSlide${index + 1}Description`]?.trim() || slide.description,
+    tag: configuredHeroSlides[index]?.tag?.trim() || slide.tag,
+  }));
   const marqueeItems = latestNotices.length > 0
     ? latestNotices.map((notice) => `${notice.title}: ${notice.content}`)
     : [
@@ -43,6 +105,16 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
         "Featured events update automatically from the backend.",
       ];
   const marqueeLoop = [...marqueeItems, ...marqueeItems];
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setActiveSlide((current) => (current + 1) % heroSlides.length);
+    }, 4500);
+
+    return () => window.clearInterval(intervalId);
+  }, [heroSlides.length]);
+
+  const currentSlide = heroSlides[activeSlide];
 
   return (
     <main className="text-[var(--color-foreground)]">
@@ -67,78 +139,168 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
       </section>
 
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,199,214,0.14),transparent_28%),radial-gradient(circle_at_85%_18%,rgba(15,76,189,0.1),transparent_24%)]" />
+        <motion.div
+          className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,199,214,0.14),transparent_28%),radial-gradient(circle_at_85%_18%,rgba(15,76,189,0.1),transparent_24%)]"
+          animate={{ opacity: [0.8, 1, 0.82] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute left-[12%] top-[14%] hidden h-44 w-44 rounded-full bg-[rgba(34,199,214,0.12)] blur-3xl lg:block"
+          animate={{ y: [0, -18, 0], scale: [1, 1.06, 1] }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute right-[8%] top-[18%] hidden h-56 w-56 rounded-full bg-[rgba(15,76,189,0.12)] blur-3xl lg:block"
+          animate={{ y: [0, 16, 0], scale: [1, 1.04, 1] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
+        />
         <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-8 px-4 py-10 sm:px-6 md:py-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:px-8 lg:py-20">
-          <div className="relative z-10 flex flex-col justify-center gap-8">
-            <div className="space-y-5">
+          <motion.div
+            className="relative z-10 flex flex-col justify-center gap-8"
+            variants={heroContainerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div variants={heroItemVariants} className="space-y-5">
               <span className="surface-card inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-[var(--color-secondary)]">
                 <Sparkles className="h-4 w-4" />
                 Tech community platform
               </span>
               <div className="space-y-4">
-                <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[var(--color-secondary)]">{organizationName}</p>
-                <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-[var(--color-primary-strong)] sm:text-5xl lg:text-[4.5rem] lg:leading-[0.95]">
-                  Build skills, run events, and grow a stronger student community.
-                </h1>
+                <motion.p variants={heroItemVariants} className="text-sm font-semibold uppercase tracking-[0.28em] text-[var(--color-secondary)]">{organizationName}</motion.p>
+                <motion.h1 variants={heroItemVariants} className="max-w-4xl text-4xl font-semibold tracking-tight text-[var(--color-primary-strong)] sm:text-5xl lg:text-[4.5rem] lg:leading-[0.95]">
+                  Build, manage, and grow XYZ Tech Club with one connected digital platform.
+                </motion.h1>
               </div>
-              <p className="max-w-2xl text-base leading-8 text-[var(--color-muted-foreground)] sm:text-lg">
-                A polished club portal for workshops, announcements, applications, and member engagement. Clear, modern, and built for active campus communities.
-              </p>
-            </div>
+              <motion.p variants={heroItemVariants} className="max-w-2xl text-base leading-8 text-[var(--color-muted-foreground)] sm:text-lg">
+                XYZ Tech Club can use this platform to publish notices, manage events, review member applications, and keep students, members, and admins connected through one organized system.
+              </motion.p>
+            </motion.div>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <motion.div variants={heroItemVariants} className="flex flex-col gap-3 sm:flex-row">
               <Link href="/apply" className="primary-button h-12 px-6 text-sm">
                 Join the Club
               </Link>
               <Link href="/events" className="secondary-button h-12 px-6 text-sm">
                 Explore Events
               </Link>
-            </div>
+            </motion.div>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <motion.div variants={heroContainerVariants} className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               {impactStats.map((item) => (
-                <div key={item.label} className="surface-card rounded-[1.5rem] p-4">
+                <motion.div
+                  key={item.label}
+                  variants={heroItemVariants}
+                  whileHover={{ y: -6 }}
+                  transition={{ duration: 0.22, ease: "easeOut" }}
+                  className="surface-card rounded-[1.5rem] p-4"
+                >
                   <p className="text-2xl font-semibold tracking-tight text-[var(--color-primary-strong)]">{item.value}</p>
                   <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">{item.label}</p>
-                </div>
+                </motion.div>
               ))}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
-          <div className="relative z-10">
-            <div className="surface-card grid gap-4 rounded-[2rem] p-5 sm:grid-cols-2 sm:p-6">
-              <div className="rounded-[1.75rem] bg-[linear-gradient(145deg,var(--color-primary-strong),var(--color-primary))] p-6 text-white shadow-[0_24px_48px_rgba(15,76,189,0.22)] sm:col-span-2">
-                <p className="text-sm font-medium uppercase tracking-[0.22em] text-white/66">Club snapshot</p>
-                <h2 className="mt-3 text-3xl font-semibold tracking-tight">{organizationName}</h2>
-                <p className="mt-3 max-w-lg text-sm leading-7 text-white/78">
-                  A focused digital home for student clubs that need clear communication, structured activity, and a professional public presence.
-                </p>
+          <motion.div
+            className="relative z-10"
+            initial={{ opacity: 0, x: 36, y: 18 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
+          >
+            <motion.div className="surface-card grid gap-4 rounded-[2rem] p-5 sm:grid-cols-2 sm:p-6" animate={{ y: [0, -6, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}>
+              <div className="relative overflow-hidden rounded-[1.75rem] shadow-[0_24px_48px_rgba(15,76,189,0.18)] sm:col-span-2">
+                <div className="relative aspect-[16/10] min-h-[280px]">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={`${currentSlide.image}-${activeSlide}`}
+                      initial={{ opacity: 0, scale: 1.04, x: 18 }}
+                      animate={{ opacity: 1, scale: 1, x: 0 }}
+                      exit={{ opacity: 0, scale: 0.98, x: -18 }}
+                      transition={{ duration: 0.55, ease: "easeOut" }}
+                      className="absolute inset-0"
+                    >
+                      <Image src={currentSlide.image} alt={currentSlide.title} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 40vw" priority={activeSlide === 0} />
+                    </motion.div>
+                  </AnimatePresence>
+                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,22,49,0.12),rgba(8,22,49,0.68))]" />
+                  <motion.div
+                    key={`${currentSlide.title}-content`}
+                    initial={{ opacity: 0, y: 22 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.45, ease: "easeOut", delay: 0.1 }}
+                    className="absolute inset-x-0 bottom-0 p-5 sm:p-6"
+                  >
+                    <span className="inline-flex rounded-full border border-white/16 bg-white/12 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/88">
+                      {currentSlide.tag}
+                    </span>
+                    <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">{currentSlide.title}</h2>
+                    <p className="mt-3 max-w-xl text-sm leading-7 text-white/82">{currentSlide.description}</p>
+                  </motion.div>
+                </div>
+                <div className="absolute left-4 top-4 flex gap-2">
+                  {heroSlides.map((slide, index) => (
+                    <button
+                      key={slide.title}
+                      type="button"
+                      aria-label={`Show slide ${index + 1}`}
+                      onClick={() => setActiveSlide(index)}
+                      className={`h-2.5 rounded-full transition-all ${index === activeSlide ? "w-8 bg-white" : "w-2.5 bg-white/46 hover:bg-white/70"}`}
+                    />
+                  ))}
+                </div>
+                <div className="absolute bottom-4 right-4 flex gap-2">
+                  <motion.button
+                    whileHover={{ y: -2, scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    type="button"
+                    aria-label="Previous slide"
+                    onClick={() => setActiveSlide((current) => (current - 1 + heroSlides.length) % heroSlides.length)}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/16 bg-white/10 text-white backdrop-blur transition hover:bg-white/18"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ y: -2, scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    type="button"
+                    aria-label="Next slide"
+                    onClick={() => setActiveSlide((current) => (current + 1) % heroSlides.length)}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/16 bg-white/10 text-white backdrop-blur transition hover:bg-white/18"
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                  </motion.button>
+                </div>
               </div>
-              <StatCard
-                label="Weekly sessions"
-                value="Every Friday"
-                description="Consistent learning routines keep members active throughout the semester."
-                icon={<CalendarDays className="h-5 w-5" />}
-              />
-              <StatCard
-                label="Community growth"
-                value="Peer-led"
-                description="Mentorship, collaboration, and leadership create stronger member retention."
-                icon={<Users className="h-5 w-5" />}
-              />
-              <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[linear-gradient(180deg,#eff7ff,#f8fcff)] p-5 sm:col-span-2">
+              <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }} className="h-full">
+                <StatCard className="h-full"
+                  label="Weekly sessions"
+                  value="Every Friday"
+                  description="Consistent learning routines keep members active throughout the semester."
+                  icon={<CalendarDays className="h-5 w-5" />}
+                />
+              </motion.div>
+              <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.38, ease: "easeOut" }} className="h-full">
+                <StatCard className="h-full"
+                  label="Community growth"
+                  value="Peer-led"
+                  description="Mentorship, collaboration, and leadership create stronger member retention."
+                  icon={<Users className="h-5 w-5" />}
+                />
+              </motion.div>
+              <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.46, ease: "easeOut" }} className="rounded-[1.5rem] border border-[var(--color-border)] bg-[linear-gradient(180deg,#eff7ff,#f8fcff)] p-5 sm:col-span-2">
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-secondary)]">Why it works</p>
                 <ul className="mt-4 grid grid-cols-1 gap-3 text-sm leading-6 text-[var(--color-foreground)] sm:grid-cols-2">
                   {trustItems.map((item) => (
-                    <li key={item} className="flex items-start gap-3">
+                    <motion.li key={item} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, ease: "easeOut" }} className="flex items-start gap-3">
                       <span className="mt-2 h-2.5 w-2.5 rounded-full bg-[var(--color-accent)]" />
                       <span>{item}</span>
-                    </li>
+                    </motion.li>
                   ))}
                 </ul>
-              </div>
-            </div>
-          </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
@@ -395,3 +557,6 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
     </main>
   );
 }
+
+
+
