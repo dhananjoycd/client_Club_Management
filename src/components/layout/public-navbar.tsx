@@ -10,15 +10,16 @@ import { cn } from "@/lib/utils";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { queryKeys } from "@/lib/query-keys";
 import { authService } from "@/services/auth.service";
+import { applicationService } from "@/services/application.service";
 import { settingsService } from "@/services/settings.service";
 
 const publicLinks = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
   { href: "/events", label: "Events" },
-  { href: "/notices", label: "Resources" },
-  { href: "/#team", label: "Team" },
-  { href: "/#contact", label: "Contact" },
+  { href: "/notices", label: "Notices" },
+  { href: "/team", label: "Team" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export function PublicNavbar() {
@@ -29,6 +30,12 @@ export function PublicNavbar() {
   const queryClient = useQueryClient();
   const sessionQuery = useQuery({ queryKey: queryKeys.auth.session, queryFn: authService.getSession, retry: false });
   const settingsQuery = useQuery({ queryKey: queryKeys.settings.detail, queryFn: settingsService.getSettings, retry: false });
+  const applicationQuery = useQuery({
+    queryKey: queryKeys.applications.list("me"),
+    queryFn: () => applicationService.getApplications({ limit: 20 }),
+    retry: false,
+    enabled: Boolean(sessionQuery.data?.data?.user),
+  });
   const logoutMutation = useMutation({
     mutationFn: authService.logout,
     onSuccess: async (response) => {
@@ -43,6 +50,16 @@ export function PublicNavbar() {
   const settings = settingsQuery.data?.data;
   const organizationName = settings?.organizationName?.trim() || "XYZ Tech Club";
   const dashboardHref = user?.role === "MEMBER" ? "/member" : user ? "/admin" : null;
+  const restrictedRoles = new Set(["MEMBER", "ADMIN", "SUPER_ADMIN", "EVENT_MANAGER"]);
+  const latestApplication = [...(applicationQuery.data?.data?.result ?? [])]
+    .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())[0];
+  const showJoinNow = !user
+    ? true
+    : restrictedRoles.has(user.role)
+      ? false
+      : latestApplication
+        ? latestApplication.status === "REJECTED"
+        : true;
 
   useEffect(() => {
     const updateHash = () => setActiveHash(window.location.hash);
@@ -56,7 +73,7 @@ export function PublicNavbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[rgba(249,251,254,0.78)] backdrop-blur-xl supports-[backdrop-filter]:bg-[rgba(249,251,254,0.68)]">
       <div className="mx-auto flex min-h-[4.75rem] w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-3 text-[var(--color-primary-strong)]">
+        <Link href="/" className="flex items-center gap-3 text-[var(--color-primary-strong)] transition-transform duration-200 hover:scale-[1.01]">
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,var(--color-primary-strong),var(--color-primary))] text-sm font-semibold text-white shadow-[0_16px_32px_rgba(15,76,189,0.24)]">
             {organizationName.slice(0, 2).toUpperCase()}
           </span>
@@ -77,7 +94,7 @@ export function PublicNavbar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                  "rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(15,76,189,0.14)]",
                   isActive
                     ? "bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]"
                     : "text-[var(--color-muted-foreground)] hover:text-[var(--color-primary-strong)]",
@@ -90,10 +107,10 @@ export function PublicNavbar() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
-          {dashboardHref ? <Link href={dashboardHref} className="secondary-button h-11 px-5 text-sm">Dashboard</Link> : null}
-          {!user ? <Link href="/login" className="secondary-button h-11 px-5 text-sm">Login</Link> : null}
-          <Link href="/apply" className="primary-button h-11 px-5 text-sm">Join Now</Link>
-          {user ? <button type="button" onClick={() => logoutMutation.mutate()} className="secondary-button h-11 px-5 text-sm">Logout</button> : null}
+          {dashboardHref ? <Link href={dashboardHref} className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Dashboard</Link> : null}
+          {!user ? <Link href="/login" className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Login</Link> : null}
+          {showJoinNow ? <Link href="/apply" className="primary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(37,99,235,0.28)]">Join Now</Link> : null}
+          {user ? <button type="button" onClick={() => logoutMutation.mutate()} className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Logout</button> : null}
         </div>
 
         <button
@@ -101,7 +118,7 @@ export function PublicNavbar() {
           aria-label={isOpen ? "Close navigation" : "Open navigation"}
           aria-expanded={isOpen}
           onClick={() => setIsOpen((current) => !current)}
-          className="secondary-button h-11 w-11 md:hidden"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--color-border)] bg-white/80 text-[var(--color-primary-strong)] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-primary-soft)] hover:shadow-md md:hidden"
         >
           {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -131,7 +148,7 @@ export function PublicNavbar() {
             })}
             {dashboardHref ? <Link href={dashboardHref} onClick={() => setIsOpen(false)} className="secondary-button h-12 px-5 text-sm">Dashboard</Link> : null}
             {!user ? <Link href="/login" onClick={() => setIsOpen(false)} className="secondary-button h-12 px-5 text-sm">Login</Link> : null}
-            <Link href="/apply" onClick={() => setIsOpen(false)} className="primary-button h-12 px-5 text-sm">Join Now</Link>
+            {showJoinNow ? <Link href="/apply" onClick={() => setIsOpen(false)} className="primary-button h-12 px-5 text-sm">Join Now</Link> : null}
             {user ? <button type="button" onClick={() => { setIsOpen(false); logoutMutation.mutate(); }} className="secondary-button h-12 px-5 text-sm">Logout</button> : null}
           </nav>
         </div>

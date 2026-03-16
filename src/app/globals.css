@@ -129,3 +129,19 @@ select {
   cursor: not-allowed;
   background: rgba(241, 245, 249, 0.9);
 }
+
+
+@keyframes announcement-marquee {
+  0% {
+    transform: translateX(0%);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.announcement-marquee-track {
+  animation: announcement-marquee 20s linear infinite;
+  will-change: transform;
+}

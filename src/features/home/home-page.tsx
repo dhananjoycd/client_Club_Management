@@ -3,20 +3,21 @@ import { format } from "date-fns";
 import { ArrowRight, CalendarDays, ChevronRight, Mail, MapPin, Phone, Sparkles, Users } from "lucide-react";
 import { StatCard } from "@/components/cards/stat-card";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
-import { SiteSettings } from "@/types/settings.types";
-import { EventItem } from "@/types/event.types";
 import {
   activityItems,
-  announcementItems,
   benefitItems,
   faqItems,
   teamPreview,
   testimonialItems,
 } from "@/features/home/home-content";
+import { EventItem } from "@/types/event.types";
+import { NoticeItem } from "@/types/notice.types";
+import { SiteSettings } from "@/types/settings.types";
 
 type HomePageViewProps = {
   settings: SiteSettings | null;
   featuredEvents: EventItem[];
+  latestNotices: NoticeItem[];
 };
 
 const trustItems = ["Student community", "Workshop-led learning", "Project-based collaboration", "Event-driven growth"];
@@ -28,26 +29,39 @@ const impactStats = [
   { label: "Mentors and seniors", value: "12+" },
 ];
 
-export function HomePageView({ settings, featuredEvents }: HomePageViewProps) {
+export function HomePageView({ settings, featuredEvents, latestNotices }: HomePageViewProps) {
   const organizationName = settings?.organizationName?.trim() || "XYZ Tech Club";
   const aboutText =
     settings?.aboutText?.trim() ||
     `${organizationName} is a student-led technology community focused on practical learning, collaborative execution, and building a stronger campus tech culture.`;
   const email = settings?.contactEmail?.trim() || "hello@xyztechclub.org";
   const phone = settings?.phone?.trim() || "+880 1234-567890";
+  const marqueeItems = latestNotices.length > 0
+    ? latestNotices.map((notice) => `${notice.title}: ${notice.content}`)
+    : [
+        "Member intake is open now.",
+        "Featured events update automatically from the backend.",
+      ];
+  const marqueeLoop = [...marqueeItems, ...marqueeItems];
 
   return (
     <main className="text-[var(--color-foreground)]">
-      <section className="border-b border-[var(--color-border)] bg-white/52 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-3 text-sm sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="surface-card rounded-full px-3 py-1 font-semibold text-[var(--color-primary-strong)]">Announcement</span>
-            <span className="text-[var(--color-muted-foreground)]">{announcementItems[0]}</span>
+      <section className="border-b border-[rgba(14,165,183,0.22)] bg-[linear-gradient(90deg,#0b2f6f,#0f4cbd,#0ea5b7)] text-white shadow-[0_10px_30px_rgba(15,76,189,0.18)]">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:gap-6 lg:px-8">
+          <div className="flex shrink-0 items-center gap-3">
+            <span className="rounded-full border border-white/18 bg-white/14 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-white">
+              Latest Notices
+            </span>
           </div>
-          <div className="flex flex-wrap items-center gap-4 text-[var(--color-muted-foreground)]">
-            {announcementItems.slice(1).map((item) => (
-              <span key={item}>{item}</span>
-            ))}
+          <div className="relative min-w-0 flex-1 overflow-hidden">
+            <div className="announcement-marquee-track flex min-w-max items-center gap-8 pr-8">
+              {marqueeLoop.map((item, index) => (
+                <div key={`${item}-${index}`} className="flex items-center gap-8 text-sm text-white/92">
+                  <span className="whitespace-nowrap font-medium">{item}</span>
+                  <span className="h-2 w-2 rounded-full bg-[rgba(255,255,255,0.72)]" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
