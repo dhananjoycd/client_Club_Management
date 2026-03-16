@@ -50,4 +50,7 @@ export type SiteSettings = {
   committeeGroupPhotoUrl?: string | null;
   aboutSectionPhotoUrl?: string | null;
   aboutText?: string | null;
+  aboutMission?: string | null;
+  aboutVision?: string | null;
+  aboutCollaboration?: string | null;
 };

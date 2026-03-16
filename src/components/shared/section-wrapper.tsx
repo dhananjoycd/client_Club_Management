@@ -5,12 +5,13 @@ type SectionWrapperProps = {
   title?: string;
   description?: string;
   children: ReactNode;
+  className?: string;
 };
 
-export function SectionWrapper({ title, description, children }: SectionWrapperProps) {
+export function SectionWrapper({ title, description, children, className }: SectionWrapperProps) {
   return (
-    <MotionReveal>
-      <section className="surface-card rounded-[2rem] p-5 sm:p-7 lg:p-8">
+    <MotionReveal className={className}>
+      <section className="surface-card h-full rounded-[2rem] p-5 sm:p-7 lg:p-8">
         {title || description ? (
           <div className="mb-6 space-y-2 sm:mb-8">
             {title ? <h2 className="text-2xl font-semibold tracking-tight text-[var(--color-primary-strong)] sm:text-3xl">{title}</h2> : null}

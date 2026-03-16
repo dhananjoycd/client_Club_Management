@@ -25,7 +25,7 @@ export function PageHeader({ eyebrow, title, description, actions }: PageHeaderP
             ) : null}
           </div>
         </div>
-        {actions ? <div className="flex items-center gap-3">{actions}</div> : null}
+        {actions ? <div className="flex w-full items-center gap-3 lg:w-auto lg:shrink-0 lg:justify-end">{actions}</div> : null}
       </div>
     </MotionReveal>
   );

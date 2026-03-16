@@ -22,6 +22,9 @@ const defaultValues: SettingsSchema = {
   contactEmail: "",
   phone: "",
   aboutText: "",
+  aboutMission: "",
+  aboutVision: "",
+  aboutCollaboration: "",
   aboutSectionPhotoUrl: "",
   facebook: "",
   linkedin: "",
@@ -149,6 +152,9 @@ export function AdminSettingsManager() {
         contactEmail: current.contactEmail ?? "",
         phone: current.phone ?? "",
         aboutText: current.aboutText ?? "",
+        aboutMission: current.aboutMission ?? "",
+        aboutVision: current.aboutVision ?? "",
+        aboutCollaboration: current.aboutCollaboration ?? "",
         aboutSectionPhotoUrl: current.aboutSectionPhotoUrl ?? "",
         facebook: links.facebook ?? "",
         linkedin: links.linkedin ?? "",
@@ -295,6 +301,9 @@ export function AdminSettingsManager() {
           contactEmail: values.contactEmail || undefined,
           phone: values.phone || undefined,
           aboutText: values.aboutText || undefined,
+          aboutMission: values.aboutMission || undefined,
+          aboutVision: values.aboutVision || undefined,
+          aboutCollaboration: values.aboutCollaboration || undefined,
           aboutSectionPhotoUrl: values.aboutSectionPhotoUrl || undefined,
           socialLinks: Object.keys(socialLinks).length > 0 ? socialLinks : undefined,
           heroSlides: heroSlides.length > 0 ? heroSlides : undefined,
@@ -318,6 +327,9 @@ export function AdminSettingsManager() {
           <FormField label="Contact email" error={errors.contactEmail} disabled={saveMutation.isPending} {...register("contactEmail")} />
           <FormField label="Phone" error={errors.phone} disabled={saveMutation.isPending} {...register("phone")} />
           <FormTextarea label="About text" error={errors.aboutText} disabled={saveMutation.isPending} {...register("aboutText")} />
+          <FormTextarea label="About mission" error={errors.aboutMission} disabled={saveMutation.isPending} {...register("aboutMission")} />
+          <FormTextarea label="About vision" error={errors.aboutVision} disabled={saveMutation.isPending} {...register("aboutVision")} />
+          <FormTextarea label="About collaboration" error={errors.aboutCollaboration} disabled={saveMutation.isPending} {...register("aboutCollaboration")} />
           <FormField label="About section image URL" error={errors.aboutSectionPhotoUrl} disabled={saveMutation.isPending} {...register("aboutSectionPhotoUrl")} />
         </div>
       </div>
