@@ -18,6 +18,10 @@ export const settingsSchema = z.object({
   heroSlide3Image: z.string().url("Enter a valid URL.").or(z.literal("")).optional(),
   heroSlide3Title: z.string().trim().optional(),
   heroSlide3Description: z.string().trim().optional(),
+  activeMembersCount: z.string().trim().regex(/^\d*$/, "Use numbers only.").optional(),
+  eventsDeliveredCount: z.string().trim().regex(/^\d*$/, "Use numbers only.").optional(),
+  projectsShippedCount: z.string().trim().regex(/^\d*$/, "Use numbers only.").optional(),
+  mentorsAndSeniorsCount: z.string().trim().regex(/^\d*$/, "Use numbers only.").optional(),
 });
 
 export type SettingsSchema = z.infer<typeof settingsSchema>;

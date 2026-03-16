@@ -32,20 +32,44 @@ const defaultValues: SettingsSchema = {
   heroSlide3Image: "",
   heroSlide3Title: "",
   heroSlide3Description: "",
+  activeMembersCount: "",
+  eventsDeliveredCount: "",
+  projectsShippedCount: "",
+  mentorsAndSeniorsCount: "",
 };
+
+function parseOptionalCount(value?: string) {
+  if (!value?.trim()) return undefined;
+  const parsedValue = Number.parseInt(value, 10);
+  return Number.isNaN(parsedValue) ? undefined : parsedValue;
+}
 
 export function AdminSettingsManager() {
   const queryClient = useQueryClient();
   const settingsQuery = useQuery({ queryKey: queryKeys.settings.detail, queryFn: settingsService.getSettings, retry: false });
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<SettingsSchema>({ resolver: zodResolver(settingsSchema), defaultValues });
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<SettingsSchema>({ resolver: zodResolver(settingsSchema), defaultValues });
 
-  const saveMutation = useMutation({ mutationFn: settingsService.upsertSettings, onSuccess: async (response) => { toast.success(response.message ?? "Settings saved successfully."); await queryClient.invalidateQueries({ queryKey: queryKeys.settings.detail }); }, onError: (error) => toast.error(getApiErrorMessage(error, "Settings update failed.")) });
+  const saveMutation = useMutation({
+    mutationFn: settingsService.upsertSettings,
+    onSuccess: async (response) => {
+      toast.success(response.message ?? "Settings saved successfully.");
+      await queryClient.invalidateQueries({ queryKey: queryKeys.settings.detail });
+    },
+    onError: (error) => toast.error(getApiErrorMessage(error, "Settings update failed.")),
+  });
 
   React.useEffect(() => {
     const current = settingsQuery.data?.data;
     if (current) {
       const links = (current.socialLinks ?? {}) as Record<string, string>;
       const heroSlides = current.heroSlides ?? [];
+      const impactStats = current.impactStats ?? {};
+
       reset({
         organizationName: current.organizationName ?? "",
         logoUrl: current.logoUrl ?? "",
@@ -64,6 +88,10 @@ export function AdminSettingsManager() {
         heroSlide3Image: heroSlides[2]?.image ?? links.heroSlide3Image ?? "",
         heroSlide3Title: heroSlides[2]?.title ?? links.heroSlide3Title ?? "",
         heroSlide3Description: heroSlides[2]?.description ?? links.heroSlide3Description ?? "",
+        activeMembersCount: impactStats.activeMembers?.toString() ?? "",
+        eventsDeliveredCount: impactStats.eventsDelivered?.toString() ?? "",
+        projectsShippedCount: impactStats.projectsShipped?.toString() ?? "",
+        mentorsAndSeniorsCount: impactStats.mentorsAndSeniors?.toString() ?? "",
       });
     }
   }, [settingsQuery.data, reset]);
@@ -102,11 +130,18 @@ export function AdminSettingsManager() {
             tag: "Teamwork",
           },
         ].filter(
-          (
-            slide,
-          ): slide is { image: string; title: string; description: string; tag: string } =>
+          (slide): slide is { image: string; title: string; description: string; tag: string } =>
             Boolean(slide.image && slide.title && slide.description),
         );
+
+        const impactStats = {
+          activeMembers: parseOptionalCount(values.activeMembersCount),
+          eventsDelivered: parseOptionalCount(values.eventsDeliveredCount),
+          projectsShipped: parseOptionalCount(values.projectsShippedCount),
+          mentorsAndSeniors: parseOptionalCount(values.mentorsAndSeniorsCount),
+        };
+
+        const hasImpactStats = Object.values(impactStats).some((value) => value !== undefined);
 
         saveMutation.mutate({
           organizationName: values.organizationName,
@@ -116,6 +151,7 @@ export function AdminSettingsManager() {
           aboutText: values.aboutText || undefined,
           socialLinks: Object.keys(socialLinks).length > 0 ? socialLinks : undefined,
           heroSlides: heroSlides.length > 0 ? heroSlides : undefined,
+          impactStats: hasImpactStats ? impactStats : undefined,
         });
       })}
       noValidate
@@ -131,6 +167,19 @@ export function AdminSettingsManager() {
           <FormField label="Contact email" error={errors.contactEmail} disabled={saveMutation.isPending} {...register("contactEmail")} />
           <FormField label="Phone" error={errors.phone} disabled={saveMutation.isPending} {...register("phone")} />
           <FormTextarea label="About text" error={errors.aboutText} disabled={saveMutation.isPending} {...register("aboutText")} />
+        </div>
+      </div>
+
+      <div className="surface-card rounded-[2rem] p-5 sm:p-6">
+        <div className="mb-5 space-y-2">
+          <h2 className="text-xl font-semibold tracking-tight text-[var(--color-primary-strong)]">Impact stats</h2>
+          <p className="text-sm leading-6 text-[var(--color-muted-foreground)]">These numbers drive the landing page stats cards and count-up presentation.</p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField type="number" min="0" inputMode="numeric" label="Active members" error={errors.activeMembersCount} disabled={saveMutation.isPending} {...register("activeMembersCount")} />
+          <FormField type="number" min="0" inputMode="numeric" label="Events delivered" error={errors.eventsDeliveredCount} disabled={saveMutation.isPending} {...register("eventsDeliveredCount")} />
+          <FormField type="number" min="0" inputMode="numeric" label="Projects shipped" error={errors.projectsShippedCount} disabled={saveMutation.isPending} {...register("projectsShippedCount")} />
+          <FormField type="number" min="0" inputMode="numeric" label="Mentors and seniors" error={errors.mentorsAndSeniorsCount} disabled={saveMutation.isPending} {...register("mentorsAndSeniorsCount")} />
         </div>
       </div>
 

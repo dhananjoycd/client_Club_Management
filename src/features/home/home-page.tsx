@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, CalendarDays, ChevronRight, Mail, MapPin, Phone, Sparkles, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { StatCard } from "@/components/cards/stat-card";
+import { CountUpNumber } from "@/components/motion/count-up-number";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
 import {
   activityItems,
@@ -17,7 +18,7 @@ import {
 } from "@/features/home/home-content";
 import { EventItem } from "@/types/event.types";
 import { NoticeItem } from "@/types/notice.types";
-import { SiteSettings } from "@/types/settings.types";
+import { SiteImpactStats, SiteSettings } from "@/types/settings.types";
 
 type HomePageViewProps = {
   settings: SiteSettings | null;
@@ -34,12 +35,12 @@ type HeroSlide = {
 
 const trustItems = ["Student community", "Workshop-led learning", "Project-based collaboration", "Event-driven growth"];
 
-const impactStats = [
-  { label: "Active members", value: "500+" },
-  { label: "Events delivered", value: "35+" },
-  { label: "Projects shipped", value: "20+" },
-  { label: "Mentors and seniors", value: "12+" },
-];
+const defaultImpactStats: Required<SiteImpactStats> = {
+  activeMembers: 500,
+  eventsDelivered: 35,
+  projectsShipped: 20,
+  mentorsAndSeniors: 12,
+};
 
 const heroContainerVariants = {
   hidden: {},
@@ -86,11 +87,12 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
   const organizationName = settings?.organizationName?.trim() || "XYZ Tech Club";
   const aboutText =
     settings?.aboutText?.trim() ||
-    `${organizationName} is a student-led technology community focused on practical learning, collaborative execution, and building a stronger campus tech culture.`;
+    `${organizationName} is a student-led technology community where students learn, build, collaborate, and contribute through workshops, events, and project-driven activity.`;
   const email = settings?.contactEmail?.trim() || "hello@xyztechclub.org";
   const phone = settings?.phone?.trim() || "+880 1234-567890";
   const configLinks = settings?.socialLinks ?? {};
   const configuredHeroSlides = settings?.heroSlides ?? [];
+  const configuredImpactStats = settings?.impactStats ?? {};
   const heroSlides = defaultHeroSlides.map((slide, index) => ({
     ...slide,
     image: configuredHeroSlides[index]?.image?.trim() || configLinks[`heroSlide${index + 1}Image`]?.trim() || slide.image,
@@ -98,6 +100,28 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
     description: configuredHeroSlides[index]?.description?.trim() || configLinks[`heroSlide${index + 1}Description`]?.trim() || slide.description,
     tag: configuredHeroSlides[index]?.tag?.trim() || slide.tag,
   }));
+  const impactStats = [
+    {
+      label: "Active members",
+      value: configuredImpactStats.activeMembers ?? defaultImpactStats.activeMembers,
+      suffix: "+",
+    },
+    {
+      label: "Events delivered",
+      value: configuredImpactStats.eventsDelivered ?? defaultImpactStats.eventsDelivered,
+      suffix: "+",
+    },
+    {
+      label: "Projects shipped",
+      value: configuredImpactStats.projectsShipped ?? defaultImpactStats.projectsShipped,
+      suffix: "+",
+    },
+    {
+      label: "Mentors and seniors",
+      value: configuredImpactStats.mentorsAndSeniors ?? defaultImpactStats.mentorsAndSeniors,
+      suffix: "+",
+    },
+  ];
   const marqueeItems = latestNotices.length > 0
     ? latestNotices.map((notice) => `${notice.title}: ${notice.content}`)
     : [
@@ -186,7 +210,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
               </Link>
             </motion.div>
 
-            <motion.div variants={heroContainerVariants} className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <motion.div variants={heroContainerVariants} className="grid grid-cols-2 gap-3 xl:grid-cols-4">
               {impactStats.map((item) => (
                 <motion.div
                   key={item.label}
@@ -195,7 +219,9 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
                   transition={{ duration: 0.22, ease: "easeOut" }}
                   className="surface-card rounded-[1.5rem] p-4"
                 >
-                  <p className="text-2xl font-semibold tracking-tight text-[var(--color-primary-strong)]">{item.value}</p>
+                  <p className="text-2xl font-semibold tracking-tight text-[var(--color-primary-strong)] sm:text-3xl">
+                    <CountUpNumber value={item.value} suffix={item.suffix} />
+                  </p>
                   <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">{item.label}</p>
                 </motion.div>
               ))}
@@ -318,14 +344,17 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
 
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-[0.92fr_1.08fr]">
-          <div className="surface-card rounded-[2rem] bg-[linear-gradient(145deg,#0b2f6f,#0f4cbd)] p-6 text-white sm:p-8">
-            <p className="text-sm font-medium uppercase tracking-[0.22em] text-[rgba(210,240,255,0.78)]">About the club</p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white">A focused student community that turns curiosity into execution.</h2>
-            <p className="mt-4 text-base leading-8 text-[rgba(235,245,255,0.82)]">{aboutText}</p>
-            <Link href="/about" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-accent)]">
-              Learn more about the club
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+          <div className="relative overflow-hidden rounded-[2rem] border border-[rgba(125,211,252,0.22)] bg-[linear-gradient(145deg,#08275a_0%,#0b3b88_52%,#0ea5b7_100%)] p-6 text-white shadow-[0_24px_60px_rgba(8,39,90,0.24)] sm:p-8">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(34,199,214,0.16),transparent_22%)]" />
+            <div className="relative">
+              <p className="text-sm font-medium uppercase tracking-[0.22em] text-[rgba(214,240,255,0.82)]">About XYZ Tech Club</p>
+              <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white">A student technology community built around learning, events, teamwork, and visible contribution.</h2>
+              <p className="mt-4 max-w-2xl text-base leading-8 text-[rgba(236,244,255,0.88)]">{aboutText || "XYZ Tech Club helps students learn practical skills, join workshops, participate in events, collaborate on projects, and grow through an active campus tech community."}</p>
+              <Link href="/about" className="secondary-button mt-6 inline-flex h-11 items-center gap-2 self-start border-white/18 bg-white/12 px-5 text-sm text-white shadow-[0_16px_36px_rgba(8,39,90,0.22)] backdrop-blur hover:border-white/26 hover:bg-white/18 hover:text-white">
+                Learn more about XYZ Tech Club
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
 
           <SectionWrapper
@@ -378,11 +407,17 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
             title={`Why join ${organizationName}?`}
             description="Students stay when the club creates visible growth, useful relationships, and real momentum."
           >
-            <div className="space-y-4">
-              <p className="text-sm leading-7 text-[var(--color-muted-foreground)]">
-                A strong club should do more than collect attendance. It should create consistent activity, responsible leadership, and a path from beginner participation to meaningful contribution.
-              </p>
-              <Link href="/apply" className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-primary)]">
+            <div className="flex h-full flex-col justify-between gap-6">
+              <div className="space-y-4">
+                <p className="text-sm leading-7 text-[var(--color-muted-foreground)]">
+                  A strong club should create consistent learning, responsible teamwork, and a clear path from first participation to real contribution.
+                </p>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-[var(--color-border)] bg-white/60 px-4 py-3 text-sm font-medium text-[var(--color-primary-strong)]">Weekly sessions and workshops</div>
+                  <div className="rounded-2xl border border-[var(--color-border)] bg-white/60 px-4 py-3 text-sm font-medium text-[var(--color-primary-strong)]">Projects, teamwork, and mentorship</div>
+                </div>
+              </div>
+              <Link href="/apply" className="primary-button inline-flex h-11 items-center gap-2 self-start px-5 text-sm">
                 Apply for membership
                 <ChevronRight className="h-4 w-4" />
               </Link>
@@ -449,35 +484,46 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
           </div>
         </SectionWrapper>
 
-        <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1.08fr_0.92fr]">
-          <SectionWrapper
-            title="Impact and momentum"
-            description="A strong landing page should show that the club is active, organized, and worth joining."
-          >
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {impactStats.map((item) => (
-                <div key={item.label} className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/60 p-5">
-                  <p className="text-3xl font-semibold tracking-tight text-[var(--color-primary-strong)]">{item.value}</p>
-                  <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">{item.label}</p>
+        <SectionWrapper
+          title="Testimonials"
+          description="Real feedback from members, participants, and mentors helps visitors trust the club much faster."
+        >
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-[0.95fr_1.05fr]">
+            <div className="relative overflow-hidden rounded-[1.75rem] border border-[rgba(125,211,252,0.26)] bg-[linear-gradient(145deg,#08275a_0%,#0b3b88_52%,#0ea5b7_100%)] p-6 text-white shadow-[0_24px_60px_rgba(8,39,90,0.2)] sm:p-8">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(34,199,214,0.18),transparent_26%)]" />
+              <div className="relative flex h-full flex-col justify-between gap-6">
+                <div>
+                  <p className="text-sm font-medium uppercase tracking-[0.22em] text-[rgba(214,240,255,0.82)]">Member voices</p>
+                  <p className="mt-5 text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl">
+                    &ldquo;{testimonialItems[0]?.quote}&rdquo;
+                  </p>
                 </div>
-              ))}
+                <div className="space-y-2">
+                  <p className="text-base font-semibold text-white">{testimonialItems[0]?.author}</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-[rgba(214,240,255,0.78)]">{testimonialItems[0]?.meta}</p>
+                </div>
+              </div>
             </div>
-          </SectionWrapper>
 
-          <SectionWrapper title="Testimonials" description="Short, credible signals from members and participants strengthen trust quickly.">
-            <div className="space-y-4">
-              {testimonialItems.map((item) => (
-                <div key={item.author} className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/60 p-5">
-                  <p className="text-sm leading-7 text-[var(--color-foreground)]">&ldquo;{item.quote}&rdquo;</p>
-                  <div className="mt-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {testimonialItems.slice(1).map((item) => (
+                <article key={item.author} className="surface-card flex h-full flex-col justify-between rounded-[1.75rem] p-5 sm:p-6">
+                  <p className="text-sm leading-7 text-[var(--color-foreground)] sm:text-base">&ldquo;{item.quote}&rdquo;</p>
+                  <div className="mt-6 border-t border-[var(--color-border)] pt-4">
                     <p className="text-sm font-semibold text-[var(--color-primary-strong)]">{item.author}</p>
-                    <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">{item.meta}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">{item.meta}</p>
                   </div>
-                </div>
+                </article>
               ))}
+              <div className="rounded-[1.75rem] border border-dashed border-[var(--color-border)] bg-white/55 p-5 sm:p-6 md:col-span-2">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-secondary)]">Why this matters</p>
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-muted-foreground)] sm:text-base">
+                  Testimonials give social proof. They help new visitors understand that XYZ Tech Club is active, useful, and trusted by real students and mentors.
+                </p>
+              </div>
             </div>
-          </SectionWrapper>
-        </section>
+          </div>
+        </SectionWrapper>
 
         <section id="team" className="grid grid-cols-1 gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <SectionWrapper
@@ -557,6 +603,20 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
     </main>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
