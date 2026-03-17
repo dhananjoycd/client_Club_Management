@@ -18,7 +18,9 @@ export const queryKeys = {
   },
   notices: {
     all: ["notices"] as const,
+    list: (scope: string) => ["notices", scope] as const,
     admin: ["notices", "admin"] as const,
+    adminList: (scope: string) => ["notices", "admin", scope] as const,
   },
   dashboard: {
     admin: ["dashboard", "admin"] as const,

@@ -5,12 +5,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { format } from "date-fns";
-import { PencilLine, Trash2, X } from "lucide-react";
+import { PencilLine, Search, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { FormActions } from "@/components/forms/form-actions";
 import { FormField, FormTextarea } from "@/components/forms/form-field";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { LoadingState } from "@/components/feedback/loading-state";
+import { PaginationControls } from "@/components/shared/pagination-controls";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { WarningConfirmModal } from "@/components/shared/warning-confirm-modal";
@@ -28,6 +29,7 @@ const audienceLabels: Record<(typeof noticeAudienceValues)[number], string> = {
   ADMINS: "Admins",
 };
 
+const ADMIN_NOTICE_LIMIT = 10;
 const formatNoticeDateTime = (value: string) => format(new Date(value), "dd MMM yyyy, hh:mm a");
 const isEditedNotice = (createdAt: string, updatedAt: string) =>
   new Date(updatedAt).getTime() > new Date(createdAt).getTime() + 1000;
@@ -36,10 +38,12 @@ export function AdminNoticesManager() {
   const queryClient = useQueryClient();
   const [editingNoticeId, setEditingNoticeId] = useState<string | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
 
   const noticesQuery = useQuery({
-    queryKey: queryKeys.notices.admin,
-    queryFn: () => noticeService.getNotices({ limit: 50 }),
+    queryKey: queryKeys.notices.adminList(`page-${page}-search-${searchTerm}`),
+    queryFn: () => noticeService.getNotices({ limit: ADMIN_NOTICE_LIMIT, page, searchTerm: searchTerm || undefined }),
     retry: false,
   });
 
@@ -54,10 +58,17 @@ export function AdminNoticesManager() {
   });
 
   const notices = useMemo(() => noticesQuery.data?.data.result ?? [], [noticesQuery.data]);
+  const meta = noticesQuery.data?.data.meta;
+  const totalPages = meta ? Math.max(1, Math.ceil(meta.total / meta.limit)) : 1;
+  const hasSearch = Boolean(searchTerm.trim());
   const editingNotice = useMemo(
     () => notices.find((notice) => notice.id === editingNoticeId) ?? null,
     [notices, editingNoticeId],
   );
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
 
   useEffect(() => {
     if (!editingNotice) {
@@ -86,6 +97,8 @@ export function AdminNoticesManager() {
       toast.success(response.message ?? "Notice created successfully.");
       await invalidateNoticeQueries();
       createForm.reset({ title: "", content: "", audience: "ALL", sendEmail: false });
+      setPage(1);
+      setSearchTerm("");
     },
     onError: (error) => toast.error(getApiErrorMessage(error, "Notice creation failed.")),
   });
@@ -132,11 +145,7 @@ export function AdminNoticesManager() {
           title="Create notice"
           description="Publish a new notice to the backend and optionally send it by email to the selected audience."
         >
-          <form
-            className="grid gap-4"
-            onSubmit={createForm.handleSubmit(handleCreateNotice)}
-            noValidate
-          >
+          <form className="grid gap-4" onSubmit={createForm.handleSubmit(handleCreateNotice)} noValidate>
             <FormField
               label="Title"
               error={createForm.formState.errors.title}
@@ -171,78 +180,104 @@ export function AdminNoticesManager() {
                 The selected audience will receive this notice by email too.
               </span>
             </label>
-            <FormActions
-              isSubmitting={isCreating}
-              submitLabel="Create notice"
-            />
+            <FormActions isSubmitting={isCreating} submitLabel="Create notice" />
           </form>
         </SectionWrapper>
 
-        <SectionWrapper title="All notices" description="Manage notices from each card. Use edit to open a modal form and delete to open a warning dialog.">
-          {noticesQuery.isLoading ? (
-            <LoadingState title="Loading notices" description="Fetching notice records." />
-          ) : noticesQuery.isError ? (
-            <EmptyState title="Unable to load notices" description={getApiErrorMessage(noticesQuery.error, "Please verify your admin session.")} />
-          ) : notices.length ? (
-            <div className="grid gap-4">
-              {notices.map((notice) => {
-                const edited = isEditedNotice(notice.createdAt, notice.updatedAt);
-
-                return (
-                  <article
-                    key={notice.id}
-                    className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-page)] p-5 transition hover:border-[var(--color-accent)] hover:bg-white"
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <h3 className="text-lg font-semibold text-[var(--color-primary)]">{notice.title}</h3>
-                        <p className="mt-2 text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">
-                          {formatNoticeDateTime(notice.createdAt)}
-                        </p>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <StatusBadge label={audienceLabels[notice.audience]} variant="info" className="w-fit" />
-                        {edited ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">
-                            <PencilLine className="h-3.5 w-3.5" />
-                            Edited
-                          </span>
-                        ) : null}
-                      </div>
-                    </div>
-                    <p className="mt-3 text-sm leading-6 text-[var(--color-muted-foreground)]">{notice.content}</p>
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--color-border)] pt-4">
-                      <div className="text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">
-                        {edited ? `Last updated ${formatNoticeDateTime(notice.updatedAt)}` : "Not edited yet"}
-                      </div>
-                      <div className="flex flex-wrap gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setEditingNoticeId(notice.id)}
-                          className="secondary-button h-10 px-4 text-sm"
-                        >
-                          <span className="inline-flex items-center gap-2">
-                            <PencilLine className="h-4 w-4" />
-                            Edit
-                          </span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setPendingDeleteId(notice.id)}
-                          className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
+        <SectionWrapper title="All notices" description="Search, paginate, and manage notices from each card.">
+          <div className="grid gap-5">
+            <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-page)] p-4 sm:p-5">
+              <label className="grid gap-2">
+                <span className="text-sm font-medium text-[var(--color-primary-strong)]">Search notices</span>
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-muted-foreground)]" />
+                  <input
+                    name="admin-notice-search"
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                    placeholder="Search by title or content"
+                    className="input-base h-12 w-full pl-11 pr-4 text-sm"
+                  />
+                </div>
+              </label>
             </div>
-          ) : (
-            <EmptyState title="No notices yet" description="Create your first notice to start publishing updates." />
-          )}
+
+            {noticesQuery.isLoading ? (
+              <LoadingState title="Loading notices" description="Fetching notice records." />
+            ) : noticesQuery.isError ? (
+              <EmptyState title="Unable to load notices" description={getApiErrorMessage(noticesQuery.error, "Please verify your admin session.")} />
+            ) : !notices.length ? (
+              <EmptyState
+                title={hasSearch ? "No matching notices" : "No notices yet"}
+                description={
+                  hasSearch
+                    ? "Try a different keyword to find the notice you want to edit."
+                    : "Create your first notice to start publishing updates."
+                }
+              />
+            ) : (
+              <>
+                <div className="grid gap-4">
+                  {notices.map((notice) => {
+                    const edited = isEditedNotice(notice.createdAt, notice.updatedAt);
+
+                    return (
+                      <article
+                        key={notice.id}
+                        className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-page)] p-5 transition hover:border-[var(--color-accent)] hover:bg-white"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <h3 className="text-lg font-semibold text-[var(--color-primary)]">{notice.title}</h3>
+                            <p className="mt-2 text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">
+                              {formatNoticeDateTime(notice.createdAt)}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <StatusBadge label={audienceLabels[notice.audience]} variant="info" className="w-fit" />
+                            {edited ? (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">
+                                <PencilLine className="h-3.5 w-3.5" />
+                                Edited
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+                        <p className="mt-3 text-sm leading-6 text-[var(--color-muted-foreground)]">{notice.content}</p>
+                        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--color-border)] pt-4">
+                          <div className="text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">
+                            {edited ? `Last updated ${formatNoticeDateTime(notice.updatedAt)}` : "Not edited yet"}
+                          </div>
+                          <div className="flex flex-wrap gap-3">
+                            <button
+                              type="button"
+                              onClick={() => setEditingNoticeId(notice.id)}
+                              className="secondary-button h-10 px-4 text-sm"
+                            >
+                              <span className="inline-flex items-center gap-2">
+                                <PencilLine className="h-4 w-4" />
+                                Edit
+                              </span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setPendingDeleteId(notice.id)}
+                              className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+
+                <PaginationControls currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+              </>
+            )}
+          </div>
         </SectionWrapper>
       </div>
 
@@ -267,11 +302,7 @@ export function AdminNoticesManager() {
               </button>
             </div>
 
-            <form
-              className="mt-6 grid gap-4"
-              onSubmit={editForm.handleSubmit(handleEditNotice)}
-              noValidate
-            >
+            <form className="mt-6 grid gap-4" onSubmit={editForm.handleSubmit(handleEditNotice)} noValidate>
               <FormField
                 label="Title"
                 error={editForm.formState.errors.title}
