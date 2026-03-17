@@ -9,6 +9,7 @@ type AdminLayoutProps = Readonly<{
 
 const adminLinks = [
   { href: "/admin", label: "Overview" },
+  { href: "/admin/profile", label: "Profile" },
   { href: "/admin/applications", label: "Applications" },
   { href: "/admin/events", label: "Events" },
   { href: "/admin/notices", label: "Notices" },

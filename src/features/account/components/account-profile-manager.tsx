@@ -35,7 +35,11 @@ const profileSchema = z.object({
 
 type ProfileSchema = z.infer<typeof profileSchema>;
 
-export function AccountProfileManager() {
+type AccountProfileManagerProps = {
+  showRegistrations?: boolean;
+};
+
+export function AccountProfileManager({ showRegistrations = true }: AccountProfileManagerProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
@@ -179,6 +183,7 @@ export function AccountProfileManager() {
         </form>
       </SectionWrapper>
 
+      {showRegistrations ? (
       <SectionWrapper className="xl:col-span-2" title="My registrations" description="Free and paid event registrations linked to your account.">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-[var(--color-muted-foreground)]">Narrow your registrations by type or current status.</p>
@@ -209,6 +214,7 @@ export function AccountProfileManager() {
           <Link href="/account/registrations" className="secondary-button h-11 px-5 text-sm">Open registrations page</Link>
         </div>
       </SectionWrapper>
+      ) : null}
     </div>
   );
 }

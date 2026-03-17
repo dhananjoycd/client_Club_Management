@@ -50,9 +50,9 @@ export default async function AboutPage() {
     <main className="px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 sm:gap-6">
         <PageHeader
-          eyebrow={`About ${organizationName}`}
-          title={`Learn how ${organizationName} builds practical growth, teamwork, and campus tech culture.`}
-          description="This page goes beyond the landing overview and explains the club story, mission, working style, leadership structure, and community impact."
+  
+          title={`About ${organizationName}`}
+          description="See the club story, mission, leadership, and the kind of practical learning culture XYZ Tech Club is building across campus."
           actions={
             <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap lg:flex-nowrap">
               <MembershipApplyCta
