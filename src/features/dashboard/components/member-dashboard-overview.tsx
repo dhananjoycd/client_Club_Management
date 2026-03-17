@@ -16,7 +16,7 @@ import { dashboardService } from "@/services/dashboard.service";
 export function MemberDashboardOverview() {
   const dashboardQuery = useQuery({ queryKey: queryKeys.dashboard.member, queryFn: dashboardService.getMemberDashboard, retry: false });
 
-  if (dashboardQuery.isLoading) return <LoadingState title="Loading account dashboard" description="Fetching your profile summary and events." />;
+  if (dashboardQuery.isLoading) return <LoadingState title="Loading your account" description="Preparing your XYZ Tech Club profile summary, events, and activity." />;
   if (dashboardQuery.isError) return <EmptyState title="Unable to load account dashboard" description={getApiErrorMessage(dashboardQuery.error, "Please verify your account session.")} />;
 
   const data = dashboardQuery.data?.data;

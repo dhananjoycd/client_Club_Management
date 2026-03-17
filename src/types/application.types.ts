@@ -4,7 +4,7 @@ export type MembershipApplicationPayload = {
   department: string;
   session: string;
   studentId: string;
-  district: string;
+  district?: string;
   phone: string;
 };
 
@@ -14,11 +14,12 @@ export type MembershipApplication = {
   department: string;
   session: string;
   studentId: string;
-  district: string;
+  district?: string;
   phone: string;
   status: ApplicationStatus;
   submittedAt: string;
   reviewedAt?: string | null;
+  reviewReason?: string | null;
   applicant?: {
     id: string;
     name?: string | null;

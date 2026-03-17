@@ -48,7 +48,7 @@ export function ProtectedNoticesList() {
   }, [searchTerm]);
 
   if (sessionQuery.isLoading) {
-    return <LoadingState title="Checking access" description="Verifying your session before loading notices." />;
+    return <LoadingState title="Checking notice access" description="Confirming your account before loading the latest XYZ Tech Club notices." />;
   }
 
   if (!sessionQuery.data?.data?.user) {
@@ -68,7 +68,7 @@ export function ProtectedNoticesList() {
   }
 
   if (noticesQuery.isLoading) {
-    return <LoadingState title="Loading notices" description="Fetching official notices from the backend." />;
+    return <LoadingState title="Loading club notices" description="Gathering the latest announcements shared by XYZ Tech Club." />;
   }
 
   if (noticesQuery.isError) {

@@ -203,7 +203,7 @@ export function AdminNoticesManager() {
             </div>
 
             {noticesQuery.isLoading ? (
-              <LoadingState title="Loading notices" description="Fetching notice records." />
+              <LoadingState title="Loading notice board" description="Preparing the notices your XYZ Tech Club team can manage." />
             ) : noticesQuery.isError ? (
               <EmptyState title="Unable to load notices" description={getApiErrorMessage(noticesQuery.error, "Please verify your admin session.")} />
             ) : !notices.length ? (

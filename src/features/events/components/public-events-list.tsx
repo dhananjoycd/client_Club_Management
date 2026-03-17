@@ -19,7 +19,7 @@ export function PublicEventsList() {
   });
 
   if (eventsQuery.isLoading) {
-    return <LoadingState title="Loading events" description="Fetching upcoming events from the backend." />;
+    return <LoadingState title="Loading upcoming events" description="Preparing the next XYZ Tech Club sessions and workshops." />;
   }
 
   if (eventsQuery.isError) {

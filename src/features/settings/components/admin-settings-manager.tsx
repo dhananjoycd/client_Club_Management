@@ -241,7 +241,7 @@ export function AdminSettingsManager() {
     }
   }, [settingsQuery.data, reset]);
 
-  if (settingsQuery.isLoading) return <LoadingState title="Loading settings" description="Fetching site settings from the backend." />;
+  if (settingsQuery.isLoading) return <LoadingState title="Loading club settings" description="Preparing your XYZ Tech Club site settings and public content." />;
   if (settingsQuery.isError) return <EmptyState title="Unable to load settings" description={getApiErrorMessage(settingsQuery.error, "Please verify your admin session.")} />;
 
   return (

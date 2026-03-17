@@ -15,7 +15,7 @@ import { dashboardService } from "@/services/dashboard.service";
 export function AdminDashboardOverview() {
   const dashboardQuery = useQuery({ queryKey: queryKeys.dashboard.admin, queryFn: dashboardService.getAdminDashboard, retry: false });
 
-  if (dashboardQuery.isLoading) return <LoadingState title="Loading admin dashboard" description="Fetching admin statistics and notices." />;
+  if (dashboardQuery.isLoading) return <LoadingState title="Loading admin overview" description="Preparing the latest XYZ Tech Club stats, notices, and activity summary." />;
   if (dashboardQuery.isError) return <EmptyState title="Unable to load admin dashboard" description={getApiErrorMessage(dashboardQuery.error, "Please verify your admin session.")} />;
 
   const data = dashboardQuery.data?.data;

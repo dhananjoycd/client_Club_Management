@@ -11,7 +11,7 @@ export default function RegisterPage() {
           Register first, then complete your profile before applying or joining events.
         </p>
       </div>
-      <Suspense fallback={<LoadingState title="Loading register" description="Preparing the registration form." />}>
+      <Suspense fallback={<LoadingState title="Loading sign up" description="Preparing the account creation form for XYZ Tech Club." />}>
         <RegisterForm />
       </Suspense>
     </div>

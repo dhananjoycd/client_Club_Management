@@ -7,13 +7,20 @@ export type AccountProfile = {
   phone?: string | null;
   academicSession?: string | null;
   department?: string | null;
+  studentId?: string | null;
+  district?: string | null;
   role: string;
   profileComplete: boolean;
   missingFields: string[];
   isClubMember: boolean;
+  membershipFieldsLocked: boolean;
+  latestApplicationStatus?: string | null;
+  latestApplicationReason?: string | null;
   memberProfile?: {
     id: string;
     membershipId: string;
+    studentId?: string | null;
+    district?: string | null;
     status: string;
     bio?: string | null;
     profilePhoto?: string | null;
@@ -28,4 +35,6 @@ export type UpdateAccountProfilePayload = {
   department?: string;
   bio?: string;
   profilePhoto?: string;
+  studentId?: string;
+  district?: string;
 };

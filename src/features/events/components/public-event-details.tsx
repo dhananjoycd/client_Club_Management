@@ -133,7 +133,7 @@ export function PublicEventDetails({ eventId }: PublicEventDetailsProps) {
   }, [eventId, pathname, paymentStatus, queryClient, refetchEvent, refetchRegistrations, router]);
 
   if (eventQuery.isLoading) {
-    return <LoadingState title="Loading event" description="Fetching event details from the backend." />;
+    return <LoadingState title="Loading event details" description="Preparing the full XYZ Tech Club event summary for you." />;
   }
 
   if (eventQuery.isError) {

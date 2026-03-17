@@ -13,7 +13,7 @@ const guestSteps = [
   },
   {
     title: "Submit academic details",
-    description: "Provide department, session, student ID, district, and phone number accurately.",
+    description: "Provide your phone, session, department, and student ID accurately in your profile.",
     icon: FileText,
   },
   {
@@ -31,7 +31,7 @@ const signedInSteps = [
   },
   {
     title: "Submit academic details",
-    description: "Provide department, session, student ID, district, and phone number accurately.",
+    description: "Provide your phone, session, department, and student ID accurately in your profile.",
     icon: FileText,
   },
   {

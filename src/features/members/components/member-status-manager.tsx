@@ -12,7 +12,7 @@ import { dashboardService } from "@/services/dashboard.service";
 export function MemberStatusManager() {
   const dashboardQuery = useQuery({ queryKey: queryKeys.dashboard.member, queryFn: dashboardService.getMemberDashboard, retry: false });
 
-  if (dashboardQuery.isLoading) return <LoadingState title="Loading membership" description="Fetching your current membership status." />;
+  if (dashboardQuery.isLoading) return <LoadingState title="Loading membership status" description="Checking your current XYZ Tech Club membership status." />;
   if (dashboardQuery.isError) return <EmptyState title="Unable to load membership" description={getApiErrorMessage(dashboardQuery.error, "Please verify your account session.")} />;
 
   const data = dashboardQuery.data?.data;

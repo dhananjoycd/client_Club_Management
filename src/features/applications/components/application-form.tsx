@@ -1,18 +1,16 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { FormActions } from "@/components/forms/form-actions";
-import { FormField } from "@/components/forms/form-field";
+import { WarningConfirmModal } from "@/components/shared/warning-confirm-modal";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { queryKeys } from "@/lib/query-keys";
-import { applicationSchema } from "@/schemas/application.schema";
 import { applicationService } from "@/services/application.service";
 import { authService } from "@/services/auth.service";
-import { MembershipApplicationPayload } from "@/types/application.types";
+import { accountService } from "@/services/account.service";
 
 const restrictedRoleConfig: Record<string, { title: string; description: string; href: string; actionLabel: string }> = {
   MEMBER: {
@@ -65,6 +63,7 @@ const applicationStatusConfig: Record<string, { title: string; description: stri
 
 export function ApplicationForm() {
   const queryClient = useQueryClient();
+  const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
   const sessionQuery = useQuery({
     queryKey: queryKeys.auth.session,
     queryFn: authService.getSession,
@@ -76,43 +75,41 @@ export function ApplicationForm() {
     enabled: Boolean(sessionQuery.data?.data?.user),
   });
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<MembershipApplicationPayload>({
-    resolver: zodResolver(applicationSchema),
-    defaultValues: {
-      department: "",
-      session: "",
-      studentId: "",
-      district: "",
-      phone: "",
-    },
-  });
 
   const applicationMutation = useMutation({
     mutationFn: applicationService.submitApplication,
     onSuccess: async (response) => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.applications.all });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.applications.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.account.profile }),
+      ]);
       toast.success(response.message ?? "Application submitted successfully.");
-      reset();
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Application submission failed. Please try again."));
     },
   });
 
-  const onSubmit = async (values: MembershipApplicationPayload) => {
-    await applicationMutation.mutateAsync(values);
-  };
 
   const currentUser = sessionQuery.data?.data?.user;
+  const profileQuery = useQuery({
+    queryKey: queryKeys.account.profile,
+    queryFn: accountService.getProfile,
+    enabled: Boolean(currentUser),
+    retry: false,
+  });
   const restrictedRoleState = currentUser ? restrictedRoleConfig[currentUser.role] : null;
   const latestApplication = applicationsQuery.data?.data?.result?.[0];
   const latestApplicationState = latestApplication ? applicationStatusConfig[latestApplication.status] : null;
-  const canShowForm = !restrictedRoleState && currentUser && latestApplication?.status !== "PENDING" && latestApplication?.status !== "APPROVED";
+  const profile = profileQuery.data?.data;
+  const membershipMissingFields = [
+    !profile?.name?.trim() ? "name" : null,
+    !profile?.phone?.trim() ? "phone" : null,
+    !profile?.academicSession?.trim() ? "session" : null,
+    !profile?.department?.trim() ? "department" : null,
+    !profile?.studentId?.trim() ? "student ID" : null,
+  ].filter(Boolean) as string[];
+  const canShowForm = !restrictedRoleState && currentUser && profile && membershipMissingFields.length === 0 && latestApplication?.status !== "PENDING" && latestApplication?.status !== "APPROVED";
 
   if (restrictedRoleState) {
     return (
@@ -144,7 +141,7 @@ export function ApplicationForm() {
     );
   }
 
-  if (applicationsQuery.isLoading) {
+  if (applicationsQuery.isLoading || profileQuery.isLoading) {
     return (
       <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-page)] p-5 text-sm text-[var(--color-muted-foreground)]">
         Checking your latest membership application status...
@@ -152,10 +149,10 @@ export function ApplicationForm() {
     );
   }
 
-  if (applicationsQuery.isError) {
+  if (applicationsQuery.isError || profileQuery.isError) {
     return (
       <div className="rounded-[1.5rem] border border-rose-200 bg-rose-50 p-5 text-sm text-rose-700">
-        Could not load your application status right now. Please refresh and try again.
+        Could not load your profile or application status right now. Please refresh and try again.
       </div>
     );
   }
@@ -176,21 +173,71 @@ export function ApplicationForm() {
         </div>
       ) : null}
 
+      {!profile && currentUser ? (
+        <div className="rounded-[1.5rem] border border-rose-200 bg-rose-50 p-5 text-sm text-rose-700">
+          Could not load your account profile. Please refresh and try again.
+        </div>
+      ) : null}
+
+      {profile && membershipMissingFields.length > 0 && latestApplication?.status !== "PENDING" && latestApplication?.status !== "APPROVED" ? (
+        <div className="rounded-[1.5rem] border border-amber-200 bg-amber-50 p-5">
+          <h3 className="text-lg font-semibold text-amber-800">Complete your profile first</h3>
+          <p className="mt-3 text-sm leading-6 text-amber-700">Membership applications now use your account profile automatically. Complete these fields first: {membershipMissingFields.join(", ")}.</p>
+          <div className="mt-5">
+            <Link href="/account/profile" className="inline-flex h-11 items-center justify-center rounded-2xl bg-amber-600 px-5 text-sm font-semibold text-white">
+              Go to profile
+            </Link>
+          </div>
+        </div>
+      ) : null}
+
       {canShowForm ? (
         <>
-          <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-page)] p-4 text-sm text-[var(--color-muted-foreground)]">
-            Applying as <span className="font-semibold text-[var(--color-primary)]">{currentUser.email}</span>
-          </div>
-          <form className="grid gap-5" onSubmit={handleSubmit(onSubmit)} noValidate>
-            <div className="grid gap-5 md:grid-cols-2">
-              <FormField label="Department" type="text" placeholder="Computer Science and Engineering" disabled={applicationMutation.isPending} error={errors.department} {...register("department")} />
-              <FormField label="Session" type="text" placeholder="2022-23" disabled={applicationMutation.isPending} error={errors.session} {...register("session")} />
-              <FormField label="Student ID" type="text" placeholder="2022331001" disabled={applicationMutation.isPending} error={errors.studentId} {...register("studentId")} />
-              <FormField label="District" type="text" placeholder="Enter your district" disabled={applicationMutation.isPending} error={errors.district} {...register("district")} />
-              <FormField label="Phone number" type="tel" placeholder="01XXXXXXXXX" disabled={applicationMutation.isPending} error={errors.phone} {...register("phone")} />
+          <WarningConfirmModal
+            open={isConfirmOpen}
+            title="Confirm your membership data"
+            description="Please review your full name, phone, academic session, department, and student ID carefully. After submission, these membership fields will stay locked while your application is under review."
+            confirmLabel={latestApplication?.status === "REJECTED" ? "Resubmit Application" : "Submit Application"}
+            isLoading={applicationMutation.isPending}
+            onCancel={() => setIsConfirmOpen(false)}
+            onConfirm={async () => {
+              if (!profile) return;
+              await applicationMutation.mutateAsync({
+                department: profile.department ?? "",
+                session: profile.academicSession ?? "",
+                studentId: profile.studentId ?? "",
+                district: profile.district ?? undefined,
+                phone: profile.phone ?? "",
+              });
+              setIsConfirmOpen(false);
+            }}
+          />
+          <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-page)] p-5 text-sm text-[var(--color-muted-foreground)]">
+            <p>Applying as <span className="font-semibold text-[var(--color-primary)]">{currentUser.email}</span></p>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              {[
+                ["Full name", profile.name ?? "Not provided"],
+                ["Phone", profile.phone ?? "Not provided"],
+                ["Academic session", profile.academicSession ?? "Not provided"],
+                ["Department", profile.department ?? "Not provided"],
+                ["Student ID", profile.studentId ?? "Not provided"],
+              ].map(([label, value]) => (
+                <div key={label} className="rounded-[1.25rem] border border-[var(--color-border)] bg-white/80 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-foreground)]">{label}</p>
+                  <p className="mt-2 text-sm font-semibold text-[var(--color-primary)]">{String(value)}</p>
+                </div>
+              ))}
             </div>
-
-            <FormActions isSubmitting={applicationMutation.isPending} submitLabel={latestApplication?.status === "REJECTED" ? "Resubmit application" : "Submit application"} helperText="Applicant name and email come from your authenticated account on the backend." />
+          </div>
+          <form
+            className="grid gap-5"
+            onSubmit={(event) => {
+              event.preventDefault();
+              setIsConfirmOpen(true);
+            }}
+            noValidate
+          >
+            <FormActions isSubmitting={applicationMutation.isPending} submitLabel={latestApplication?.status === "REJECTED" ? "Resubmit application" : "Submit application"} helperText="Membership applications now pull phone, session, department, and student ID directly from your profile." />
           </form>
         </>
       ) : null}

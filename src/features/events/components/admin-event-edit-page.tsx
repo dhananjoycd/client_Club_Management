@@ -182,7 +182,7 @@ export function AdminEventEditPage({ eventId }: Props) {
   };
 
   if (eventQuery.isLoading) {
-    return <LoadingState title="Loading event" description="Preparing the event editor." />;
+    return <LoadingState title="Loading event editor" description="Preparing this XYZ Tech Club event for admin editing." />;
   }
 
   if (eventQuery.isError || !eventQuery.data?.data) {

@@ -4,8 +4,8 @@ type LoadingStateProps = {
 };
 
 export function LoadingState({
-  title = "Loading content",
-  description = "Please wait while the latest data is being prepared.",
+  title = "Loading Club Portal",
+  description = "Please wait while XYZ Tech Club prepares the latest page data for you.",
 }: LoadingStateProps) {
   return (
     <div className="rounded-[2rem] border border-[var(--color-border)] bg-white p-6 shadow-sm sm:p-8">

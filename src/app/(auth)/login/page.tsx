@@ -11,7 +11,7 @@ export default function LoginPage() {
           Sign in to access your member or admin dashboard.
         </p>
       </div>
-      <Suspense fallback={<LoadingState title="Loading login" description="Preparing the authentication form." />}>
+      <Suspense fallback={<LoadingState title="Loading sign in" description="Preparing secure access to your XYZ Tech Club account." />}>
         <LoginForm />
       </Suspense>
     </div>

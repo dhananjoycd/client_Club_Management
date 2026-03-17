@@ -69,6 +69,7 @@ export function PublicNavbar() {
   const user = sessionQuery.data?.data?.user;
   const settings = settingsQuery.data?.data;
   const accountProfile = accountProfileQuery.data?.data;
+  const isNavbarAuthLoading = sessionQuery.isLoading || (Boolean(user) && (accountProfileQuery.isLoading || applicationQuery.isLoading));
   const organizationName = settings?.organizationName?.trim() || "XYZ Tech Club";
   const dashboardHref = user?.role === "USER" || user?.role === "MEMBER" ? "/account" : user ? "/admin" : null;
   const restrictedRoles = new Set(["MEMBER", "ADMIN", "SUPER_ADMIN", "EVENT_MANAGER"]);
@@ -154,11 +155,21 @@ export function PublicNavbar() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
-          {avatarButton}
-          {!user ? <Link href="/login" className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Login</Link> : null}
-          {!user ? <Link href="/register" className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Register</Link> : null}
-          {showJoinNow ? <Link href="/apply" className="primary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(37,99,235,0.28)]">Join Now</Link> : null}
-          {user ? <button type="button" onClick={() => logoutMutation.mutate()} className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Logout</button> : null}
+          {isNavbarAuthLoading ? (
+            <div className="flex items-center gap-3" aria-hidden="true">
+              <div className="h-11 w-11 animate-pulse rounded-full border border-[var(--color-border)] bg-white/80" />
+              <div className="h-11 w-24 animate-pulse rounded-full border border-[var(--color-border)] bg-white/80" />
+              <div className="h-11 w-28 animate-pulse rounded-full bg-[var(--color-primary-soft)]" />
+            </div>
+          ) : (
+            <>
+              {avatarButton}
+              {!user ? <Link href="/login" className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Login</Link> : null}
+              {!user ? <Link href="/register" className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Register</Link> : null}
+              {showJoinNow ? <Link href="/apply" className="primary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(37,99,235,0.28)]">Join Now</Link> : null}
+              {user ? <button type="button" onClick={() => logoutMutation.mutate()} className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Logout</button> : null}
+            </>
+          )}
         </div>
 
         <button
@@ -194,11 +205,20 @@ export function PublicNavbar() {
                 </Link>
               );
             })}
-            {avatarButton ? <div className="flex justify-start">{avatarButton}</div> : null}
-            {!user ? <Link href="/login" onClick={() => setIsOpen(false)} className="secondary-button h-12 px-5 text-sm">Login</Link> : null}
-            {!user ? <Link href="/register" onClick={() => setIsOpen(false)} className="secondary-button h-12 px-5 text-sm">Register</Link> : null}
-            {showJoinNow ? <Link href="/apply" onClick={() => setIsOpen(false)} className="primary-button h-12 px-5 text-sm">Join Now</Link> : null}
-            {user ? <button type="button" onClick={() => { setIsOpen(false); logoutMutation.mutate(); }} className="secondary-button h-12 px-5 text-sm">Logout</button> : null}
+            {isNavbarAuthLoading ? (
+              <div className="grid gap-2" aria-hidden="true">
+                <div className="h-12 animate-pulse rounded-2xl border border-[var(--color-border)] bg-white/80" />
+                <div className="h-12 animate-pulse rounded-2xl border border-[var(--color-border)] bg-white/80" />
+              </div>
+            ) : (
+              <>
+                {avatarButton ? <div className="flex justify-start">{avatarButton}</div> : null}
+                {!user ? <Link href="/login" onClick={() => setIsOpen(false)} className="secondary-button h-12 px-5 text-sm">Login</Link> : null}
+                {!user ? <Link href="/register" onClick={() => setIsOpen(false)} className="secondary-button h-12 px-5 text-sm">Register</Link> : null}
+                {showJoinNow ? <Link href="/apply" onClick={() => setIsOpen(false)} className="primary-button h-12 px-5 text-sm">Join Now</Link> : null}
+                {user ? <button type="button" onClick={() => { setIsOpen(false); logoutMutation.mutate(); }} className="secondary-button h-12 px-5 text-sm">Logout</button> : null}
+              </>
+            )}
           </nav>
         </div>
       ) : null}

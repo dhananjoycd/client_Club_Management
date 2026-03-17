@@ -12,6 +12,7 @@ import { MotionReveal } from "@/components/motion/motion-shell";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { LoadingState } from "@/components/feedback/loading-state";
 import { ActionLoadingOverlay } from "@/components/shared/action-loading-overlay";
+import { FilterChip } from "@/components/shared/filter-chip";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { WarningConfirmModal } from "@/components/shared/warning-confirm-modal";
 import { PaginationControls } from "@/components/shared/pagination-controls";
@@ -131,7 +132,7 @@ export function PublicEventsBrowser() {
   }, [pastPage, pastTotalPages]);
 
   if (eventsQuery.isLoading) {
-    return <LoadingState title="Loading events" description="Fetching live event data from the backend." />;
+    return <LoadingState title="Loading club events" description="Preparing live XYZ Tech Club events, filters, and featured activities." />;
   }
 
   if (eventsQuery.isError) {
@@ -292,22 +293,23 @@ export function PublicEventsBrowser() {
             </div>
             <div className="flex flex-wrap gap-3 xl:justify-end">
               {(["all", "upcoming", "past", "free", "paid"] as const).map((filter) => (
-                <button
+                <FilterChip
                   key={filter}
-                  type="button"
+                  label={
+                    filter === "all"
+                      ? "All Events"
+                      : filter === "upcoming"
+                        ? "Upcoming"
+                        : filter === "past"
+                          ? "Past Events"
+                          : filter === "free"
+                            ? "Free"
+                            : "Paid"
+                  }
+                  active={activeFilter === filter}
                   onClick={() => setActiveFilter(filter)}
-                  className={`secondary-button h-11 whitespace-nowrap px-5 text-sm ${activeFilter === filter ? "border-[var(--color-accent)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]" : ""}`}
-                >
-                  {filter === "all"
-                    ? "All Events"
-                    : filter === "upcoming"
-                      ? "Upcoming"
-                      : filter === "past"
-                        ? "Past Events"
-                        : filter === "free"
-                          ? "Free"
-                          : "Paid"}
-                </button>
+                  className="h-11 px-5 text-sm"
+                />
               ))}
             </div>
           </div>

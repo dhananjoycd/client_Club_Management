@@ -23,6 +23,7 @@ import { FormActions } from "@/components/forms/form-actions";
 import { FormField, FormTextarea } from "@/components/forms/form-field";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { LoadingState } from "@/components/feedback/loading-state";
+import { FilterChip } from "@/components/shared/filter-chip";
 import { PaginationControls } from "@/components/shared/pagination-controls";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -276,7 +277,7 @@ export function AdminEventsManager() {
         >
           <div className="grid gap-5">
             <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-page)] p-4 sm:p-5">
-              <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+              <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
                 <label className="grid gap-2">
                   <span className="text-sm font-medium text-[var(--color-primary-strong)]">Search events</span>
                   <div className="relative">
@@ -286,11 +287,11 @@ export function AdminEventsManager() {
                       value={searchTerm}
                       onChange={(event) => setSearchTerm(event.target.value)}
                       placeholder="Search XYZ Tech Club events by title, location, category, or description"
-                      className="input-base h-12 w-full pl-11 pr-4 text-sm"
+                      className="input-base h-12 w-full min-w-0 pl-11 pr-4 text-sm"
                     />
                   </div>
                 </label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 xl:justify-end">
                   {([
                     ["ALL", "All"],
                     ["UPCOMING", "Upcoming"],
@@ -301,25 +302,19 @@ export function AdminEventsManager() {
                     ["FREE", "Free"],
                     ["PAID", "Paid"],
                   ] as const).map(([value, label]) => (
-                    <button
+                    <FilterChip
                       key={value}
-                      type="button"
+                      label={label}
+                      active={activeFilter === value}
                       onClick={() => setActiveFilter(value)}
-                      className={`inline-flex h-10 items-center justify-center rounded-full border px-4 text-sm font-medium transition ${
-                        activeFilter === value
-                          ? "border-[var(--color-accent)] bg-[var(--color-primary)] text-white"
-                          : "border-[var(--color-border)] bg-white text-[var(--color-primary)] hover:border-[var(--color-accent)]"
-                      }`}
-                    >
-                      {label}
-                    </button>
+                    />
                   ))}
                 </div>
               </div>
             </div>
 
             {eventsQuery.isLoading ? (
-              <LoadingState title="Loading events" description="Fetching event records." />
+              <LoadingState title="Loading event board" description="Preparing the XYZ Tech Club events your admin team can manage." />
             ) : eventsQuery.isError ? (
               <EmptyState title="Unable to load events" description={getApiErrorMessage(eventsQuery.error, "Please verify your admin session.")} />
             ) : !filteredEvents.length ? (
@@ -355,7 +350,7 @@ export function AdminEventsManager() {
                               </span>
                             ) : null}
                             <h3 className="text-xl font-semibold text-[var(--color-primary)]">{event.title}</h3>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-wrap gap-2 xl:justify-end">
                               <StatusBadge label={badges.timing} variant={badges.isPast ? "inactive" : "pending"} className="w-fit text-[10px]" />
                               <StatusBadge label={badges.registration} variant={event.isRegistrationOpen ? "info" : "inactive"} className="w-fit text-[10px]" />
                               <StatusBadge label={badges.type} variant={event.eventType === "PAID" ? "pending" : "active"} className="w-fit text-[10px]" />
@@ -427,7 +422,7 @@ export function AdminEventsManager() {
                           >
                             <span className="inline-flex items-center gap-2">
                               <ToggleLeft className="h-4 w-4" />
-                              {event.isRegistrationOpen ? "Close Registration" : "Open Registration"}
+                              {event.isRegistrationOpen ? "Close" : "Open"}
                             </span>
                           </button>
                           <button
