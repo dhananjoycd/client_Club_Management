@@ -10,7 +10,6 @@ type MemberLayoutProps = Readonly<{
 const memberLinks = [
   { href: "/account", label: "Overview" },
   { href: "/account/profile", label: "Profile" },
-  { href: "/account/membership-status", label: "Membership" },
   { href: "/account/registrations", label: "Registrations" },
 ];
 

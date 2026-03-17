@@ -38,12 +38,12 @@ export function MemberRegistrationsManager() {
             >
               <div>
                 <h3 className="text-lg font-semibold text-[var(--color-primary)]">{registration.event.title}</h3>
-                <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">{registration.event.location}</p>
+                <p className="mt-2 break-words text-sm text-[var(--color-muted-foreground)]">{registration.event.location}</p>
                 <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
                   {format(new Date(registration.event.eventDate), "dd MMM yyyy, hh:mm a")}
                 </p>
                 {registration.event.eventType === "PAID" ? (
-                  <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
+                  <p className="mt-2 break-words text-sm text-[var(--color-muted-foreground)]">
                     Paid event:{" "}
                     {registration.paidAmount
                       ? `${registration.paidAmount} ${registration.paidCurrency?.toUpperCase()}`

@@ -197,7 +197,7 @@ export function PublicEventDetails({ eventId }: PublicEventDetailsProps) {
                   <StatusBadge label={isRegistrationOpen ? "Registration Open" : "Registration Closed"} variant={isRegistrationOpen ? "pending" : "inactive"} className="bg-white/14 text-white" />
                   {event.isFeatured ? <StatusBadge label="Featured" variant="active" className="bg-white/14 text-white" /> : null}
                 </div>
-                <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">{event.title}</h1>
+                <h1 className="mt-4 text-2xl font-semibold tracking-tight sm:text-4xl">{event.title}</h1>
                 <p className="mt-4 max-w-3xl text-sm leading-7 text-white/82 sm:text-base">{event.description}</p>
                 {event.imageUrl ? (
                   <div className="relative mt-5 h-56 overflow-hidden rounded-[1.5rem] border border-white/12 sm:h-72">
@@ -205,11 +205,11 @@ export function PublicEventDetails({ eventId }: PublicEventDetailsProps) {
                   </div>
                 ) : null}
               </div>
-              <div className="surface-card rounded-[1.75rem] p-5 text-[var(--color-foreground)] sm:min-w-[260px] sm:p-6">
+              <div className="surface-card w-full rounded-[1.75rem] p-5 text-[var(--color-foreground)] sm:min-w-[260px] sm:p-6">
                 <div className="space-y-3 text-sm text-[var(--color-muted-foreground)]">
                   <div className="flex items-center gap-2"><CalendarRange className="h-4 w-4 text-[var(--color-primary)]" /><span>{format(new Date(event.eventDate), "dd MMM yyyy")}</span></div>
                   <div className="flex items-center gap-2"><Clock3 className="h-4 w-4 text-[var(--color-primary)]" /><span>{format(new Date(event.eventDate), "hh:mm a")}</span></div>
-                  <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-[var(--color-primary)]" /><span>{event.location}</span></div>
+                  <div className="flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-primary)]" /><span className="min-w-0 break-words">{event.location}</span></div>
                   <div className="flex items-center gap-2"><Users className="h-4 w-4 text-[var(--color-primary)]" /><span>{registrationCount} / {event.capacity} registered</span></div>
                 </div>
                 <div className="mt-5 flex flex-col gap-3">

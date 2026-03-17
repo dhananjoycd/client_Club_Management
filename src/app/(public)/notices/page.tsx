@@ -8,8 +8,8 @@ export default function NoticesPage() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
         <PageHeader
           eyebrow="Official Notices"
-          title="Role-aware notice access connected to the backend notice module."
-          description="The backend protects notice access by session and role, so this page now behaves like a real application rather than a static public board."
+          title="Read role-based notices in one place."
+          description="Notice access stays connected to the backend, and each card now shows publish time plus an edited marker when an update was made later."
         />
 
         <SectionWrapper

@@ -74,7 +74,7 @@ export function RegisterForm() {
           helperText="Create your account first. You can complete your profile later before applying or joining events."
           secondaryAction={
             <p className="text-sm text-[var(--color-muted-foreground)]">
-              Already have an account? <Link href="/login" className="font-medium text-[var(--color-primary)]">Login here</Link>
+              Already have an account? <Link href="/login" className="font-semibold text-[var(--color-secondary)] transition hover:text-[var(--color-primary)]">Login here</Link>
             </p>
           }
         />

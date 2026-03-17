@@ -58,7 +58,7 @@ export function LoginForm() {
               <p className="text-sm font-medium text-emerald-700">Your account is already active. Use your dashboard instead of the membership application.</p>
             ) : (
               <p className="text-sm text-[var(--color-muted-foreground)]">
-                New here? <Link href="/register" className="font-medium text-[var(--color-primary)]">Create an account</Link>
+                New here? <Link href="/register" className="font-semibold text-[var(--color-secondary)] transition hover:text-[var(--color-primary)]">Create an account</Link>
               </p>
             )
           }

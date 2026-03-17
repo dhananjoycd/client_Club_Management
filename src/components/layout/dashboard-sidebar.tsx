@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ChevronDown } from "lucide-react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type NavigationLink = {
@@ -16,35 +18,79 @@ type DashboardSidebarProps = {
 
 export function DashboardSidebar({ heading, links }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const activeLink = useMemo(() => links.find((link) => pathname === link.href), [links, pathname]);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <aside className="w-full border-b border-[var(--color-border)] bg-white lg:min-h-screen lg:w-72 lg:border-b-0 lg:border-r">
-      <div className="flex flex-col gap-6 px-4 py-5 sm:px-6">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-muted-foreground)]">Dashboard</p>
-          <h2 className="mt-2 text-lg font-semibold text-[var(--color-primary)]">{heading}</h2>
+    <aside className="sticky top-[4.75rem] z-20 w-full border-b border-[var(--color-border)] bg-white lg:top-[4.75rem] lg:h-[calc(100vh-4.75rem)] lg:w-72 lg:self-start lg:overflow-y-auto lg:border-b-0 lg:border-r">
+      <div className="px-4 py-4 sm:px-6 lg:py-5">
+        <div className="hidden lg:block">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-muted-foreground)]">Dashboard</p>
+            <h2 className="mt-2 text-lg font-semibold text-[var(--color-primary)]">{heading}</h2>
+          </div>
+
+          <nav className="mt-6 grid gap-2">
+            {links.map((link) => {
+              const isActive = pathname === link.href;
+
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "rounded-xl border-l-2 px-3 py-2 text-sm font-medium transition-colors",
+                    isActive
+                      ? "border-[var(--color-accent)] bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]"
+                      : "border-transparent text-[var(--color-muted-foreground)] hover:bg-[var(--color-page)] hover:text-[var(--color-primary)]",
+                  )}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
 
-        <nav className="grid gap-2">
-          {links.map((link) => {
-            const isActive = pathname === link.href;
+        <div className="lg:hidden">
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen((current) => !current)}
+            className="surface-card flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left"
+            aria-expanded={isMobileMenuOpen}
+            aria-label="Toggle dashboard menu"
+          >
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--color-muted-foreground)]">Dashboard Menu</p>
+              <p className="mt-1 text-sm font-semibold text-[var(--color-primary-strong)]">{activeLink?.label ?? heading}</p>
+            </div>
+            <ChevronDown className={cn("h-5 w-5 text-[var(--color-primary)] transition-transform", isMobileMenuOpen ? "rotate-180" : "rotate-0")} />
+          </button>
 
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "rounded-xl px-3 py-2 text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-[var(--color-primary)] text-white"
-                    : "text-[var(--color-muted-foreground)] hover:bg-[var(--color-page)] hover:text-[var(--color-primary)]"
-                )}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
+          {isMobileMenuOpen ? (
+            <nav className="mt-3 grid gap-2">
+              {links.map((link) => {
+                const isActive = pathname === link.href;
+
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={cn(
+                      "rounded-xl border-l-2 px-3 py-3 text-sm font-medium transition-colors",
+                      isActive
+                        ? "border-[var(--color-accent)] bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]"
+                        : "border-transparent bg-white text-[var(--color-muted-foreground)] hover:bg-[var(--color-page)] hover:text-[var(--color-primary)]",
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          ) : null}
+        </div>
       </div>
     </aside>
   );

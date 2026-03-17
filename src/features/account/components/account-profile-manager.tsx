@@ -92,21 +92,29 @@ export function AccountProfileManager() {
           {[["Name", profile.name ?? "Not provided"], ["Email", profile.email], ["Phone", profile.phone ?? "Not provided"], ["Session", profile.academicSession ?? "Not provided"], ["Department", profile.department ?? "Not provided"], ["Role", profile.role]].map(([label, value]) => (
             <div key={label} className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-page)] p-5">
               <p className="text-sm font-medium text-[var(--color-muted-foreground)]">{label}</p>
-              <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-primary)]">{String(value)}</p>
+              <p className="mt-2 break-words text-sm font-semibold leading-6 text-[var(--color-primary)]">{String(value)}</p>
             </div>
           ))}
         </div>
-        {profile.memberProfile ? (
-          <div className="mt-5 rounded-[1.5rem] border border-[var(--color-border)] bg-white/70 p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-medium text-[var(--color-muted-foreground)]">Membership</p>
-                <p className="mt-2 text-base font-semibold text-[var(--color-primary)]">{profile.memberProfile.membershipId}</p>
-              </div>
-              <StatusBadge label={profile.memberProfile.status} variant={profile.memberProfile.status === "ACTIVE" ? "active" : "inactive"} />
+        <div className="mt-5 rounded-[1.5rem] border border-[var(--color-border)] bg-white/70 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-[var(--color-muted-foreground)]">Membership</p>
+              <p className="mt-2 text-base font-semibold text-[var(--color-primary)]">
+                {profile.memberProfile?.membershipId ?? "No membership ID yet"}
+              </p>
             </div>
+            <StatusBadge
+              label={profile.memberProfile?.status ?? "INACTIVE"}
+              variant={profile.memberProfile?.status === "ACTIVE" ? "active" : profile.memberProfile?.status ? "inactive" : "pending"}
+            />
           </div>
-        ) : null}
+          <p className="mt-4 text-sm leading-6 text-[var(--color-muted-foreground)]">
+            {profile.memberProfile
+              ? "Your membership record is already linked to this account."
+              : "This account does not have an approved club membership yet. Apply and wait for admin review to become an active member."}
+          </p>
+        </div>
       </SectionWrapper>
 
       <SectionWrapper title="Edit profile" description="These fields are used to auto-fill event registrations after login.">
@@ -125,17 +133,13 @@ export function AccountProfileManager() {
             <FormField label="Academic session" error={errors.academicSession} disabled={updateMutation.isPending} {...register("academicSession")} />
           </div>
           <FormField label="Department" error={errors.department} disabled={updateMutation.isPending} {...register("department")} />
-          {profile.memberProfile ? (
-            <>
-              <FormTextarea label="Bio" error={errors.bio as never} disabled={updateMutation.isPending} {...register("bio")} />
-              <FormField label="Profile photo URL" error={errors.profilePhoto as never} disabled={updateMutation.isPending} {...register("profilePhoto")} />
-            </>
-          ) : null}
+          <FormTextarea label="Bio" error={errors.bio as never} disabled={updateMutation.isPending} {...register("bio")} />
+          <FormField label="Profile photo URL" error={errors.profilePhoto as never} disabled={updateMutation.isPending} {...register("profilePhoto")} />
           <FormActions isSubmitting={updateMutation.isPending} submitLabel="Save profile" helperText="Name, email, phone, session, and department are used automatically for event registration." />
         </form>
       </SectionWrapper>
 
-      <SectionWrapper title="My registrations" description="Free and paid event registrations linked to your account.">
+      <SectionWrapper className="xl:col-span-2" title="My registrations" description="Free and paid event registrations linked to your account.">
         {profile.registrations.length ? (
           <div className="grid gap-4">
             {profile.registrations.map((registration) => (

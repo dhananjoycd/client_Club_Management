@@ -207,7 +207,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
               </span>
               <div className="space-y-4">
                 <motion.p variants={heroItemVariants} className="text-sm font-semibold uppercase tracking-[0.28em] text-[var(--color-secondary)]">{organizationName}</motion.p>
-                <motion.h1 variants={heroItemVariants} className="max-w-4xl text-4xl font-semibold tracking-tight text-[var(--color-primary-strong)] sm:text-5xl lg:text-[4.5rem] lg:leading-[0.95]">
+                <motion.h1 variants={heroItemVariants} className="max-w-4xl text-3xl font-semibold tracking-tight text-[var(--color-primary-strong)] sm:text-5xl lg:text-[4.5rem] lg:leading-[0.95]">
                   Build, manage, and grow XYZ Tech Club with one connected digital platform.
                 </motion.h1>
               </div>
@@ -250,7 +250,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
             animate={{ opacity: 1, x: 0, y: 0 }}
             transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
           >
-            <motion.div className="surface-card grid gap-4 rounded-[2rem] p-5 sm:grid-cols-2 sm:p-6" animate={{ y: [0, -6, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}>
+            <motion.div className="surface-card grid gap-4 rounded-[2rem] p-4 sm:grid-cols-2 sm:p-6" animate={{ y: [0, -6, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}>
               <div className="relative overflow-hidden rounded-[1.75rem] shadow-[0_24px_48px_rgba(15,76,189,0.18)] sm:col-span-2">
                 <div className="relative aspect-[16/10] min-h-[280px]">
                   <AnimatePresence mode="wait">

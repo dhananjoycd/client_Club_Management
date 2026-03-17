@@ -1,4 +1,10 @@
-export type NoticeAudience = "ALL" | "MEMBERS" | "ADMINS";
+export type NoticeAudience =
+  | "ALL"
+  | "USERS"
+  | "APPLICANTS"
+  | "MEMBERS"
+  | "EVENT_MANAGERS"
+  | "ADMINS";
 
 export type NoticeItem = {
   id: string;
@@ -6,4 +12,5 @@ export type NoticeItem = {
   content: string;
   audience: NoticeAudience;
   createdAt: string;
+  updatedAt: string;
 };
