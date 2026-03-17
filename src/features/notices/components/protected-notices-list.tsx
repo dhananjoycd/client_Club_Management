@@ -24,6 +24,7 @@ const audienceLabels: Record<string, string> = {
 };
 
 const PUBLIC_NOTICE_LIMIT = 10;
+const PUBLIC_NOTICE_FETCH_LIMIT = 100;
 const isEditedNotice = (createdAt: string, updatedAt: string) => new Date(updatedAt).getTime() > new Date(createdAt).getTime() + 1000;
 
 export function ProtectedNoticesList() {
@@ -37,8 +38,8 @@ export function ProtectedNoticesList() {
   });
 
   const noticesQuery = useQuery({
-    queryKey: queryKeys.notices.list(`public-${page}-${searchTerm}`),
-    queryFn: () => noticeService.getNotices({ limit: PUBLIC_NOTICE_LIMIT, page, searchTerm: searchTerm || undefined }),
+    queryKey: queryKeys.notices.list("public-all"),
+    queryFn: () => noticeService.getNotices({ limit: PUBLIC_NOTICE_FETCH_LIMIT, page: 1 }),
     enabled: Boolean(sessionQuery.data?.data?.user),
   });
 
@@ -74,10 +75,15 @@ export function ProtectedNoticesList() {
     return <EmptyState title="Unable to load notices" description={getApiErrorMessage(noticesQuery.error, "Please try again later.")} />;
   }
 
-  const notices = noticesQuery.data?.data.result ?? [];
-  const meta = noticesQuery.data?.data.meta;
-  const totalPages = meta ? Math.max(1, Math.ceil(meta.total / meta.limit)) : 1;
-  const hasSearch = Boolean(searchTerm.trim());
+  const allNotices = noticesQuery.data?.data.result ?? [];
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const filteredNotices = allNotices.filter((notice) => {
+    if (!normalizedSearch) return true;
+    return [notice.title, notice.content].some((value) => value.toLowerCase().includes(normalizedSearch));
+  });
+  const totalPages = Math.max(1, Math.ceil(filteredNotices.length / PUBLIC_NOTICE_LIMIT));
+  const notices = filteredNotices.slice((page - 1) * PUBLIC_NOTICE_LIMIT, page * PUBLIC_NOTICE_LIMIT);
+  const hasSearch = Boolean(normalizedSearch);
 
   return (
     <div className="grid gap-5">

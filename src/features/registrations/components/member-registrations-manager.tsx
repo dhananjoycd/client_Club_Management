@@ -46,8 +46,8 @@ export function MemberRegistrationsManager() {
                   <p className="mt-2 break-words text-sm text-[var(--color-muted-foreground)]">
                     Paid event:{" "}
                     {registration.paidAmount
-                      ? `${registration.paidAmount} ${registration.paidCurrency?.toUpperCase()}`
-                      : `${registration.event.price ?? 0} ${registration.event.currency?.toUpperCase()}`}
+                      ? `${registration.paidAmount} ${"BDT"}`
+                      : `${registration.event.price ?? 0} ${"BDT"}`}
                   </p>
                 ) : null}
               </div>
@@ -60,7 +60,14 @@ export function MemberRegistrationsManager() {
                 {registration.paymentStatus ? (
                   <StatusBadge
                     label={registration.paymentStatus}
-                    variant={registration.paymentStatus === "PAID" || registration.paymentStatus === "NOT_REQUIRED" ? "active" : "pending"}
+                    variant={registration.paymentStatus === "PAID" || registration.paymentStatus === "NOT_REQUIRED" ? "active" : registration.paymentStatus === "FAILED" ? "inactive" : "pending"}
+                    className="w-fit"
+                  />
+                ) : null}
+                {registration.paymentVerificationStatus && registration.paymentVerificationStatus !== "NOT_APPLICABLE" ? (
+                  <StatusBadge
+                    label={registration.paymentVerificationStatus}
+                    variant={registration.paymentVerificationStatus === "VERIFIED" ? "active" : registration.paymentVerificationStatus === "FAILED" ? "inactive" : "pending"}
                     className="w-fit"
                   />
                 ) : null}

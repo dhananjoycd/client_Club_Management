@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { MotionReveal } from "@/components/motion/motion-shell";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { LoadingState } from "@/components/feedback/loading-state";
+import { ActionLoadingOverlay } from "@/components/shared/action-loading-overlay";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { WarningConfirmModal } from "@/components/shared/warning-confirm-modal";
 import { PaginationControls } from "@/components/shared/pagination-controls";
@@ -50,7 +51,7 @@ export function PublicEventsBrowser() {
   const router = useRouter();
   const pathname = usePathname();
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeFilter, setActiveFilter] = useState<"all" | "upcoming" | "past">("all");
+  const [activeFilter, setActiveFilter] = useState<"all" | "upcoming" | "past" | "free" | "paid">("all");
   const [pendingEvent, setPendingEvent] = useState<EventItem | null>(null);
   const [upcomingPage, setUpcomingPage] = useState(1);
   const [pastPage, setPastPage] = useState(1);
@@ -75,9 +76,9 @@ export function PublicEventsBrowser() {
     retry: false,
   });
 
-  const registrationStatusByEvent = useMemo(() => {
+  const registrationByEvent = useMemo(() => {
     const items = registrationsQuery.data?.data.result ?? [];
-    return new Map(items.map((item) => [item.event.id, item.status]));
+    return new Map(items.map((item) => [item.event.id, item]));
   }, [registrationsQuery.data]);
 
   const registerMutation = useMutation({
@@ -88,9 +89,15 @@ export function PublicEventsBrowser() {
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const filteredEvents = allEvents.filter((event) => {
     const status = getEventStatus(event);
-    const matchesFilter = activeFilter === "all" ? true : status === activeFilter;
+    const eventType = (event.eventType ?? "FREE").toLowerCase();
+    const matchesFilter =
+      activeFilter === "all"
+        ? true
+        : activeFilter === "free" || activeFilter === "paid"
+          ? eventType === activeFilter
+          : status === activeFilter;
     const matchesSearch = normalizedSearch
-      ? [event.title, event.location, event.description].some((value) => value.toLowerCase().includes(normalizedSearch))
+      ? [event.title, event.location, event.description, event.category ?? ""].some((value) => value.toLowerCase().includes(normalizedSearch))
       : true;
 
     return matchesFilter && matchesSearch;
@@ -138,7 +145,7 @@ export function PublicEventsBrowser() {
       title: event.eventType === "PAID" ? "Review payment before continuing" : "Confirm your registration",
       description:
         event.eventType === "PAID"
-          ? `You are about to continue to Stripe to pay ${event.price ?? 0} ${event.currency?.toUpperCase() ?? "USD"} for this event. Please confirm that your profile details are correct before proceeding.`
+          ? `You are about to continue to Stripe to pay ${event.price ?? 0} BDT for this event. Please confirm that your profile details are correct before proceeding.`
           : "You are about to register for this event using your saved profile details. Please confirm that everything is correct before continuing.",
       confirmLabel: event.eventType === "PAID" ? "Continue to Stripe" : isFull ? "Join Waitlist" : "Confirm Registration",
     };
@@ -173,14 +180,36 @@ export function PublicEventsBrowser() {
     });
   };
 
+  const actionLoadingState =
+    registerMutation.isPending && pendingEvent
+      ? {
+          title: pendingEvent.eventType === "PAID" ? "Preparing secure checkout" : "Confirming your registration",
+          description:
+            pendingEvent.eventType === "PAID"
+              ? "Please wait while we prepare your Stripe checkout session for this event."
+              : "Please wait while we save your event registration and refresh your account data.",
+        }
+      : null;
+
   const renderRegisterAction = (event: EventItem) => {
-    const registrationStatus = registrationStatusByEvent.get(event.id);
-    const registrationLabel = getRegistrationLabel(registrationStatus);
+    const registration = registrationByEvent.get(event.id);
+    const registrationLabel = getRegistrationLabel(registration?.status);
     const isPast = getEventStatus(event) === "past";
     const isFull = getRegistrationCount(event) >= event.capacity;
     const isRegistrationOpen = event.isRegistrationOpen !== false;
 
-    if (registrationLabel) {
+    if (registration?.paymentVerificationStatus === "PENDING_VERIFICATION") {
+      return (
+        <button type="button" disabled className="secondary-button h-11 w-full cursor-not-allowed px-5 text-sm opacity-70 sm:w-auto">
+          Payment Verification Pending
+        </button>
+      );
+    }
+
+    if (
+      registrationLabel &&
+      (registration?.paymentVerificationStatus === "VERIFIED" || registration?.paymentVerificationStatus === "NOT_APPLICABLE")
+    ) {
       return user ? (
         <Link href="/account/registrations" className="secondary-button h-11 w-full px-5 text-sm sm:w-auto">
           {registrationLabel}
@@ -244,7 +273,7 @@ export function PublicEventsBrowser() {
         {registerMutation.isPending && registerMutation.variables === event.id
           ? "Registering..."
           : event.eventType === "PAID"
-            ? `Pay ${event.price ?? 0} ${event.currency?.toUpperCase() ?? "USD"}`
+            ? `Pay ${event.price ?? 0} BDT`
             : isFull
               ? "Join Waitlist"
               : "Register Now"}
@@ -259,17 +288,25 @@ export function PublicEventsBrowser() {
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
             <div className="space-y-2">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-secondary)]">Browse events</p>
-              <h2 className="max-w-2xl text-2xl font-semibold tracking-tight text-[var(--color-primary-strong)] sm:text-3xl">Browse upcoming and past events.</h2>
+              <h2 className="max-w-2xl text-2xl font-semibold tracking-tight text-[var(--color-primary-strong)] sm:text-3xl">Browse upcoming and past events</h2>
             </div>
             <div className="flex flex-wrap gap-3 xl:justify-end">
-              {(["all", "upcoming", "past"] as const).map((filter) => (
+              {(["all", "upcoming", "past", "free", "paid"] as const).map((filter) => (
                 <button
                   key={filter}
                   type="button"
                   onClick={() => setActiveFilter(filter)}
                   className={`secondary-button h-11 whitespace-nowrap px-5 text-sm ${activeFilter === filter ? "border-[var(--color-accent)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]" : ""}`}
                 >
-                  {filter === "all" ? "All Events" : filter === "upcoming" ? "Upcoming" : "Past Events"}
+                  {filter === "all"
+                    ? "All Events"
+                    : filter === "upcoming"
+                      ? "Upcoming"
+                      : filter === "past"
+                        ? "Past Events"
+                        : filter === "free"
+                          ? "Free"
+                          : "Paid"}
                 </button>
               ))}
             </div>
@@ -357,19 +394,19 @@ export function PublicEventsBrowser() {
           {upcomingEvents.length ? (
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
               {paginatedUpcomingEvents.map((event) => (
-                <article key={event.id} className="surface-card flex h-full flex-col rounded-[1.75rem] p-5 sm:p-6">
+                <article key={event.id} className="flex h-full flex-col rounded-[1.75rem] border border-[rgba(148,163,184,0.18)] bg-white/72 p-5 backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-[rgba(37,99,235,0.18)] hover:bg-white hover:shadow-[0_18px_36px_rgba(37,99,235,0.10)] sm:p-6">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <StatusBadge label="Upcoming" variant="info" className="text-[10px]" />
                       {event.category ? <StatusBadge label={event.category} variant="default" className="text-[10px]" /> : null}
-                      {event.eventType ? <StatusBadge label={event.eventType === "PAID" ? `Paid ${event.price ?? 0} ${event.currency?.toUpperCase() ?? "USD"}` : "Free"} variant={event.eventType === "PAID" ? "pending" : "active"} className="text-[10px]" /> : null}
+                      {event.eventType ? <StatusBadge label={event.eventType === "PAID" ? `Paid ${event.price ?? 0} BDT` : "Free"} variant={event.eventType === "PAID" ? "pending" : "active"} className="text-[10px]" /> : null}
                       {event.isFeatured ? <StatusBadge label="Featured" variant="active" className="text-[10px]" /> : null}
                     </div>
                     <p className="text-sm text-[var(--color-muted-foreground)]">{format(new Date(event.eventDate), "dd MMM yyyy")}</p>
                   </div>
                   <h3 className="mt-4 text-xl font-semibold tracking-tight text-[var(--color-primary-strong)]">{event.title}</h3>
                   {event.imageUrl ? (
-                    <div className="relative mt-4 h-44 overflow-hidden rounded-[1.25rem] border border-[var(--color-border)]">
+                    <div className="relative mt-4 h-44 overflow-hidden rounded-[1.25rem]">
                       <Image src={event.imageUrl} alt={event.title} fill className="object-cover" sizes="(max-width: 1280px) 100vw, 22vw" unoptimized />
                     </div>
                   ) : null}
@@ -393,7 +430,7 @@ export function PublicEventsBrowser() {
                     </div>
                     <div className="grid grid-cols-[auto_1fr] items-start gap-x-2 gap-y-1">
                       <span className="font-semibold text-[var(--color-primary-strong)]">Type:</span>
-                      <span className="min-w-0">{event.eventType === "PAID" ? `${event.price ?? 0} ${event.currency?.toUpperCase() ?? "USD"}` : "Free"}</span>
+                      <span className="min-w-0">{event.eventType === "PAID" ? `${event.price ?? 0} BDT` : "Free"}</span>
                     </div>
                   </div>
                   <div className="mt-auto flex w-full justify-center pt-6">
@@ -423,13 +460,13 @@ export function PublicEventsBrowser() {
           {pastEvents.length ? (
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {paginatedPastEvents.map((event) => (
-                <article key={event.id} className="flex h-full flex-col rounded-[1.5rem] border border-[var(--color-border)] bg-white/60 p-5">
+                <article key={event.id} className="flex h-full flex-col rounded-[1.5rem] border border-[rgba(148,163,184,0.16)] bg-white/68 p-5 backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-[rgba(37,99,235,0.16)] hover:bg-white hover:shadow-[0_16px_32px_rgba(37,99,235,0.08)]">
                   <div className="flex items-start justify-between gap-3">
                     <h3 className="text-lg font-semibold text-[var(--color-primary-strong)]">{event.title}</h3>
                     <div className="flex flex-wrap items-center gap-2">
                       <StatusBadge label="Completed" variant="inactive" className="text-[10px]" />
                       {event.category ? <StatusBadge label={event.category} variant="default" className="text-[10px]" /> : null}
-                      {event.eventType ? <StatusBadge label={event.eventType === "PAID" ? `Paid ${event.price ?? 0} ${event.currency?.toUpperCase() ?? "USD"}` : "Free"} variant={event.eventType === "PAID" ? "pending" : "active"} className="text-[10px]" /> : null}
+                      {event.eventType ? <StatusBadge label={event.eventType === "PAID" ? `Paid ${event.price ?? 0} BDT` : "Free"} variant={event.eventType === "PAID" ? "pending" : "active"} className="text-[10px]" /> : null}
                     </div>
                   </div>
                   <p className="mt-3 text-sm leading-6 text-[var(--color-muted-foreground)]">{truncateText(event.description, 70)}</p>
@@ -471,6 +508,7 @@ export function PublicEventsBrowser() {
           </div>
         </section>
       </MotionReveal>
+      <ActionLoadingOverlay open={Boolean(actionLoadingState)} title={actionLoadingState?.title ?? "Please wait"} description={actionLoadingState?.description ?? "Preparing your action."} />
       {pendingEvent ? (
         <WarningConfirmModal
           open={Boolean(pendingEvent)}

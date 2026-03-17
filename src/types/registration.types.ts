@@ -1,10 +1,12 @@
 export type RegistrationStatus = "REGISTERED" | "WAITLISTED" | "CANCELLED";
 export type PaymentStatus = "NOT_REQUIRED" | "PENDING" | "PAID" | "FAILED" | "REFUNDED";
+export type PaymentVerificationStatus = "NOT_APPLICABLE" | "PENDING_VERIFICATION" | "VERIFIED" | "FAILED";
 
 export type RegistrationItem = {
   id: string;
   status: RegistrationStatus;
   paymentStatus?: PaymentStatus;
+  paymentVerificationStatus?: PaymentVerificationStatus;
   snapshotName?: string;
   snapshotEmail?: string;
   snapshotPhone?: string;

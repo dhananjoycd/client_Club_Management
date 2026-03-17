@@ -1,4 +1,4 @@
-import { RegistrationStatus } from "@/types/registration.types";
+import { PaymentStatus, PaymentVerificationStatus, RegistrationStatus } from "@/types/registration.types";
 
 export const eventCategories = ["Workshop", "Seminar", "Webinar", "Hackathon", "Competition", "Tech Talk", "Bootcamp", "Meetup"] as const;
 export type EventCategory = (typeof eventCategories)[number];
@@ -14,6 +14,8 @@ export type EventCreator = {
 export type EventRegistrationSummary = {
   id: string;
   status: RegistrationStatus;
+  paymentStatus?: PaymentStatus;
+  paymentVerificationStatus?: PaymentVerificationStatus;
   registeredAt?: string;
 };
 

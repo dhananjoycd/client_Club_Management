@@ -26,13 +26,18 @@ export const eventService = {
     return data;
   },
 
+  async markPaymentVerificationFailed(id: string) {
+    const { data } = await api.post<ApiResponse<RegistrationItem | null>>(`/events/${id}/payment-failed`);
+    return data;
+  },
+
   async createEvent(payload: EventSchema) {
     const normalizedPayload = {
       ...payload,
       eventDate: new Date(payload.eventDate).toISOString(),
       imageUrl: payload.imageUrl || undefined,
       category: payload.category || undefined,
-      currency: payload.eventType === "PAID" ? (payload.currency || "usd") : undefined,
+      currency: payload.eventType === "PAID" ? "bdt" : undefined,
       price: payload.eventType === "PAID" ? payload.price : undefined,
     };
     const { data } = await api.post<ApiResponse<EventItem>>("/events", normalizedPayload);
@@ -45,7 +50,7 @@ export const eventService = {
       ...(payload.eventDate ? { eventDate: new Date(payload.eventDate).toISOString() } : {}),
       ...(payload.imageUrl !== undefined ? { imageUrl: payload.imageUrl || undefined } : {}),
       ...(payload.category !== undefined ? { category: payload.category || undefined } : {}),
-      ...(payload.currency !== undefined ? { currency: payload.currency || undefined } : {}),
+      ...(payload.currency !== undefined ? { currency: "bdt" } : {}),
       ...(payload.price !== undefined ? { price: payload.price } : {}),
     };
     const { data } = await api.patch<ApiResponse<EventItem>>(`/events/${id}`, normalizedPayload);

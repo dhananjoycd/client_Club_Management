@@ -33,12 +33,12 @@ export function WarningConfirmModal({
         </div>
         <h3 className="mt-5 text-2xl font-semibold tracking-tight text-[var(--color-primary-strong)]">{title}</h3>
         <p className="mt-3 text-sm leading-7 text-[var(--color-muted-foreground)]">{description}</p>
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+        <div className="mt-6 flex flex-col gap-3 md:flex-row">
           <button
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className="primary-button h-12 w-full px-6 text-sm disabled:cursor-not-allowed disabled:opacity-70"
+            className="primary-button h-12 w-full whitespace-nowrap px-5 text-sm disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isLoading ? "Please wait..." : confirmLabel}
           </button>
@@ -46,7 +46,7 @@ export function WarningConfirmModal({
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            className="secondary-button h-12 w-full px-6 text-sm disabled:cursor-not-allowed disabled:opacity-70"
+            className="secondary-button h-12 w-full whitespace-nowrap px-5 text-sm disabled:cursor-not-allowed disabled:opacity-70"
           >
             {cancelLabel}
           </button>

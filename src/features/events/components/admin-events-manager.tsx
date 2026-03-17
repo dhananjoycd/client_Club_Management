@@ -1,22 +1,37 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { format } from "date-fns";
+import {
+  CalendarDays,
+  MapPin,
+  PencilLine,
+  Search,
+  Star,
+  Ticket,
+  ToggleLeft,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { toast } from "sonner";
 import { FormActions } from "@/components/forms/form-actions";
 import { FormField, FormTextarea } from "@/components/forms/form-field";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { LoadingState } from "@/components/feedback/loading-state";
+import { PaginationControls } from "@/components/shared/pagination-controls";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { WarningConfirmModal } from "@/components/shared/warning-confirm-modal";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { queryKeys } from "@/lib/query-keys";
 import { eventSchema, EventSchema } from "@/schemas/event.schema";
 import { eventService } from "@/services/event.service";
-import { eventCategories } from "@/types/event.types";
+import { eventCategories, EventItem } from "@/types/event.types";
 
 const defaultValues: EventSchema = {
   title: "",
@@ -27,20 +42,33 @@ const defaultValues: EventSchema = {
   category: "Workshop",
   eventType: "FREE",
   price: 0,
-  currency: "usd",
+  currency: "bdt",
   imageUrl: "",
   isFeatured: false,
   isRegistrationOpen: true,
+  sendEmail: false,
 };
 
-function toDatetimeLocal(value: string) {
-  const date = new Date(value);
-  const offset = date.getTimezoneOffset();
-  const local = new Date(date.getTime() - offset * 60_000);
-  return local.toISOString().slice(0, 16);
+const EVENTS_PER_PAGE = 10;
+
+type BoardFilter = "ALL" | "UPCOMING" | "PAST" | "FEATURED" | "OPEN" | "CLOSED" | "FREE" | "PAID";
+
+function truncateText(value: string, limit: number) {
+  if (value.length <= limit) return value;
+  return `${value.slice(0, limit).trimEnd()}...`;
 }
 
-function EventFormFields({ register, watch, errors, disabled }: { register: ReturnType<typeof useForm<EventSchema>>["register"]; watch: ReturnType<typeof useForm<EventSchema>>["watch"]; errors: ReturnType<typeof useForm<EventSchema>>["formState"]["errors"]; disabled: boolean; }) {
+function EventFormFields({
+  register,
+  watch,
+  errors,
+  disabled,
+}: {
+  register: ReturnType<typeof useForm<EventSchema>>["register"];
+  watch: ReturnType<typeof useForm<EventSchema>>["watch"];
+  errors: ReturnType<typeof useForm<EventSchema>>["formState"]["errors"];
+  disabled: boolean;
+}) {
   const eventType = watch("eventType");
 
   return (
@@ -52,24 +80,41 @@ function EventFormFields({ register, watch, errors, disabled }: { register: Retu
         <FormField label="Event date" type="datetime-local" error={errors.eventDate} disabled={disabled} {...register("eventDate")} />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        <FormField label="Capacity" type="number" error={errors.capacity as never} disabled={disabled} {...register("capacity", { valueAsNumber: true })} />
+        <FormField
+          label="Capacity"
+          type="number"
+          error={errors.capacity as never}
+          disabled={disabled}
+          {...register("capacity", { valueAsNumber: true })}
+        />
         <label className="grid gap-2">
           <span className="text-sm font-medium text-[var(--color-primary)]">Category</span>
-          <select className="input-base" disabled={disabled} {...register("category")}>
-            {eventCategories.map((category) => <option key={category} value={category}>{category}</option>)}
+          <select className="input-base h-12 px-4 text-sm" disabled={disabled} {...register("category")}>
+            {eventCategories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
           </select>
         </label>
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
-        <label className="grid gap-2 sm:col-span-1">
+        <label className="grid gap-2">
           <span className="text-sm font-medium text-[var(--color-primary)]">Event type</span>
-          <select className="input-base" disabled={disabled} {...register("eventType")}>
+          <select className="input-base h-12 px-4 text-sm" disabled={disabled} {...register("eventType")}>
             <option value="FREE">Free</option>
             <option value="PAID">Paid</option>
           </select>
         </label>
-        <FormField label="Price" type="number" step="0.01" error={errors.price as never} disabled={disabled || eventType !== "PAID"} {...register("price", { valueAsNumber: true })} />
-        <FormField label="Currency" error={errors.currency} disabled={disabled || eventType !== "PAID"} {...register("currency")} />
+        <FormField
+          label="Price"
+          type="number"
+          step="0.01"
+          error={errors.price as never}
+          disabled={disabled || eventType !== "PAID"}
+          {...register("price", { valueAsNumber: true })}
+        />
+        <FormField label="Currency" value="BDT" disabled readOnly />
       </div>
       <FormField label="Event image URL" error={errors.imageUrl} disabled={disabled} {...register("imageUrl")} />
       <div className="grid gap-3 sm:grid-cols-2">
@@ -82,42 +127,85 @@ function EventFormFields({ register, watch, errors, disabled }: { register: Retu
           Registration open
         </label>
       </div>
+      <label className="flex items-start gap-3 rounded-[1rem] border border-[var(--color-border)] bg-white/70 px-4 py-3 text-sm text-[var(--color-muted-foreground)]">
+        <input type="checkbox" className="mt-1 h-4 w-4" disabled={disabled} {...register("sendEmail")} />
+        <span>
+          <span className="block font-medium text-[var(--color-primary-strong)]">Send this event by email</span>
+          If email is configured, XYZ Tech Club users and members will get this event update in their inbox too.
+        </span>
+      </label>
     </div>
   );
 }
 
+function getEventBadges(event: EventItem) {
+  const isPast = new Date(event.eventDate).getTime() < Date.now();
+  return {
+    isPast,
+    timing: isPast ? "Past" : "Upcoming",
+    registration: event.isRegistrationOpen ? "Registration Open" : "Registration Closed",
+    featured: event.isFeatured ? "Featured" : null,
+    type: event.eventType === "PAID" ? "Paid" : "Free",
+  };
+}
+
 export function AdminEventsManager() {
   const queryClient = useQueryClient();
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const eventsQuery = useQuery({ queryKey: queryKeys.events.admin, queryFn: () => eventService.getEvents({ limit: 50 }), retry: false });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeFilter, setActiveFilter] = useState<BoardFilter>("ALL");
+  const [page, setPage] = useState(1);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+
+  const eventsQuery = useQuery({
+    queryKey: queryKeys.events.admin,
+    queryFn: () => eventService.getEvents({ limit: 100 }),
+    retry: false,
+  });
+
   const events = useMemo(() => eventsQuery.data?.data.result ?? [], [eventsQuery.data]);
-  const selectedEvent = events.find((event) => event.id === selectedEventId) ?? events[0] ?? null;
-
   const createForm = useForm<EventSchema>({ resolver: zodResolver(eventSchema), defaultValues });
-  const editForm = useForm<EventSchema>({ resolver: zodResolver(eventSchema), defaultValues });
 
   useEffect(() => {
-    if (!selectedEventId && events[0]) setSelectedEventId(events[0].id);
-  }, [events, selectedEventId]);
+    setPage(1);
+  }, [searchTerm, activeFilter]);
 
-  useEffect(() => {
-    if (selectedEvent) {
-      editForm.reset({
-        title: selectedEvent.title,
-        description: selectedEvent.description,
-        location: selectedEvent.location,
-        eventDate: toDatetimeLocal(selectedEvent.eventDate),
-        capacity: selectedEvent.capacity,
-        category: selectedEvent.category ?? "Workshop",
-        eventType: selectedEvent.eventType ?? "FREE",
-        price: selectedEvent.price ?? 0,
-        currency: selectedEvent.currency ?? "usd",
-        imageUrl: selectedEvent.imageUrl ?? "",
-        isFeatured: selectedEvent.isFeatured ?? false,
-        isRegistrationOpen: selectedEvent.isRegistrationOpen ?? true,
-      });
-    }
-  }, [editForm, selectedEvent]);
+  const filteredEvents = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+
+    return events.filter((event) => {
+      const isPast = new Date(event.eventDate).getTime() < Date.now();
+      const matchesSearch =
+        !normalizedSearch ||
+        event.title.toLowerCase().includes(normalizedSearch) ||
+        event.location.toLowerCase().includes(normalizedSearch) ||
+        event.description.toLowerCase().includes(normalizedSearch) ||
+        (event.category ?? "").toLowerCase().includes(normalizedSearch);
+
+      if (!matchesSearch) return false;
+
+      switch (activeFilter) {
+        case "UPCOMING":
+          return !isPast;
+        case "PAST":
+          return isPast;
+        case "FEATURED":
+          return Boolean(event.isFeatured);
+        case "OPEN":
+          return Boolean(event.isRegistrationOpen);
+        case "CLOSED":
+          return !event.isRegistrationOpen;
+        case "FREE":
+          return (event.eventType ?? "FREE") === "FREE";
+        case "PAID":
+          return event.eventType === "PAID";
+        default:
+          return true;
+      }
+    });
+  }, [activeFilter, events, searchTerm]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredEvents.length / EVENTS_PER_PAGE));
+  const paginatedEvents = filteredEvents.slice((page - 1) * EVENTS_PER_PAGE, page * EVENTS_PER_PAGE);
 
   const invalidateEventQueries = async () => {
     await Promise.all([
@@ -127,60 +215,256 @@ export function AdminEventsManager() {
     ]);
   };
 
-  const createMutation = useMutation({ mutationFn: eventService.createEvent, onSuccess: async (response) => { toast.success(response.message ?? "Event created successfully."); createForm.reset(defaultValues); await invalidateEventQueries(); }, onError: (error) => toast.error(getApiErrorMessage(error, "Event creation failed.")) });
-  const updateMutation = useMutation({ mutationFn: ({ id, payload }: { id: string; payload: Partial<EventSchema> }) => eventService.updateEvent(id, payload), onSuccess: async (response) => { toast.success(response.message ?? "Event updated successfully."); await invalidateEventQueries(); }, onError: (error) => toast.error(getApiErrorMessage(error, "Event update failed.")) });
-  const deleteMutation = useMutation({ mutationFn: eventService.deleteEvent, onSuccess: async (response, deletedId) => { toast.success(response.message ?? "Event deleted successfully."); if (selectedEventId === deletedId) setSelectedEventId(null); await invalidateEventQueries(); }, onError: (error) => toast.error(getApiErrorMessage(error, "Event deletion failed.")) });
+  const createMutation = useMutation({
+    mutationFn: eventService.createEvent,
+    onSuccess: async (response) => {
+      toast.success(response.message ?? "Event created successfully.");
+      createForm.reset(defaultValues);
+      await invalidateEventQueries();
+    },
+    onError: (error) => toast.error(getApiErrorMessage(error, "Event creation failed.")),
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: Partial<EventSchema> }) => eventService.updateEvent(id, payload),
+    onSuccess: async (response) => {
+      toast.success(response.message ?? "Event updated successfully.");
+      await invalidateEventQueries();
+    },
+    onError: (error) => toast.error(getApiErrorMessage(error, "Event update failed.")),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: eventService.deleteEvent,
+    onSuccess: async (response) => {
+      toast.success(response.message ?? "Event deleted successfully.");
+      setPendingDeleteId(null);
+      await invalidateEventQueries();
+    },
+    onError: (error) => toast.error(getApiErrorMessage(error, "Event deletion failed.")),
+  });
+
+  const handleCreateEvent: SubmitHandler<EventSchema> = (values) => {
+    createMutation.mutate(values);
+  };
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1.08fr_0.92fr]">
-      <SectionWrapper title="Event management" description="Admins control category, free or paid type, featured state, Stripe-ready pricing, and registration availability from here.">
-        {eventsQuery.isLoading ? <LoadingState title="Loading events" description="Fetching event records." /> : eventsQuery.isError ? <EmptyState title="Unable to load events" description={getApiErrorMessage(eventsQuery.error, "Please verify your admin session.")} /> : events.length ? (
-          <div className="grid gap-4">
-            {events.map((event) => {
-              const isPast = new Date(event.eventDate).getTime() < Date.now();
-              return (
-                <button key={event.id} type="button" onClick={() => setSelectedEventId(event.id)} className={`flex w-full flex-col gap-4 rounded-[1.5rem] border p-5 text-left transition md:flex-row md:items-center md:justify-between ${selectedEvent?.id === event.id ? "border-[var(--color-accent)] bg-[var(--color-primary-soft)] shadow-sm" : "border-[var(--color-border)] bg-[var(--color-page)] hover:border-[var(--color-accent)]"}`}>
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-lg font-semibold text-[var(--color-primary)]">{event.title}</h3>
-                      {event.isFeatured ? <StatusBadge label="Featured" variant="active" className="text-[10px]" /> : null}
-                      <StatusBadge label={event.isRegistrationOpen ? "Registration Open" : "Closed"} variant={event.isRegistrationOpen ? "info" : "inactive"} className="text-[10px]" />
-                      <StatusBadge label={isPast ? "Past" : "Upcoming"} variant={isPast ? "inactive" : "pending"} className="text-[10px]" />
-                      {event.eventType ? <StatusBadge label={event.eventType} variant={event.eventType === "PAID" ? "pending" : "active"} className="text-[10px]" /> : null}
-                    </div>
-                    <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">{event.location}</p>
-                    <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">{format(new Date(event.eventDate), "dd MMM yyyy, hh:mm a")}</p>
-                    <div className="mt-2 flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-secondary)]">
-                      {event.category ? <span>{event.category}</span> : null}
-                      <span>{event.eventType === "PAID" ? `${event.price ?? 0} ${event.currency?.toUpperCase()}` : "Free"}</span>
-                    </div>
-                  </div>
-                  <button type="button" onClick={(e) => { e.stopPropagation(); deleteMutation.mutate(event.id); }} className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">Delete</button>
-                </button>
-              );
-            })}
-          </div>
-        ) : <EmptyState title="No events found" description="Create an event to start managing the public events page." />}
-      </SectionWrapper>
-
+    <>
       <div className="grid gap-6">
-        <SectionWrapper title="Create event" description="Free and paid events both support category, image, featured state, and registration control.">
-          <form className="grid gap-4" onSubmit={createForm.handleSubmit((values) => createMutation.mutate(values))} noValidate>
-            <EventFormFields register={createForm.register} watch={createForm.watch} errors={createForm.formState.errors} disabled={createMutation.isPending} />
-            <FormActions isSubmitting={createMutation.isPending} submitLabel="Create event" helperText="Paid events redirect to Stripe checkout when users register." />
+        <SectionWrapper
+          title="Create event"
+          description="Publish a new XYZ Tech Club event with category, pricing, featured state, and registration controls."
+        >
+          <form className="grid gap-4" onSubmit={createForm.handleSubmit(handleCreateEvent)} noValidate>
+            <EventFormFields
+              register={createForm.register}
+              watch={createForm.watch}
+              errors={createForm.formState.errors}
+              disabled={createMutation.isPending}
+            />
+            <FormActions
+              isSubmitting={createMutation.isPending}
+              submitLabel="Create event"
+              helperText="Free and paid events both appear in the XYZ Tech Club event board below after creation."
+            />
           </form>
         </SectionWrapper>
 
-        <SectionWrapper title="Edit selected event" description="Update how the event appears publicly, whether it is free or paid, and whether Stripe checkout is required.">
-          {selectedEvent ? (
-            <form className="grid gap-4" onSubmit={editForm.handleSubmit((values) => updateMutation.mutate({ id: selectedEvent.id, payload: values }))} noValidate>
-              <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/70 p-4"><p className="text-sm font-medium text-[var(--color-muted-foreground)]">Selected event</p><p className="mt-2 text-lg font-semibold text-[var(--color-primary)]">{selectedEvent.title}</p></div>
-              <EventFormFields register={editForm.register} watch={editForm.watch} errors={editForm.formState.errors} disabled={updateMutation.isPending} />
-              <FormActions isSubmitting={updateMutation.isPending} submitLabel="Save changes" helperText="Category, event type, and payment settings update the public page immediately." />
-            </form>
-          ) : <EmptyState title="No event selected" description="Select an event from the list to edit its public presentation and registration settings." />}
+        <SectionWrapper
+          title="Event board"
+          description="Manage XYZ Tech Club workshops, seminars, hackathons, and other activities from one event board."
+        >
+          <div className="grid gap-5">
+            <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-page)] p-4 sm:p-5">
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+                <label className="grid gap-2">
+                  <span className="text-sm font-medium text-[var(--color-primary-strong)]">Search events</span>
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-muted-foreground)]" />
+                    <input
+                      name="admin-event-search"
+                      value={searchTerm}
+                      onChange={(event) => setSearchTerm(event.target.value)}
+                      placeholder="Search XYZ Tech Club events by title, location, category, or description"
+                      className="input-base h-12 w-full pl-11 pr-4 text-sm"
+                    />
+                  </div>
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {([
+                    ["ALL", "All"],
+                    ["UPCOMING", "Upcoming"],
+                    ["PAST", "Past"],
+                    ["FEATURED", "Featured"],
+                    ["OPEN", "Open"],
+                    ["CLOSED", "Closed"],
+                    ["FREE", "Free"],
+                    ["PAID", "Paid"],
+                  ] as const).map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setActiveFilter(value)}
+                      className={`inline-flex h-10 items-center justify-center rounded-full border px-4 text-sm font-medium transition ${
+                        activeFilter === value
+                          ? "border-[var(--color-accent)] bg-[var(--color-primary)] text-white"
+                          : "border-[var(--color-border)] bg-white text-[var(--color-primary)] hover:border-[var(--color-accent)]"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {eventsQuery.isLoading ? (
+              <LoadingState title="Loading events" description="Fetching event records." />
+            ) : eventsQuery.isError ? (
+              <EmptyState title="Unable to load events" description={getApiErrorMessage(eventsQuery.error, "Please verify your admin session.")} />
+            ) : !filteredEvents.length ? (
+              <EmptyState
+                title={searchTerm || activeFilter !== "ALL" ? "No matching events" : "No events found"}
+                description={
+                  searchTerm || activeFilter !== "ALL"
+                    ? "Try a different keyword or filter to find the event you want to manage."
+                    : "Create an event to start managing the public events page."
+                }
+              />
+            ) : (
+              <>
+                <div className="grid gap-4 lg:grid-cols-2">
+                  {paginatedEvents.map((event) => {
+                    const badges = getEventBadges(event);
+                    const registrationsCount = event._count?.registrations ?? event.registrations?.length ?? 0;
+                    const featuredCardClass = event.isFeatured
+                      ? "border-[var(--color-accent)] bg-[linear-gradient(180deg,rgba(14,165,233,0.08),rgba(255,255,255,0.96))] ring-1 ring-[rgba(14,165,233,0.18)]"
+                      : "border-[var(--color-border)] bg-[var(--color-page)]";
+
+                    return (
+                      <article
+                        key={event.id}
+                        className={`flex h-full flex-col rounded-[1.75rem] p-5 transition hover:border-[var(--color-accent)] hover:bg-white ${featuredCardClass}`}
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div className="space-y-2">
+                            {event.isFeatured ? (
+                              <span className="inline-flex items-center gap-2 rounded-full border border-[rgba(14,165,233,0.24)] bg-[rgba(14,165,233,0.1)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-primary)]">
+                                <Star className="h-3.5 w-3.5 fill-current" />
+                                Spotlight event
+                              </span>
+                            ) : null}
+                            <h3 className="text-xl font-semibold text-[var(--color-primary)]">{event.title}</h3>
+                            <div className="flex flex-wrap gap-2">
+                              <StatusBadge label={badges.timing} variant={badges.isPast ? "inactive" : "pending"} className="w-fit text-[10px]" />
+                              <StatusBadge label={badges.registration} variant={event.isRegistrationOpen ? "info" : "inactive"} className="w-fit text-[10px]" />
+                              <StatusBadge label={badges.type} variant={event.eventType === "PAID" ? "pending" : "active"} className="w-fit text-[10px]" />
+                              {badges.featured ? <StatusBadge label={badges.featured} variant="active" className="w-fit text-[10px]" /> : null}
+                              {event.category ? <StatusBadge label={event.category} variant="default" className="w-fit text-[10px]" /> : null}
+                            </div>
+                          </div>
+                          {event.imageUrl ? (
+                            <div className="h-16 w-20 overflow-hidden rounded-[1rem] border border-[var(--color-border)] bg-slate-100">
+                              <Image src={event.imageUrl} alt={event.title} width={80} height={64} className="h-full w-full object-cover" />
+                            </div>
+                          ) : null}
+                        </div>
+
+                        <p className="mt-4 text-sm leading-6 text-[var(--color-muted-foreground)]">
+                          {truncateText(event.description, 120)}
+                        </p>
+
+                        <div className="mt-5 grid gap-3 text-sm text-[var(--color-muted-foreground)] sm:grid-cols-2">
+                          <div className="inline-flex items-center gap-2">
+                            <CalendarDays className="h-4 w-4 text-[var(--color-secondary)]" />
+                            <span>{format(new Date(event.eventDate), "dd MMM yyyy, hh:mm a")}</span>
+                          </div>
+                          <div className="inline-flex items-center gap-2">
+                            <MapPin className="h-4 w-4 text-[var(--color-secondary)]" />
+                            <span>{event.location}</span>
+                          </div>
+                          <div className="inline-flex items-center gap-2">
+                            <Users className="h-4 w-4 text-[var(--color-secondary)]" />
+                            <span>{registrationsCount} / {event.capacity} registered</span>
+                          </div>
+                          <div className="inline-flex items-center gap-2">
+                            <Ticket className="h-4 w-4 text-[var(--color-secondary)]" />
+                            <span>{event.eventType === "PAID" ? `${event.price ?? 0} BDT` : "Free event"}</span>
+                          </div>
+                        </div>
+
+                        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                          <Link href={`/admin/events/${event.id}/edit`} className="secondary-button h-11 px-4 text-sm">
+                            <span className="inline-flex items-center gap-2">
+                              <PencilLine className="h-4 w-4" />
+                              Edit Event
+                            </span>
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              toggleMutation.mutate({
+                                id: event.id,
+                                payload: { isFeatured: !event.isFeatured },
+                              })
+                            }
+                            className="secondary-button h-11 px-4 text-sm"
+                          >
+                            <span className="inline-flex items-center gap-2">
+                              <Star className="h-4 w-4" />
+                              {event.isFeatured ? "Unfeature" : "Feature"}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              toggleMutation.mutate({
+                                id: event.id,
+                                payload: { isRegistrationOpen: !event.isRegistrationOpen },
+                              })
+                            }
+                            className="secondary-button h-11 px-4 text-sm"
+                          >
+                            <span className="inline-flex items-center gap-2">
+                              <ToggleLeft className="h-4 w-4" />
+                              {event.isRegistrationOpen ? "Close Registration" : "Open Registration"}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPendingDeleteId(event.id)}
+                            className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </button>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+
+                <PaginationControls currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+              </>
+            )}
+          </div>
         </SectionWrapper>
       </div>
-    </div>
+
+
+      <WarningConfirmModal
+        open={Boolean(pendingDeleteId)}
+        title="Delete this event?"
+        description="This action will remove the event from admin and public views. This cannot be undone."
+        confirmLabel="Delete event"
+        isLoading={deleteMutation.isPending}
+        onCancel={() => setPendingDeleteId(null)}
+        onConfirm={() => {
+          if (pendingDeleteId) {
+            deleteMutation.mutate(pendingDeleteId);
+          }
+        }}
+      />
+    </>
   );
 }

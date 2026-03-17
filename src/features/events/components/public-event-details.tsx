@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CalendarRange, Clock3, MapPin, Users } from "lucide-react";
@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { MotionReveal } from "@/components/motion/motion-shell";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { LoadingState } from "@/components/feedback/loading-state";
+import { ActionLoadingOverlay } from "@/components/shared/action-loading-overlay";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { WarningConfirmModal } from "@/components/shared/warning-confirm-modal";
 import { getApiErrorMessage } from "@/lib/api-error";
@@ -34,7 +35,10 @@ export function PublicEventDetails({ eventId }: PublicEventDetailsProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isWarningOpen, setIsWarningOpen] = useState(false);
+  const [paymentVerificationState, setPaymentVerificationState] = useState<null | { title: string; description: string }>(null);
+  const handledPaymentRef = useRef<string | null>(null);
   const eventQuery = useQuery({ queryKey: queryKeys.events.detail(eventId), queryFn: () => eventService.getEventById(eventId) });
   const sessionQuery = useQuery({ queryKey: queryKeys.auth.session, queryFn: authService.getSession, retry: false });
   const user = sessionQuery.data?.data?.user;
@@ -52,14 +56,81 @@ export function PublicEventDetails({ eventId }: PublicEventDetailsProps) {
     retry: false,
   });
 
-  const currentRegistrationStatus = useMemo(() => {
+  const currentRegistration = useMemo(() => {
     const items = registrationsQuery.data?.data.result ?? [];
-    return items.find((item) => item.event.id === eventId)?.status;
+    return items.find((item) => item.event.id === eventId) ?? null;
   }, [eventId, registrationsQuery.data]);
 
   const registerMutation = useMutation({
     mutationFn: eventService.registerForEvent,
   });
+
+  const paymentStatus = searchParams.get("payment");
+  const refetchRegistrations = registrationsQuery.refetch;
+  const refetchEvent = eventQuery.refetch;
+
+  useEffect(() => {
+    if (!paymentStatus || !pathname) return;
+
+    const paymentKey = `${eventId}:${paymentStatus}`;
+    if (handledPaymentRef.current === paymentKey) return;
+    handledPaymentRef.current = paymentKey;
+
+    const verifyPaidRegistration = async () => {
+      if (paymentStatus === "cancelled") {
+        await eventService.markPaymentVerificationFailed(eventId);
+        await Promise.all([
+          refetchRegistrations(),
+          refetchEvent(),
+          queryClient.invalidateQueries({ queryKey: queryKeys.events.all }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.account.profile }),
+        ]);
+        toast.error("Payment was cancelled before confirmation. You can try again whenever you are ready.");
+        router.replace(pathname, { scroll: false });
+        return;
+      }
+
+      setPaymentVerificationState({
+        title: "Verifying your payment",
+        description: "Please wait while we confirm your Stripe payment and connect it to this event registration.",
+      });
+
+      let verified = false;
+      for (let attempt = 0; attempt < 4; attempt += 1) {
+        const [registrationsResult] = await Promise.all([
+          refetchRegistrations(),
+          refetchEvent(),
+          queryClient.invalidateQueries({ queryKey: queryKeys.events.all }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.account.profile }),
+        ]);
+
+        const registration = registrationsResult.data?.data.result?.find((item) => item.event.id === eventId);
+        if (registration?.paymentVerificationStatus === "VERIFIED") {
+          verified = true;
+          break;
+        }
+        if (registration?.paymentVerificationStatus === "FAILED") {
+          break;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+      }
+
+      setPaymentVerificationState(null);
+      const latestRegistration = (await refetchRegistrations()).data?.data.result?.find((item) => item.event.id === eventId);
+      if (latestRegistration?.paymentVerificationStatus === "VERIFIED") {
+        toast.success("Payment verified. Your event registration is confirmed.");
+      } else if (latestRegistration?.paymentVerificationStatus === "FAILED") {
+        toast.error("Payment could not be verified. Please try again or contact support if the issue continues.");
+      } else {
+        toast.info("Your payment was received, but registration confirmation is still in progress.");
+      }
+
+      router.replace(pathname, { scroll: false });
+    };
+
+    void verifyPaidRegistration();
+  }, [eventId, pathname, paymentStatus, queryClient, refetchEvent, refetchRegistrations, router]);
 
   if (eventQuery.isLoading) {
     return <LoadingState title="Loading event" description="Fetching event details from the backend." />;
@@ -84,7 +155,7 @@ export function PublicEventDetails({ eventId }: PublicEventDetailsProps) {
     title: event.eventType === "PAID" ? "Review payment before continuing" : "Confirm your registration",
     description:
       event.eventType === "PAID"
-        ? `You are about to continue to Stripe to pay ${event.price ?? 0} ${event.currency?.toUpperCase() ?? "USD"} for this event. Please confirm that your profile details are correct before proceeding.`
+        ? `You are about to continue to Stripe to pay ${event.price ?? 0} BDT for this event. Please confirm that your profile details are correct before proceeding.`
         : "You are about to register for this event using your saved profile details. Please confirm that everything is correct before continuing.",
     confirmLabel: event.eventType === "PAID" ? "Continue to Stripe" : isFull ? "Join Waitlist" : "Confirm Registration",
   };
@@ -101,6 +172,10 @@ export function PublicEventDetails({ eventId }: PublicEventDetailsProps) {
       onSuccess: async (response) => {
         setIsWarningOpen(false);
         if (response.data?.requiresPayment && response.data.checkoutUrl) {
+          setPaymentVerificationState({
+            title: "Opening secure payment",
+            description: "We are taking you to Stripe so you can complete this event payment safely.",
+          });
           window.location.href = response.data.checkoutUrl;
           return;
         }
@@ -117,14 +192,26 @@ export function PublicEventDetails({ eventId }: PublicEventDetailsProps) {
   };
 
   const renderRegisterAction = () => {
-    if (currentRegistrationStatus === "REGISTERED" || currentRegistrationStatus === "WAITLISTED") {
+    if (currentRegistration?.paymentVerificationStatus === "PENDING_VERIFICATION") {
+      return (
+        <button type="button" disabled className="secondary-button h-12 w-full cursor-not-allowed px-6 text-sm opacity-70 sm:w-auto">
+          Payment Verification Pending
+        </button>
+      );
+    }
+
+    if (
+      currentRegistration &&
+      (currentRegistration.paymentVerificationStatus === "VERIFIED" || currentRegistration.paymentVerificationStatus === "NOT_APPLICABLE") &&
+      (currentRegistration.status === "REGISTERED" || currentRegistration.status === "WAITLISTED")
+    ) {
       return user ? (
         <Link href="/account/registrations" className="secondary-button h-12 w-full px-6 text-sm sm:w-auto">
-          {currentRegistrationStatus === "WAITLISTED" ? "View Waitlist" : "View Registration"}
+          {currentRegistration.status === "WAITLISTED" ? "View Waitlist" : "View Registration"}
         </Link>
       ) : (
         <button type="button" disabled className="secondary-button h-12 w-full cursor-not-allowed px-6 text-sm opacity-70 sm:w-auto">
-          {currentRegistrationStatus === "WAITLISTED" ? "Waitlisted" : "Registered"}
+          {currentRegistration.status === "WAITLISTED" ? "Waitlisted" : "Registered"}
         </button>
       );
     }
@@ -178,10 +265,22 @@ export function PublicEventDetails({ eventId }: PublicEventDetailsProps) {
         disabled={registerMutation.isPending}
         className="primary-button h-12 w-full px-6 text-sm sm:w-auto"
       >
-        {registerMutation.isPending ? "Registering..." : event.eventType === "PAID" ? `Pay ${event.price ?? 0} ${event.currency?.toUpperCase() ?? "USD"}` : isFull ? "Join Waitlist" : "Register Now"}
+        {registerMutation.isPending ? "Registering..." : event.eventType === "PAID" ? `Pay ${event.price ?? 0} BDT` : isFull ? "Join Waitlist" : "Register Now"}
       </button>
     );
   };
+
+  const actionLoadingState =
+    paymentVerificationState ??
+    (registerMutation.isPending
+      ? {
+          title: event.eventType === "PAID" ? "Preparing secure checkout" : "Confirming your registration",
+          description:
+            event.eventType === "PAID"
+              ? "Please wait while we prepare your Stripe checkout session for this event."
+              : "Please wait while we save your event registration and refresh your account data.",
+        }
+      : null);
 
   return (
     <main className="px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
@@ -193,7 +292,7 @@ export function PublicEventDetails({ eventId }: PublicEventDetailsProps) {
                 <div className="flex flex-wrap items-center gap-2">
                   <StatusBadge label={isPast ? "Past Event" : "Upcoming Event"} variant={isPast ? "inactive" : "active"} className="bg-white/14 text-white" />
                   {event.category ? <StatusBadge label={event.category} variant="info" className="bg-white/14 text-white" /> : null}
-                  {event.eventType ? <StatusBadge label={event.eventType === "PAID" ? `Paid ${event.price ?? 0} ${event.currency?.toUpperCase() ?? "USD"}` : "Free Event"} variant={event.eventType === "PAID" ? "pending" : "active"} className="bg-white/14 text-white" /> : null}
+                  {event.eventType ? <StatusBadge label={event.eventType === "PAID" ? `Paid ${event.price ?? 0} BDT` : "Free Event"} variant={event.eventType === "PAID" ? "pending" : "active"} className="bg-white/14 text-white" /> : null}
                   <StatusBadge label={isRegistrationOpen ? "Registration Open" : "Registration Closed"} variant={isRegistrationOpen ? "pending" : "inactive"} className="bg-white/14 text-white" />
                   {event.isFeatured ? <StatusBadge label="Featured" variant="active" className="bg-white/14 text-white" /> : null}
                 </div>
@@ -230,7 +329,7 @@ export function PublicEventDetails({ eventId }: PublicEventDetailsProps) {
                 { label: "Location", value: event.location },
                 { label: "Capacity", value: `${registrationCount} / ${event.capacity}` },
                 { label: "Category", value: event.category || "General" },
-                { label: "Type", value: event.eventType === "PAID" ? `${event.price ?? 0} ${event.currency?.toUpperCase() ?? "USD"}` : "Free" },
+                { label: "Type", value: event.eventType === "PAID" ? `${event.price ?? 0} BDT` : "Free" },
                 { label: "Registration", value: isRegistrationOpen ? "Open" : "Closed" },
               ].map((item) => (
                 <div key={item.label} className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/60 p-5 text-center">
@@ -242,6 +341,7 @@ export function PublicEventDetails({ eventId }: PublicEventDetailsProps) {
           </section>
         </MotionReveal>
       </div>
+      <ActionLoadingOverlay open={Boolean(actionLoadingState)} title={actionLoadingState?.title ?? "Please wait"} description={actionLoadingState?.description ?? "Preparing your action."} />
       <WarningConfirmModal
         open={isWarningOpen}
         title={warningContent.title}

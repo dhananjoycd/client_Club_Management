@@ -152,10 +152,11 @@ export function AccountProfileManager() {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <StatusBadge label={registration.status} variant={registration.status === "REGISTERED" ? "active" : registration.status === "WAITLISTED" ? "pending" : "inactive"} />
-                    {registration.paymentStatus ? <StatusBadge label={registration.paymentStatus} variant={registration.paymentStatus === "PAID" || registration.paymentStatus === "NOT_REQUIRED" ? "active" : "pending"} /> : null}
+                    {registration.paymentStatus ? <StatusBadge label={registration.paymentStatus} variant={registration.paymentStatus === "PAID" || registration.paymentStatus === "NOT_REQUIRED" ? "active" : registration.paymentStatus === "FAILED" ? "inactive" : "pending"} /> : null}
+                    {registration.paymentVerificationStatus && registration.paymentVerificationStatus !== "NOT_APPLICABLE" ? <StatusBadge label={registration.paymentVerificationStatus} variant={registration.paymentVerificationStatus === "VERIFIED" ? "active" : registration.paymentVerificationStatus === "FAILED" ? "inactive" : "pending"} /> : null}
                   </div>
                 </div>
-                {registration.event.eventType === "PAID" ? <p className="mt-3 text-sm text-[var(--color-muted-foreground)]">Paid event: {registration.paidAmount ? `${registration.paidAmount} ${registration.paidCurrency?.toUpperCase()}` : `${registration.event.price ?? 0} ${registration.event.currency?.toUpperCase()}`}</p> : null}
+                {registration.event.eventType === "PAID" ? <p className="mt-3 text-sm text-[var(--color-muted-foreground)]">Paid event: {registration.paidAmount ? `${registration.paidAmount} ${"BDT"}` : `${registration.event.price ?? 0} ${"BDT"}`}</p> : null}
               </div>
             ))}
           </div>

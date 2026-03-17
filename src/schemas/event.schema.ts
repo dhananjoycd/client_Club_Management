@@ -15,6 +15,7 @@ export const eventSchema = z.object({
   imageUrl: z.string().url("Enter a valid URL.").or(z.literal("")).optional(),
   isFeatured: z.boolean().default(false),
   isRegistrationOpen: z.boolean().default(true),
+  sendEmail: z.boolean().default(false),
 }).superRefine((value, ctx) => {
   if (value.eventType === "PAID" && (!value.price || value.price <= 0)) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["price"], message: "Price is required for paid events." });
