@@ -1,8 +1,18 @@
 export type RegistrationStatus = "REGISTERED" | "WAITLISTED" | "CANCELLED";
+export type PaymentStatus = "NOT_REQUIRED" | "PENDING" | "PAID" | "FAILED" | "REFUNDED";
 
 export type RegistrationItem = {
   id: string;
   status: RegistrationStatus;
+  paymentStatus?: PaymentStatus;
+  snapshotName?: string;
+  snapshotEmail?: string;
+  snapshotPhone?: string;
+  snapshotSession?: string;
+  snapshotDepartment?: string;
+  paidAmount?: number | null;
+  paidCurrency?: string | null;
+  stripeCheckoutSessionId?: string | null;
   registeredAt: string;
   event: {
     id: string;
@@ -10,6 +20,14 @@ export type RegistrationItem = {
     location: string;
     eventDate: string;
     capacity?: number;
+    eventType?: "FREE" | "PAID";
+    price?: number | null;
+    currency?: string | null;
+  };
+  user?: {
+    id: string;
+    name?: string | null;
+    email: string;
   };
   member?: {
     id: string;

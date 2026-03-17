@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Facebook, Github, Linkedin } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-keys";
+import { authService } from "@/services/auth.service";
 import { settingsService } from "@/services/settings.service";
 
 const socialConfig = {
@@ -16,11 +17,14 @@ const socialLabels = Object.keys(socialConfig) as Array<keyof typeof socialConfi
 
 export function PublicFooter() {
   const settingsQuery = useQuery({ queryKey: queryKeys.settings.detail, queryFn: settingsService.getSettings, retry: false });
+  const sessionQuery = useQuery({ queryKey: queryKeys.auth.session, queryFn: authService.getSession, retry: false });
   const settings = settingsQuery.data?.data;
   const organizationName = settings?.organizationName?.trim() || "XYZ Tech Club";
   const email = settings?.contactEmail?.trim() || "hello@xyztechclub.org";
   const phone = settings?.phone?.trim() || "+880 1234-567890";
   const socialLinks = settings?.socialLinks ?? {};
+  const restrictedRoles = new Set(["MEMBER", "ADMIN", "SUPER_ADMIN", "EVENT_MANAGER"]);
+  const isRestrictedUser = restrictedRoles.has(sessionQuery.data?.data?.user?.role ?? "");
   const activeSocialLinks = socialLabels
     .map((label) => [label, socialLinks[label]] as const)
     .filter(([, href]) => typeof href === "string" && href.trim().length > 0);
@@ -47,7 +51,7 @@ export function PublicFooter() {
           <div className="grid gap-2 text-[rgba(226,232,240,0.72)]">
             <Link href="/about" className="transition hover:text-[var(--color-accent)]">About</Link>
             <Link href="/events" className="transition hover:text-[var(--color-accent)]">Events</Link>
-            <Link href="/apply" className="transition hover:text-[var(--color-accent)]">Apply</Link>
+            {!isRestrictedUser ? <Link href="/apply" className="transition hover:text-[var(--color-accent)]">Apply</Link> : null}
             <Link href="/notices" className="transition hover:text-[var(--color-accent)]">Resources</Link>
             <Link href="/committee" className="transition hover:text-[var(--color-accent)]">Committee</Link>
           </div>

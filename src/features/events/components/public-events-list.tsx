@@ -1,13 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { CalendarRange, MapPin, Users } from "lucide-react";
+import { ArrowRight, CalendarRange, MapPin, Users } from "lucide-react";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { LoadingState } from "@/components/feedback/loading-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { queryKeys } from "@/lib/query-keys";
+import { truncateText } from "@/lib/text";
 import { eventService } from "@/services/event.service";
 
 export function PublicEventsList() {
@@ -42,7 +44,7 @@ export function PublicEventsList() {
               className="text-[10px]"
             />
           </div>
-          <p className="mt-3 text-sm leading-6 text-[var(--color-muted-foreground)]">{event.description}</p>
+          <p className="mt-3 text-sm leading-6 text-[var(--color-muted-foreground)]">{truncateText(event.description, 60)}</p>
           <div className="mt-5 grid gap-3 text-sm text-[var(--color-muted-foreground)]">
             <div className="flex items-center gap-2">
               <CalendarRange className="h-4 w-4 text-[var(--color-primary)]" />
@@ -58,6 +60,12 @@ export function PublicEventsList() {
                 {event._count?.registrations ?? 0} / {event.capacity} registered
               </span>
             </div>
+          </div>
+          <div className="mt-5">
+            <Link href={`/events/${event.id}`} className="secondary-button inline-flex h-10 items-center gap-2 px-4 text-sm">
+              Details
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </article>
       ))}

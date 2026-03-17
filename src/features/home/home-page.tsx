@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { StatCard } from "@/components/cards/stat-card";
 import { CountUpNumber } from "@/components/motion/count-up-number";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
+import { MembershipApplyCta } from "@/components/shared/membership-apply-cta";
 import { CommitteeMemberCard } from "@/components/committee/committee-member-card";
 import { FaqAccordion } from "@/components/faq/faq-accordion";
 import {
@@ -20,6 +21,7 @@ import {
 } from "@/features/home/home-content";
 import { EventItem } from "@/types/event.types";
 import { NoticeItem } from "@/types/notice.types";
+import { truncateText } from "@/lib/text";
 import { SiteCommitteeMember, SiteFaqItem, SiteImpactStats, SiteSettings, SiteTestimonial } from "@/types/settings.types";
 
 type HomePageViewProps = {
@@ -215,9 +217,10 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
             </motion.div>
 
             <motion.div variants={heroItemVariants} className="flex flex-col gap-3 sm:flex-row">
-              <Link href="/apply" className="primary-button h-12 px-6 text-sm">
-                Join the Club
-              </Link>
+              <MembershipApplyCta
+                label="Join the Club"
+                className="primary-button h-12 px-6 text-sm"
+              />
               <Link href="/events" className="secondary-button h-12 px-6 text-sm">
                 Explore Events
               </Link>
@@ -448,10 +451,10 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
                   <div className="rounded-2xl border border-[var(--color-border)] bg-white/60 px-4 py-3 text-sm font-medium text-[var(--color-primary-strong)]">Projects, teamwork, and mentorship</div>
                 </div>
               </div>
-              <Link href="/apply" className="primary-button inline-flex h-11 items-center gap-2 self-start px-5 text-sm">
-                Apply for membership
-                <ChevronRight className="h-4 w-4" />
-              </Link>
+              <MembershipApplyCta
+                label="Apply for membership"
+                className="primary-button inline-flex h-11 items-center gap-2 self-start px-5 text-sm"
+              />
             </div>
           </SectionWrapper>
 
@@ -487,7 +490,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
                     <span className="text-sm text-[var(--color-muted-foreground)]">{format(new Date(event.eventDate), "dd MMM yyyy")}</span>
                   </div>
                   <h3 className="mt-4 text-xl font-semibold tracking-tight text-[var(--color-primary-strong)]">{event.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-[var(--color-muted-foreground)]">{event.description}</p>
+                  <p className="mt-3 text-sm leading-6 text-[var(--color-muted-foreground)]">{truncateText(event.description, 60)}</p>
                   <div className="mt-5 space-y-2 text-sm text-[var(--color-muted-foreground)]">
                     <p>
                       <span className="font-medium text-[var(--color-primary-strong)]">Location:</span> {event.location}
@@ -495,6 +498,12 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
                     <p>
                       <span className="font-medium text-[var(--color-primary-strong)]">Capacity:</span> {event.capacity}
                     </p>
+                  </div>
+                  <div className="mt-5">
+                    <Link href={`/events/${event.id}`} className="secondary-button inline-flex h-10 items-center gap-2 px-4 text-sm">
+                      Details
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
                   </div>
                 </article>
               ))
@@ -615,9 +624,10 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
                 Apply for membership, follow upcoming activities, and connect with a club culture built around action, learning, and teamwork.
               </p>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <Link href="/apply" className="primary-button h-11 px-5 text-sm">
-                  Apply for Membership
-                </Link>
+                <MembershipApplyCta
+                  label="Apply for Membership"
+                  className="primary-button h-11 px-5 text-sm"
+                />
                 <Link href="#contact" className="secondary-button h-11 border-white/14 bg-white/6 px-5 text-sm text-white hover:bg-white/10 hover:text-white">
                   Contact Us
                 </Link>

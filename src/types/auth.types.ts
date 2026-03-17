@@ -1,9 +1,15 @@
-export type AuthRole = "SUPER_ADMIN" | "ADMIN" | "EVENT_MANAGER" | "MEMBER" | string;
+export type AuthRole = "USER" | "SUPER_ADMIN" | "ADMIN" | "EVENT_MANAGER" | "MEMBER" | string;
 
 export type LoginPayload = {
   email: string;
   password: string;
   rememberMe?: boolean;
+};
+
+export type RegisterPayload = {
+  name: string;
+  email: string;
+  password: string;
 };
 
 export type AuthUser = {

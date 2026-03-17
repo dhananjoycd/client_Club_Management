@@ -1,6 +1,5 @@
-import { PublicEventsList } from "@/features/events/components/public-events-list";
 import { PageHeader } from "@/components/shared/page-header";
-import { SectionWrapper } from "@/components/shared/section-wrapper";
+import { PublicEventsBrowser } from "@/features/events/components/public-events-browser";
 
 export default function EventsPage() {
   return (
@@ -8,16 +7,11 @@ export default function EventsPage() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
         <PageHeader
           eyebrow="Events"
-          title="Upcoming event information connected to the backend event module."
-          description="This page now fetches upcoming events from the real API and uses the same card-based presentation for a clean public experience."
+          title="Browse club events in one place."
+          description="This page reads live backend event data, so admins control what appears, members can register for active events, and visitors can explore upcoming sessions, featured activities, and past club momentum from one screen."
         />
 
-        <SectionWrapper
-          title="Upcoming events"
-          description="Event data is loaded from the backend and rendered in a public-friendly layout."
-        >
-          <PublicEventsList />
-        </SectionWrapper>
+        <PublicEventsBrowser />
       </div>
     </main>
   );

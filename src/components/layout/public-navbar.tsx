@@ -1,15 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { queryKeys } from "@/lib/query-keys";
 import { authService } from "@/services/auth.service";
+import { accountService } from "@/services/account.service";
 import { applicationService } from "@/services/application.service";
 import { settingsService } from "@/services/settings.service";
 
@@ -22,6 +24,15 @@ const publicLinks = [
   { href: "/contact", label: "Contact" },
 ];
 
+function getInitials(name?: string | null, email?: string | null) {
+  const source = name?.trim() || email?.trim() || "User";
+  const parts = source.split(/\s+/).filter(Boolean);
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+  return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
+}
+
 export function PublicNavbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeHash, setActiveHash] = useState("");
@@ -30,6 +41,12 @@ export function PublicNavbar() {
   const queryClient = useQueryClient();
   const sessionQuery = useQuery({ queryKey: queryKeys.auth.session, queryFn: authService.getSession, retry: false });
   const settingsQuery = useQuery({ queryKey: queryKeys.settings.detail, queryFn: settingsService.getSettings, retry: false });
+  const accountProfileQuery = useQuery({
+    queryKey: queryKeys.account.profile,
+    queryFn: accountService.getProfile,
+    enabled: Boolean(sessionQuery.data?.data?.user),
+    retry: false,
+  });
   const applicationQuery = useQuery({
     queryKey: queryKeys.applications.list("me"),
     queryFn: () => applicationService.getApplications({ limit: 20 }),
@@ -40,7 +57,10 @@ export function PublicNavbar() {
     mutationFn: authService.logout,
     onSuccess: async (response) => {
       toast.success(response.message ?? "Logged out successfully.");
-      await queryClient.invalidateQueries({ queryKey: queryKeys.auth.session });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.auth.session }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.account.profile }),
+      ]);
       router.push("/");
     },
     onError: (error) => toast.error(getApiErrorMessage(error, "Logout failed.")),
@@ -48,8 +68,9 @@ export function PublicNavbar() {
 
   const user = sessionQuery.data?.data?.user;
   const settings = settingsQuery.data?.data;
+  const accountProfile = accountProfileQuery.data?.data;
   const organizationName = settings?.organizationName?.trim() || "XYZ Tech Club";
-  const dashboardHref = user?.role === "MEMBER" ? "/member" : user ? "/admin" : null;
+  const dashboardHref = user?.role === "USER" || user?.role === "MEMBER" ? "/account" : user ? "/admin" : null;
   const restrictedRoles = new Set(["MEMBER", "ADMIN", "SUPER_ADMIN", "EVENT_MANAGER"]);
   const latestApplication = [...(applicationQuery.data?.data?.result ?? [])]
     .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())[0];
@@ -60,6 +81,11 @@ export function PublicNavbar() {
       : latestApplication
         ? latestApplication.status === "REJECTED"
         : true;
+  const avatarImage = useMemo(
+    () => user?.image?.trim() || accountProfile?.memberProfile?.profilePhoto?.trim() || null,
+    [accountProfile?.memberProfile?.profilePhoto, user?.image],
+  );
+  const avatarInitials = getInitials(accountProfile?.name ?? user?.name, user?.email);
 
   useEffect(() => {
     const updateHash = () => setActiveHash(window.location.hash);
@@ -69,6 +95,27 @@ export function PublicNavbar() {
 
     return () => window.removeEventListener("hashchange", updateHash);
   }, [pathname]);
+
+  const avatarButton = dashboardHref && user ? (
+    <button
+      type="button"
+      onClick={() => {
+        setIsOpen(false);
+        router.push(dashboardHref);
+      }}
+      className="inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-[var(--color-border)] bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+      aria-label="Go to dashboard"
+      title="Go to dashboard"
+    >
+      {avatarImage ? (
+        <span className="relative block h-full w-full">
+          <Image src={avatarImage} alt={user.email} fill className="object-cover" sizes="44px" unoptimized />
+        </span>
+      ) : (
+        <span className="text-sm font-semibold text-[var(--color-primary-strong)]">{avatarInitials}</span>
+      )}
+    </button>
+  ) : null;
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[rgba(249,251,254,0.78)] backdrop-blur-xl supports-[backdrop-filter]:bg-[rgba(249,251,254,0.68)]">
@@ -107,8 +154,9 @@ export function PublicNavbar() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
-          {dashboardHref ? <Link href={dashboardHref} className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Dashboard</Link> : null}
+          {avatarButton}
           {!user ? <Link href="/login" className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Login</Link> : null}
+          {!user ? <Link href="/register" className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Register</Link> : null}
           {showJoinNow ? <Link href="/apply" className="primary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(37,99,235,0.28)]">Join Now</Link> : null}
           {user ? <button type="button" onClick={() => logoutMutation.mutate()} className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Logout</button> : null}
         </div>
@@ -146,8 +194,9 @@ export function PublicNavbar() {
                 </Link>
               );
             })}
-            {dashboardHref ? <Link href={dashboardHref} onClick={() => setIsOpen(false)} className="secondary-button h-12 px-5 text-sm">Dashboard</Link> : null}
+            {avatarButton ? <div className="flex justify-start">{avatarButton}</div> : null}
             {!user ? <Link href="/login" onClick={() => setIsOpen(false)} className="secondary-button h-12 px-5 text-sm">Login</Link> : null}
+            {!user ? <Link href="/register" onClick={() => setIsOpen(false)} className="secondary-button h-12 px-5 text-sm">Register</Link> : null}
             {showJoinNow ? <Link href="/apply" onClick={() => setIsOpen(false)} className="primary-button h-12 px-5 text-sm">Join Now</Link> : null}
             {user ? <button type="button" onClick={() => { setIsOpen(false); logoutMutation.mutate(); }} className="secondary-button h-12 px-5 text-sm">Logout</button> : null}
           </nav>
@@ -156,4 +205,3 @@ export function PublicNavbar() {
     </header>
   );
 }
-

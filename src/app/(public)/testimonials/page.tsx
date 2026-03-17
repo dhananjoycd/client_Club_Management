@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
+import { MembershipApplyCta } from "@/components/shared/membership-apply-cta";
 import { settingsService } from "@/services/settings.service";
 import { testimonialItems } from "@/features/home/home-content";
 import { SiteTestimonial } from "@/types/settings.types";
@@ -34,9 +35,10 @@ export default async function TestimonialsPage() {
           title="What members, participants, and mentors say about XYZ Tech Club."
           description="These testimonials are managed from settings, so the page can stay current without redesigning the public landing experience."
           actions={
-            <Link href="/apply" className="primary-button h-11 px-5 text-sm">
-              Join the Club
-            </Link>
+            <MembershipApplyCta
+              label="Join the Club"
+              className="primary-button h-11 px-5 text-sm"
+            />
           }
         />
 

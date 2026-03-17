@@ -1,5 +1,7 @@
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { ProtectedArea } from "@/components/layout/protected-area";
+import { PublicFooter } from "@/components/layout/public-footer";
+import { PublicNavbar } from "@/components/layout/public-navbar";
 
 type AdminLayoutProps = Readonly<{
   children: React.ReactNode;
@@ -16,14 +18,18 @@ const adminLinks = [
 export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <ProtectedArea allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
-      <DashboardShell
-        title="Admin Dashboard"
-        description="Manage operations, applications, events, notices, and platform settings."
-        sidebarHeading="Admin Panel"
-        links={adminLinks}
-      >
-        {children}
-      </DashboardShell>
+      <div className="min-h-screen bg-[var(--color-page)]">
+        <PublicNavbar />
+        <DashboardShell
+          title="Admin Dashboard"
+          description="Manage operations, applications, events, notices, and platform settings."
+          sidebarHeading="Admin Panel"
+          links={adminLinks}
+        >
+          {children}
+        </DashboardShell>
+        <PublicFooter />
+      </div>
     </ProtectedArea>
   );
 }

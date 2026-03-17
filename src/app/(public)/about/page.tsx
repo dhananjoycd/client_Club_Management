@@ -5,6 +5,7 @@ import { CommitteeMemberCard } from "@/components/committee/committee-member-car
 import { MotionReveal } from "@/components/motion/motion-shell";
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
+import { MembershipApplyCta } from "@/components/shared/membership-apply-cta";
 import { committeePreview } from "@/features/home/home-content";
 import { settingsService } from "@/services/settings.service";
 import { SiteCommitteeMember, SiteSettings } from "@/types/settings.types";
@@ -54,9 +55,10 @@ export default async function AboutPage() {
           description="This page goes beyond the landing overview and explains the club story, mission, working style, leadership structure, and community impact."
           actions={
             <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap lg:flex-nowrap">
-              <Link href="/apply" className="primary-button h-12 w-full whitespace-nowrap px-6 text-sm sm:w-auto">
-                Join the Club
-              </Link>
+              <MembershipApplyCta
+                label="Join the Club"
+                className="primary-button h-12 w-full whitespace-nowrap px-6 text-sm sm:w-auto"
+              />
               <Link href="/committee" className="secondary-button h-12 w-full whitespace-nowrap px-6 text-sm sm:w-auto">
                 See Committee
               </Link>
@@ -201,9 +203,10 @@ export default async function AboutPage() {
             If you want structured growth, real event experience, collaborative projects, and an active peer network, this is the right place to start.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <Link href="/apply" className="primary-button h-12 w-full px-6 text-sm sm:w-auto">
-              Apply for Membership
-            </Link>
+            <MembershipApplyCta
+              label="Apply for Membership"
+              className="primary-button h-12 w-full px-6 text-sm sm:w-auto"
+            />
             <Link href="/events" className="secondary-button h-12 w-full border-white/14 bg-white/6 px-6 text-sm text-white hover:bg-white/10 hover:text-white sm:w-auto">
               Explore Events
             </Link>

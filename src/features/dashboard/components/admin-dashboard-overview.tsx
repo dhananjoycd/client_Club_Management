@@ -23,7 +23,7 @@ export function AdminDashboardOverview() {
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         <StatCard label="Members" value={String(data.totalMembers)} description="Total registered member profiles in the system." icon={<Users className="h-5 w-5" />} />
         <StatCard label="Pending applications" value={String(data.pendingApplications)} description="Applications awaiting admin review." icon={<FileStack className="h-5 w-5" />} />
         <StatCard label="Events" value={String(data.totalEvents)} description="Total event records available in the system." icon={<CalendarDays className="h-5 w-5" />} />
@@ -50,3 +50,4 @@ export function AdminDashboardOverview() {
     </div>
   );
 }
+

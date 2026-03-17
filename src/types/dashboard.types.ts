@@ -18,6 +18,7 @@ export type DashboardAdminData = {
 
 export type DashboardMemberData = {
   profileStatus: string | null;
+  profileComplete: boolean;
   upcomingEvents: Array<{
     id: string;
     title: string;
@@ -28,12 +29,16 @@ export type DashboardMemberData = {
   registeredEvents: Array<{
     id: string;
     status: string;
+    paymentStatus?: string;
     registeredAt: string;
     event: {
       id: string;
       title: string;
       location: string;
       eventDate: string;
+      eventType?: "FREE" | "PAID";
+      price?: number | null;
+      currency?: string | null;
     };
   }>;
 };

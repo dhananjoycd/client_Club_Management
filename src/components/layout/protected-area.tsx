@@ -35,7 +35,7 @@ export function ProtectedArea({ children, allowedRoles }: ProtectedAreaProps) {
     }
 
     if (!allowedRoles.includes(user.role)) {
-      const fallback = user.role === "MEMBER" ? "/member" : "/admin";
+      const fallback = user.role === "USER" || user.role === "MEMBER" ? "/account" : "/admin";
       router.replace(fallback);
     }
   }, [allowedRoles, pathname, router, sessionQuery.data, sessionQuery.isLoading]);

@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { CommitteeMemberCard } from "@/components/committee/committee-member-card";
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
+import { MembershipApplyCta } from "@/components/shared/membership-apply-cta";
 import { committeePreview } from "@/features/home/home-content";
 import { settingsService } from "@/services/settings.service";
 import { SiteCommitteeMember, SiteSettings } from "@/types/settings.types";
@@ -38,9 +39,10 @@ export default async function CommitteePage() {
           title="Executive committee members of XYZ Tech Club."
           description="Updated from settings so the public page always shows the latest committee lineup."
           actions={
-            <Link href="/apply" className="primary-button h-11 px-5 text-sm">
-              Join the Club
-            </Link>
+            <MembershipApplyCta
+              label="Join the Club"
+              className="primary-button h-11 px-5 text-sm"
+            />
           }
         />
 
@@ -62,10 +64,10 @@ export default async function CommitteePage() {
             ))}
           </div>
           <div className="mt-6 flex justify-end">
-            <Link href="/apply" className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-primary)]">
-              Apply to become a member
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+            <MembershipApplyCta
+              label="Apply to become a member"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-primary)]"
+            />
           </div>
         </SectionWrapper>
       </div>

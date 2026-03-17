@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { FormActions } from "@/components/forms/form-actions";
 import { FormField } from "@/components/forms/form-field";
+import { PasswordField } from "@/components/forms/password-field";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { queryKeys } from "@/lib/query-keys";
 import { loginSchema } from "@/schemas/auth.schema";
@@ -28,7 +29,7 @@ export function LoginForm() {
       await queryClient.invalidateQueries({ queryKey: queryKeys.auth.session });
       toast.success(response.message ?? "Login successful.");
       const user = response.data?.user;
-      const fallback = user?.role === "MEMBER" ? "/member" : "/admin";
+      const fallback = user?.role === "USER" || user?.role === "MEMBER" ? "/account" : "/admin";
       router.push(redirectTo || fallback);
     },
     onError: (error) => toast.error(getApiErrorMessage(error, "Login failed. Please try again.")),
@@ -46,9 +47,22 @@ export function LoginForm() {
 
       <form className="grid gap-5" onSubmit={handleSubmit((values) => loginMutation.mutate(values))} noValidate>
         <FormField label="Email address" type="email" placeholder="member@example.com" autoComplete="email" disabled={loginMutation.isPending} error={errors.email} {...register("email")} />
-        <FormField label="Password" type="password" placeholder="Enter your password" autoComplete="current-password" disabled={loginMutation.isPending} error={errors.password} {...register("password")} />
+        <PasswordField label="Password" placeholder="Enter your password" autoComplete="current-password" disabled={loginMutation.isPending} error={errors.password} {...register("password")} />
         <label className="flex items-center gap-3 text-sm text-[var(--color-muted-foreground)]"><input type="checkbox" className="h-4 w-4" disabled={loginMutation.isPending} {...register("rememberMe")} /><span>Keep me signed in on this device</span></label>
-        <FormActions isSubmitting={loginMutation.isPending} submitLabel="Sign in" helperText="This form is connected to the backend auth route and uses cookie-based session authentication." secondaryAction={<p className="text-sm text-[var(--color-muted-foreground)]">Membership applicant? <Link href="/apply" className="font-medium text-[var(--color-primary)]">Apply here</Link></p>} />
+        <FormActions
+          isSubmitting={loginMutation.isPending}
+          submitLabel="Sign in"
+          helperText="This form is connected to the backend auth route and uses cookie-based session authentication."
+          secondaryAction={
+            currentUser ? (
+              <p className="text-sm font-medium text-emerald-700">Your account is already active. Use your dashboard instead of the membership application.</p>
+            ) : (
+              <p className="text-sm text-[var(--color-muted-foreground)]">
+                New here? <Link href="/register" className="font-medium text-[var(--color-primary)]">Create an account</Link>
+              </p>
+            )
+          }
+        />
       </form>
     </div>
   );
