@@ -10,7 +10,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { z } from "zod";
 import { EmptyState } from "@/components/feedback/empty-state";
-import { LoadingState } from "@/components/feedback/loading-state";
+import { FormLoadingState } from "@/components/feedback/form-loading-state";
 import { FormActions } from "@/components/forms/form-actions";
 import { FormField, FormTextarea } from "@/components/forms/form-field";
 import { RegistrationFilterBar } from "@/components/shared/registration-filter-bar";
@@ -100,7 +100,7 @@ export function AccountProfileManager({ showRegistrations = true }: AccountProfi
     onError: (error) => toast.error(getApiErrorMessage(error, "Profile update failed.")),
   });
 
-  if (profileQuery.isLoading) return <LoadingState title="Loading your profile" description="Preparing your XYZ Tech Club account details and saved registration data." />;
+  if (profileQuery.isLoading) return <FormLoadingState title="Loading your profile" description="Preparing your XYZ Tech Club account details and saved registration data." />;
   if (profileQuery.isError) return <EmptyState title="Unable to load profile" description={getApiErrorMessage(profileQuery.error, "Please verify your session.")} />;
   if (!profile) return <EmptyState title="Profile not found" description="No account was found for the current session." />;
 

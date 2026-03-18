@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Search } from "lucide-react";
 import { EmptyState } from "@/components/feedback/empty-state";
-import { LoadingState } from "@/components/feedback/loading-state";
+import { TableLoadingState } from "@/components/feedback/table-loading-state";
 import { FilterChip } from "@/components/shared/filter-chip";
 import { PaginationControls } from "@/components/shared/pagination-controls";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
@@ -84,7 +84,7 @@ export function AdminPaymentsManager() {
   const paginatedPayments = filteredPayments.slice((page - 1) * PAYMENTS_PER_PAGE, page * PAYMENTS_PER_PAGE);
 
   if (!registrationsQuery.data && registrationsQuery.isLoading) {
-    return <LoadingState title="Loading payments" description="Preparing paid event registrations and verification states for review." />;
+    return <TableLoadingState title="Loading payments" description="Preparing paid event registrations and verification states for review." />;
   }
 
   if (registrationsQuery.isError) {

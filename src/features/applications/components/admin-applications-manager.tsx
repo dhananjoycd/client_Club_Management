@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/feedback/empty-state";
-import { LoadingState } from "@/components/feedback/loading-state";
+import { TableLoadingState } from "@/components/feedback/table-loading-state";
 import { FilterChip } from "@/components/shared/filter-chip";
 import { PaginationControls } from "@/components/shared/pagination-controls";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
@@ -81,7 +81,7 @@ export function AdminApplicationsManager() {
   const paginatedApplications = filteredApplications.slice((page - 1) * APPLICATIONS_PER_PAGE, page * APPLICATIONS_PER_PAGE);
 
   if (applicationsQuery.isLoading) {
-    return <LoadingState title="Loading membership applications" description="Preparing the latest XYZ Tech Club membership requests for review." />;
+    return <TableLoadingState title="Loading membership applications" description="Preparing the latest XYZ Tech Club membership requests for review." />;
   }
 
   if (applicationsQuery.isError) {

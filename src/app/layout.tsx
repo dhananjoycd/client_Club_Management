@@ -1,5 +1,8 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { Manrope, Space_Grotesk } from "next/font/google";
+import { Suspense } from "react";
+import { RouteProgressBar } from "@/components/feedback/route-progress-bar";
+import { GlobalErrorProvider } from "@/providers/global-error-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import { ToasterProvider } from "@/providers/toaster-provider";
 import "./globals.css";
@@ -28,8 +31,13 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html lang="en" suppressHydrationWarning>
       <body className={`${bodyFont.variable} ${displayFont.variable}`}>
         <QueryProvider>
-          {children}
-          <ToasterProvider />
+          <GlobalErrorProvider>
+            <Suspense fallback={null}>
+              <RouteProgressBar />
+            </Suspense>
+            {children}
+            <ToasterProvider />
+          </GlobalErrorProvider>
         </QueryProvider>
       </body>
     </html>

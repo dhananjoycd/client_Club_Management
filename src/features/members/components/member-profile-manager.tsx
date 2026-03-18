@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { FormActions } from "@/components/forms/form-actions";
 import { FormField, FormTextarea } from "@/components/forms/form-field";
 import { EmptyState } from "@/components/feedback/empty-state";
-import { LoadingState } from "@/components/feedback/loading-state";
+import { FormLoadingState } from "@/components/feedback/form-loading-state";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { getApiErrorMessage } from "@/lib/api-error";
@@ -31,7 +31,7 @@ export function MemberProfileManager() {
 
   const updateMutation = useMutation({ mutationFn: (values: ProfileSchema) => memberService.updateMember(member!.id, { bio: values.bio, profilePhoto: values.profilePhoto || undefined }), onSuccess: async (response) => { toast.success(response.message ?? "Profile updated successfully."); await queryClient.invalidateQueries({ queryKey: queryKeys.members.me }); }, onError: (error) => toast.error(getApiErrorMessage(error, "Profile update failed.")) });
 
-  if (sessionQuery.isLoading || membersQuery.isLoading) return <LoadingState title="Loading member profile" description="Preparing your approved XYZ Tech Club member profile." />;
+  if (sessionQuery.isLoading || membersQuery.isLoading) return <FormLoadingState title="Loading member profile" description="Preparing your approved XYZ Tech Club member profile." />;
   if (sessionQuery.isError || membersQuery.isError) return <EmptyState title="Unable to load profile" description={getApiErrorMessage(sessionQuery.error ?? membersQuery.error, "Please verify your member session.")} />;
   if (!member) return <EmptyState title="Profile not found" description="No member profile record was found for the current account." />;
 

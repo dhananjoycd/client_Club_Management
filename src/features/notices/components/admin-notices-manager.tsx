@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { FormActions } from "@/components/forms/form-actions";
 import { FormField, FormTextarea } from "@/components/forms/form-field";
 import { EmptyState } from "@/components/feedback/empty-state";
-import { LoadingState } from "@/components/feedback/loading-state";
+import { TableLoadingState } from "@/components/feedback/table-loading-state";
 import { PaginationControls } from "@/components/shared/pagination-controls";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -241,7 +241,7 @@ export function AdminNoticesManager() {
             </div>
 
             {noticesQuery.isLoading ? (
-              <LoadingState title="Loading notice board" description="Preparing the notices your XYZ Tech Club team can manage." />
+              <TableLoadingState title="Loading notice board" description="Preparing the notices your XYZ Tech Club team can manage." />
             ) : noticesQuery.isError ? (
               <EmptyState title="Unable to load notices" description={getApiErrorMessage(noticesQuery.error, "Please verify your admin session.")} />
             ) : !notices.length ? (

@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { FormActions } from "@/components/forms/form-actions";
 import { FormField, FormTextarea } from "@/components/forms/form-field";
 import { EmptyState } from "@/components/feedback/empty-state";
-import { LoadingState } from "@/components/feedback/loading-state";
+import { FormLoadingState } from "@/components/feedback/form-loading-state";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { queryKeys } from "@/lib/query-keys";
@@ -189,7 +189,7 @@ export function AdminEventEditPage({ eventId }: Props) {
   };
 
   if (eventQuery.isLoading) {
-    return <LoadingState title="Loading event editor" description="Preparing this XYZ Tech Club event for admin editing." />;
+    return <FormLoadingState title="Loading event editor" description="Preparing this XYZ Tech Club event for admin editing." />;
   }
 
   if (eventQuery.isError || !eventQuery.data?.data) {

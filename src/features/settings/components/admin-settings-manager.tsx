@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { FormField, FormTextarea } from "@/components/forms/form-field";
 import { WarningConfirmModal } from "@/components/shared/warning-confirm-modal";
 import { EmptyState } from "@/components/feedback/empty-state";
-import { LoadingState } from "@/components/feedback/loading-state";
+import { FormLoadingState } from "@/components/feedback/form-loading-state";
 import { faqItems } from "@/features/home/home-content";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { queryKeys } from "@/lib/query-keys";
@@ -299,7 +299,7 @@ export function AdminSettingsManager() {
     });
   }, [settingsQuery.data, reset]);
 
-  if (settingsQuery.isLoading) return <LoadingState title="Loading club settings" description="Preparing your XYZ Tech Club site settings and public content." />;
+  if (settingsQuery.isLoading) return <FormLoadingState title="Loading club settings" description="Preparing your XYZ Tech Club site settings and public content." fields={9} />;
   if (settingsQuery.isError) return <EmptyState title="Unable to load settings" description={getApiErrorMessage(settingsQuery.error, "Please verify your admin session.")} />;
 
   return (

@@ -7,6 +7,7 @@ import { Search } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { LoadingState } from "@/components/feedback/loading-state";
+import { TableLoadingState } from "@/components/feedback/table-loading-state";
 import { FilterChip } from "@/components/shared/filter-chip";
 import { PaginationControls } from "@/components/shared/pagination-controls";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
@@ -103,7 +104,7 @@ export function AdminUsersManager() {
   );
 
   if (!usersQuery.data && usersQuery.isLoading) {
-    return <LoadingState title="Loading users" description="Preparing the latest XYZ Tech Club accounts for admin review." />;
+    return <TableLoadingState title="Loading users" description="Preparing the latest XYZ Tech Club accounts for admin review." />;
   }
 
   if (usersQuery.isError) {

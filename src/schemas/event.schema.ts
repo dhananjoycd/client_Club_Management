@@ -23,7 +23,7 @@ export const eventSchema = z.object({
     return;
   }
 
-  if (value.eventType === "PAID" && value.price < MIN_PAID_EVENT_PRICE_BDT) {
+  if (value.eventType === "PAID" && value.price !== undefined && value.price < MIN_PAID_EVENT_PRICE_BDT) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["price"],
@@ -33,3 +33,4 @@ export const eventSchema = z.object({
 });
 
 export type EventSchema = z.input<typeof eventSchema>;
+

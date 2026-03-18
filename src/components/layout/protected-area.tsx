@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { LoadingState } from "@/components/feedback/loading-state";
@@ -14,9 +13,16 @@ type ProtectedAreaProps = {
   allowedRoles: string[];
 };
 
-export function ProtectedArea({ children, allowedRoles }: ProtectedAreaProps) {
+const getRedirectTarget = (pathname: string, search: string) => {
+  const currentPath = `${pathname}${search}`;
+  return `/login?redirect=${encodeURIComponent(currentPath)}`;
+};
+
+function ProtectedAreaContent({ children, allowedRoles }: ProtectedAreaProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
+  const search = searchParams.toString();
   const sessionQuery = useQuery({
     queryKey: queryKeys.auth.session,
     queryFn: authService.getSession,
@@ -30,7 +36,7 @@ export function ProtectedArea({ children, allowedRoles }: ProtectedAreaProps) {
 
     const user = sessionQuery.data?.data?.user;
     if (!user) {
-      router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
+      router.replace(getRedirectTarget(pathname, search ? `?${search}` : ""));
       return;
     }
 
@@ -38,7 +44,7 @@ export function ProtectedArea({ children, allowedRoles }: ProtectedAreaProps) {
       const fallback = user.role === "USER" || user.role === "MEMBER" ? "/account" : "/admin";
       router.replace(fallback);
     }
-  }, [allowedRoles, pathname, router, sessionQuery.data, sessionQuery.isLoading]);
+  }, [allowedRoles, pathname, router, search, sessionQuery.data, sessionQuery.isLoading]);
 
   if (sessionQuery.isLoading) {
     return <LoadingState title="Checking access" description="Verifying your session before loading this area." />;
@@ -55,3 +61,12 @@ export function ProtectedArea({ children, allowedRoles }: ProtectedAreaProps) {
 
   return <>{children}</>;
 }
+
+export function ProtectedArea({ children, allowedRoles }: ProtectedAreaProps) {
+  return (
+    <Suspense fallback={<LoadingState title="Checking access" description="Preparing this protected area." />}>
+      <ProtectedAreaContent allowedRoles={allowedRoles}>{children}</ProtectedAreaContent>
+    </Suspense>
+  );
+}
+

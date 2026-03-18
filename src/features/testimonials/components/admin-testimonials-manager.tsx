@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Search, Star } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/feedback/empty-state";
-import { LoadingState } from "@/components/feedback/loading-state";
+import { TableLoadingState } from "@/components/feedback/table-loading-state";
 import { FilterChip } from "@/components/shared/filter-chip";
 import { PaginationControls } from "@/components/shared/pagination-controls";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
@@ -121,7 +121,7 @@ export function AdminTestimonialsManager() {
   };
 
   if (!testimonialsQuery.data && testimonialsQuery.isLoading) {
-    return <LoadingState title="Loading testimonials" description="Preparing community submissions and moderation status." />;
+    return <TableLoadingState title="Loading testimonials" description="Preparing community submissions and moderation status." />;
   }
 
   if (testimonialsQuery.isError) {

@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/feedback/empty-state";
-import { LoadingState } from "@/components/feedback/loading-state";
+import { TableLoadingState } from "@/components/feedback/table-loading-state";
 import { PaginationControls } from "@/components/shared/pagination-controls";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -91,7 +91,7 @@ export function AdminCommitteeManager() {
   const paginatedSessions = sessions.slice((safeCurrentPage - 1) * COMMITTEE_SESSIONS_PER_PAGE, safeCurrentPage * COMMITTEE_SESSIONS_PER_PAGE);
 
   if (sessionsQuery.isLoading) {
-    return <LoadingState title="Loading committee sessions" description="Preparing the session-wise committee overview for the admin dashboard." />;
+    return <TableLoadingState title="Loading committee sessions" description="Preparing the session-wise committee overview for the admin dashboard." />;
   }
 
   if (sessionsQuery.isError) {

@@ -8,7 +8,8 @@ export const noticeSchema = z.object({
   title: z.string().trim().min(1, "Title is required.").max(NOTICE_TITLE_MAX_LENGTH, `Title cannot exceed ${NOTICE_TITLE_MAX_LENGTH} characters.`),
   content: z.string().trim().min(1, "Content is required.").max(NOTICE_CONTENT_MAX_LENGTH, `Content cannot exceed ${NOTICE_CONTENT_MAX_LENGTH} characters.`),
   audience: z.enum(noticeAudienceValues),
-  sendEmail: z.boolean().optional().default(false),
+  sendEmail: z.boolean(),
 });
 
 export type NoticeSchema = z.infer<typeof noticeSchema>;
+

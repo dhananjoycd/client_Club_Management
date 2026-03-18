@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/feedback/empty-state";
-import { LoadingState } from "@/components/feedback/loading-state";
+import { TableLoadingState } from "@/components/feedback/table-loading-state";
 import { FilterChip } from "@/components/shared/filter-chip";
 import { PaginationControls } from "@/components/shared/pagination-controls";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
@@ -125,7 +125,7 @@ export function AdminContactsManager() {
   };
 
   if (!contactsQuery.data && contactsQuery.isLoading) {
-    return <LoadingState title="Loading contacts" description="Preparing the admin contact inbox and the latest user requests." />;
+    return <TableLoadingState title="Loading contacts" description="Preparing the admin contact inbox and the latest user requests." />;
   }
 
   if (contactsQuery.isError) {
