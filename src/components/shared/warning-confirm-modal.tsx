@@ -1,5 +1,6 @@
 "use client";
 
+import { ReactNode } from "react";
 import { AlertTriangle } from "lucide-react";
 
 type WarningConfirmModalProps = {
@@ -9,6 +10,7 @@ type WarningConfirmModalProps = {
   confirmLabel: string;
   cancelLabel?: string;
   isLoading?: boolean;
+  children?: ReactNode;
   onConfirm: () => void;
   onCancel: () => void;
 };
@@ -20,6 +22,7 @@ export function WarningConfirmModal({
   confirmLabel,
   cancelLabel = "Go Back",
   isLoading = false,
+  children,
   onConfirm,
   onCancel,
 }: WarningConfirmModalProps) {
@@ -33,6 +36,7 @@ export function WarningConfirmModal({
         </div>
         <h3 className="mt-5 text-2xl font-semibold tracking-tight text-[var(--color-primary-strong)]">{title}</h3>
         <p className="mt-3 text-sm leading-7 text-[var(--color-muted-foreground)]">{description}</p>
+        {children ? <div className="mt-5">{children}</div> : null}
         <div className="mt-6 flex flex-col gap-3 md:flex-row">
           <button
             type="button"

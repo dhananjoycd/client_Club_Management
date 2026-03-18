@@ -16,6 +16,7 @@ const adminLinks = [
   { href: "/admin/payments", label: "Payments", allowedRoles: ["ADMIN", "SUPER_ADMIN", "EVENT_MANAGER"] },
   { href: "/admin/notices", label: "Notices", allowedRoles: ["ADMIN", "SUPER_ADMIN", "EVENT_MANAGER"] },
   { href: "/admin/testimonials", label: "Testimonials", allowedRoles: ["ADMIN", "SUPER_ADMIN"] },
+  { href: "/admin/contacts", label: "Contacts", allowedRoles: ["ADMIN", "SUPER_ADMIN"] },
   { href: "/admin/committee", label: "Committee", allowedRoles: ["SUPER_ADMIN"] },
   { href: "/admin/settings", label: "Settings", allowedRoles: ["ADMIN", "SUPER_ADMIN"] },
 ];

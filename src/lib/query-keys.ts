@@ -54,6 +54,11 @@ export const queryKeys = {
     adminSessions: ["committee", "admin", "sessions"] as const,
     eligibleMembers: ["committee", "admin", "eligible-members"] as const,
   },
+  contacts: {
+    all: ["contacts"] as const,
+    mine: ["contacts", "mine"] as const,
+    adminList: (scope: string) => ["contacts", "admin", scope] as const,
+  },
   settings: {
     detail: ["settings"] as const,
   },
