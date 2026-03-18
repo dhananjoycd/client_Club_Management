@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Facebook, Linkedin, Mail, MessageCircle } from "lucide-react";
-import { SiteCommitteeMember } from "@/types/settings.types";
+import { CommitteeDisplayMember } from "@/types/committee.types";
 
 type CommitteeMemberCardProps = {
-  member: SiteCommitteeMember;
+  member: CommitteeDisplayMember;
   compact?: boolean;
 };
 
@@ -35,13 +35,13 @@ export function CommitteeMemberCard({ member }: CommitteeMemberCardProps) {
   ].filter(Boolean) as Array<{ href: string; label: string; icon: typeof Facebook }>;
 
   return (
-    <article className="surface-card flex h-full flex-col items-center rounded-[1.75rem] p-5 text-center sm:p-6">
+    <article className="flex h-full flex-col items-center rounded-[1.75rem] border border-[var(--color-border)] bg-white/70 p-5 text-center transition duration-200 hover:-translate-y-1 hover:border-[var(--color-accent)] hover:bg-white hover:shadow-[0_20px_40px_rgba(15,23,42,0.08)] sm:p-6">
       {member.photoUrl ? (
-        <div className="relative h-20 w-20 overflow-hidden rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-page)] shadow-sm">
+        <div className="relative h-20 w-20 overflow-hidden rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-page)]">
           <Image src={member.photoUrl} alt={member.name} fill className="object-cover" sizes="80px" />
         </div>
       ) : (
-        <div className="flex h-20 w-20 items-center justify-center rounded-[1.5rem] bg-[linear-gradient(135deg,var(--color-primary-soft),var(--color-accent-soft))] text-2xl font-semibold text-[var(--color-primary-strong)] shadow-sm">
+        <div className="flex h-20 w-20 items-center justify-center rounded-[1.5rem] bg-[linear-gradient(135deg,var(--color-primary-soft),var(--color-accent-soft))] text-2xl font-semibold text-[var(--color-primary-strong)]">
           {initials}
         </div>
       )}

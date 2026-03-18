@@ -52,7 +52,7 @@ export function PublicFooter() {
             <Link href="/about" className="transition hover:text-[var(--color-accent)]">About</Link>
             <Link href="/events" className="transition hover:text-[var(--color-accent)]">Events</Link>
             {!isRestrictedUser ? <Link href="/apply" className="transition hover:text-[var(--color-accent)]">Apply</Link> : null}
-            <Link href="/notices" className="transition hover:text-[var(--color-accent)]">Resources</Link>
+            <Link href="/notices" className="transition hover:text-[var(--color-accent)]">Notices</Link>
             <Link href="/committee" className="transition hover:text-[var(--color-accent)]">Committee</Link>
           </div>
         </div>
@@ -61,7 +61,7 @@ export function PublicFooter() {
           <p className="font-semibold text-white">Connect</p>
           <p>{email}</p>
           <p>{phone}</p>
-          <p>Main campus activity zone, member and event updates available through the platform.</p>
+          <p>XYZ Tech Club connects students through practical events, teamwork, and campus tech culture.</p>
           <div className="flex flex-wrap gap-3 pt-2">
             {activeSocialLinks.length > 0 ? (
               activeSocialLinks.map(([label, href]) => {

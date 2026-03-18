@@ -22,12 +22,16 @@ import {
 import { EventItem } from "@/types/event.types";
 import { NoticeItem } from "@/types/notice.types";
 import { truncateText } from "@/lib/text";
-import { SiteCommitteeMember, SiteFaqItem, SiteImpactStats, SiteSettings, SiteTestimonial } from "@/types/settings.types";
+import { CommitteeDisplayMember } from "@/types/committee.types";
+import { SiteFaqItem, SiteImpactStats, SiteSettings } from "@/types/settings.types";
+import { PublicTestimonial } from "@/types/testimonial.types";
 
 type HomePageViewProps = {
   settings: SiteSettings | null;
   featuredEvents: EventItem[];
   latestNotices: NoticeItem[];
+  testimonials: PublicTestimonial[];
+  committeeMembers: CommitteeDisplayMember[];
 };
 
 type HeroSlide = {
@@ -89,7 +93,7 @@ const defaultHeroSlides: HeroSlide[] = [
   },
 ];
 
-export function HomePageView({ settings, featuredEvents, latestNotices }: HomePageViewProps) {
+export function HomePageView({ settings, featuredEvents, latestNotices, testimonials, committeeMembers }: HomePageViewProps) {
   const [activeSlide, setActiveSlide] = useState(0);
   const organizationName = settings?.organizationName?.trim() || "XYZ Tech Club";
   const aboutText =
@@ -101,9 +105,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
   const configuredHeroSlides = settings?.heroSlides ?? [];
   const configuredImpactStats = settings?.impactStats ?? {};
   const configuredFaqs = settings?.faqs ?? [];
-  const configuredTestimonials = settings?.testimonials ?? [];
-  const configuredCommitteeMembers = settings?.committeeMembers ?? [];
-  const committeeGroupPhotoUrl = settings?.committeeGroupPhotoUrl?.trim() || defaultCommitteeGroupPhotoUrl;
+  const committeeGroupPhotoUrl = defaultCommitteeGroupPhotoUrl;
   const aboutSectionPhotoUrl = settings?.aboutSectionPhotoUrl?.trim() || defaultAboutSectionPhotoUrl;
   const heroSlides = defaultHeroSlides.map((slide, index) => ({
     ...slide,
@@ -113,8 +115,8 @@ export function HomePageView({ settings, featuredEvents, latestNotices }: HomePa
     tag: configuredHeroSlides[index]?.tag?.trim() || slide.tag,
   }));
   const displayFaqs: SiteFaqItem[] = configuredFaqs.length > 0 ? configuredFaqs : faqItems;
-  const displayTestimonials: SiteTestimonial[] = configuredTestimonials.length > 0 ? configuredTestimonials : testimonialItems;
-  const displayCommitteeMembers: SiteCommitteeMember[] = configuredCommitteeMembers.length > 0 ? configuredCommitteeMembers : committeePreview;
+  const displayTestimonials = testimonials.length > 0 ? testimonials.map((item) => ({ ...item, author: item.authorName })) : testimonialItems;
+  const displayCommitteeMembers = committeeMembers.length > 0 ? committeeMembers : committeePreview;
   const impactStats = [
     {
       label: "Active members",

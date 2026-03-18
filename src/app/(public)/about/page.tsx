@@ -7,22 +7,27 @@ import { PageHeader } from "@/components/shared/page-header";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
 import { MembershipApplyCta } from "@/components/shared/membership-apply-cta";
 import { committeePreview } from "@/features/home/home-content";
+import { committeeService } from "@/services/committee.service";
 import { settingsService } from "@/services/settings.service";
-import { SiteCommitteeMember, SiteSettings } from "@/types/settings.types";
+import { CommitteeDisplayMember } from "@/types/committee.types";
+import { SiteSettings } from "@/types/settings.types";
 
 const defaultAboutSectionPhotoUrl = "https://www.faulkner.edu/wp-content/uploads/college-students-working-on-a-group-project-Faulkner-University.jpg";
 
-async function getAboutPageData(): Promise<SiteSettings | null> {
+async function getAboutPageData(): Promise<{ settings: SiteSettings | null; committeeMembers: CommitteeDisplayMember[] }> {
   try {
-    const result = await settingsService.getSettings();
-    return result.data ?? null;
+    const [settingsResult, committeeResult] = await Promise.allSettled([settingsService.getSettings(), committeeService.getPublicCommittee()]);
+    return {
+      settings: settingsResult.status === "fulfilled" ? settingsResult.value.data ?? null : null,
+      committeeMembers: committeeResult.status === "fulfilled" ? committeeResult.value.data?.activeSession?.assignments ?? [] : committeePreview,
+    };
   } catch {
-    return null;
+    return { settings: null, committeeMembers: committeePreview };
   }
 }
 
 export default async function AboutPage() {
-  const settings = await getAboutPageData();
+  const { settings, committeeMembers } = await getAboutPageData();
   const organizationName = settings?.organizationName?.trim() || "XYZ Tech Club";
   const aboutStory =
     settings?.aboutText?.trim() ||
@@ -37,7 +42,6 @@ export default async function AboutPage() {
     settings?.aboutCollaboration?.trim() ||
     `The club grows through campus collaboration, faculty support, mentor guidance, and peer coordination across events, sessions, and projects.`;
   const aboutSectionPhotoUrl = settings?.aboutSectionPhotoUrl?.trim() || defaultAboutSectionPhotoUrl;
-  const committeeMembers: SiteCommitteeMember[] = settings?.committeeMembers?.length ? settings.committeeMembers : committeePreview;
   const impactStats = settings?.impactStats;
   const impactItems = [
     { label: "Active members", value: impactStats?.activeMembers ?? 500 },

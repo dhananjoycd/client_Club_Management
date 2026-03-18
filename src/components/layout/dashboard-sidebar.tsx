@@ -4,11 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
+import { authService } from "@/services/auth.service";
 
 type NavigationLink = {
   href: string;
   label: string;
+  allowedRoles?: string[];
 };
 
 type DashboardSidebarProps = {
@@ -18,8 +22,22 @@ type DashboardSidebarProps = {
 
 export function DashboardSidebar({ heading, links }: DashboardSidebarProps) {
   const pathname = usePathname();
-  const activeLink = useMemo(() => links.find((link) => pathname === link.href), [links, pathname]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const sessionQuery = useQuery({
+    queryKey: queryKeys.auth.session,
+    queryFn: authService.getSession,
+    retry: false,
+  });
+
+  const userRole = sessionQuery.data?.data?.user?.role;
+  const visibleLinks = useMemo(
+    () => links.filter((link) => !link.allowedRoles || (userRole ? link.allowedRoles.includes(userRole) : true)),
+    [links, userRole],
+  );
+  const activeLink = useMemo(
+    () => visibleLinks.find((link) => pathname === link.href),
+    [visibleLinks, pathname],
+  );
 
   return (
     <aside className="sticky top-[4.75rem] z-20 w-full border-b border-[var(--color-border)] bg-white lg:top-[4.75rem] lg:h-[calc(100vh-4.75rem)] lg:w-72 lg:self-start lg:overflow-y-auto lg:border-b-0 lg:border-r">
@@ -31,7 +49,7 @@ export function DashboardSidebar({ heading, links }: DashboardSidebarProps) {
           </div>
 
           <nav className="mt-6 grid gap-2">
-            {links.map((link) => {
+            {visibleLinks.map((link) => {
               const isActive = pathname === link.href;
 
               return (
@@ -69,7 +87,7 @@ export function DashboardSidebar({ heading, links }: DashboardSidebarProps) {
 
           {isMobileMenuOpen ? (
             <nav className="mt-3 grid gap-2">
-              {links.map((link) => {
+              {visibleLinks.map((link) => {
                 const isActive = pathname === link.href;
 
                 return (

@@ -5,6 +5,7 @@ import { MotionPage } from "@/components/motion/motion-shell";
 type NavigationLink = {
   href: string;
   label: string;
+  allowedRoles?: string[];
 };
 
 type DashboardShellProps = {

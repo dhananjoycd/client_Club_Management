@@ -71,6 +71,7 @@ export function PublicNavbar() {
   const accountProfile = accountProfileQuery.data?.data;
   const isNavbarAuthLoading = sessionQuery.isLoading || (Boolean(user) && (accountProfileQuery.isLoading || applicationQuery.isLoading));
   const organizationName = settings?.organizationName?.trim() || "XYZ Tech Club";
+  const logoImage = settings?.logoUrl?.trim() || null;
   const dashboardHref = user?.role === "USER" || user?.role === "MEMBER" ? "/account" : user ? "/admin" : null;
   const restrictedRoles = new Set(["MEMBER", "ADMIN", "SUPER_ADMIN", "EVENT_MANAGER"]);
   const latestApplication = [...(applicationQuery.data?.data?.result ?? [])]
@@ -122,8 +123,14 @@ export function PublicNavbar() {
     <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[rgba(249,251,254,0.78)] backdrop-blur-xl supports-[backdrop-filter]:bg-[rgba(249,251,254,0.68)]">
       <div className="mx-auto flex min-h-[4.75rem] w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-3 text-[var(--color-primary-strong)] transition-transform duration-200 hover:scale-[1.01]">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,var(--color-primary-strong),var(--color-primary))] text-sm font-semibold text-white shadow-[0_16px_32px_rgba(15,76,189,0.24)]">
-            {organizationName.slice(0, 2).toUpperCase()}
+          <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-[linear-gradient(135deg,var(--color-primary-strong),var(--color-primary))] text-sm font-semibold text-white shadow-[0_16px_32px_rgba(15,76,189,0.24)]">
+            {logoImage ? (
+              <span className="relative block h-full w-full">
+                <Image src={logoImage} alt={`${organizationName} logo`} fill className="object-cover" sizes="44px" unoptimized />
+              </span>
+            ) : (
+              organizationName.slice(0, 2).toUpperCase()
+            )}
           </span>
           <span className="hidden min-w-0 text-left sm:block">
             <span className="block text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--color-secondary)]">Build / Learn / Lead</span>

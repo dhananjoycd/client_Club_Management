@@ -1,0 +1,18 @@
+Test করার জন্য এই 3টা demo data use করতে পারো:
+
+**Slide 1**
+- Image URL: `https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=80`
+- Title: `Build practical tech skills with XYZ Tech Club`
+- Description: `Join workshops, coding sessions, and collaborative campus activities that help students learn by building together.`
+
+**Slide 2**
+- Image URL: `https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=80`
+- Title: `Learn, collaborate, and grow with your campus tech community`
+- Description: `From project teamwork to peer learning and club events, XYZ Tech Club creates a space where students can explore technology with confidence.`
+
+**Slide 3**
+- Image URL: `https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1400&q=80`
+- Title: `Turn ideas into real projects and events`
+- Description: `Take part in seminars, hackathons, and practical sessions that connect creativity, teamwork, and real campus impact.`
+
+চাইলে আমি এগুলো আরও short, more premium, বা Bangla-English mixed style-এও rewrite করে দিতে পারি।

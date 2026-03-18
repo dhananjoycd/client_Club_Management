@@ -38,6 +38,22 @@ export const queryKeys = {
   registrations: {
     all: ["registrations"] as const,
   },
+  payments: {
+    all: ["payments"] as const,
+    list: (scope: string) => ["payments", scope] as const,
+  },
+  testimonials: {
+    all: ["testimonials"] as const,
+    publicList: ["testimonials", "public"] as const,
+    mine: ["testimonials", "mine"] as const,
+    adminList: (scope: string) => ["testimonials", "admin", scope] as const,
+  },
+  committee: {
+    all: ["committee"] as const,
+    publicData: ["committee", "public"] as const,
+    adminSessions: ["committee", "admin", "sessions"] as const,
+    eligibleMembers: ["committee", "admin", "eligible-members"] as const,
+  },
   settings: {
     detail: ["settings"] as const,
   },

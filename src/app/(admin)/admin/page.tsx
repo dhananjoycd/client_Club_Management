@@ -1,5 +1,10 @@
+import { ProtectedArea } from "@/components/layout/protected-area";
 import { AdminDashboardOverview } from "@/features/dashboard/components/admin-dashboard-overview";
 
 export default function AdminOverviewPage() {
-  return <AdminDashboardOverview />;
+  return (
+    <ProtectedArea allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
+      <AdminDashboardOverview />
+    </ProtectedArea>
+  );
 }
