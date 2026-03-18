@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -14,12 +14,11 @@ import { queryKeys } from "@/lib/query-keys";
 import { registerSchema } from "@/schemas/auth.schema";
 import { authService } from "@/services/auth.service";
 import { RegisterPayload } from "@/types/auth.types";
+import { AuthGoogleButton } from "./auth-google-button";
 
 export function RegisterForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
-  const redirectTo = searchParams.get("redirect");
   const sessionQuery = useQuery({ queryKey: queryKeys.auth.session, queryFn: authService.getSession, retry: false });
   const {
     register,
@@ -32,10 +31,10 @@ export function RegisterForm() {
 
   const registerMutation = useMutation({
     mutationFn: authService.register,
-    onSuccess: async (response) => {
+    onSuccess: async (_response, variables) => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.auth.session });
-      toast.success(response.message ?? "Registration successful.");
-      router.push(redirectTo || "/account");
+      toast.success("Account created. Check your email to verify your address.");
+      router.push(`/verify-email?email=${encodeURIComponent(variables.email)}&sent=1`);
     },
     onError: (error) => toast.error(getApiErrorMessage(error, "Registration failed. Please try again.")),
   });
@@ -71,11 +70,17 @@ export function RegisterForm() {
         <FormActions
           isSubmitting={registerMutation.isPending}
           submitLabel="Create account"
-          helperText="Create your account first. You can complete your profile later before applying or joining events."
+          helperText="Create your account first, then verify your email before signing in and joining member features."
           secondaryAction={
-            <p className="text-sm text-[var(--color-muted-foreground)]">
-              Already have an account? <Link href="/login" className="font-semibold text-[var(--color-secondary)] transition hover:text-[var(--color-primary)]">Login here</Link>
-            </p>
+            <div className="grid gap-4 pt-2">
+              <p className="text-sm text-[var(--color-muted-foreground)]">
+                Already have an account? <Link href="/login" className="font-semibold text-[var(--color-secondary)] transition hover:text-[var(--color-primary)]">Login here</Link>
+              </p>
+              <div className="grid gap-4 border-t border-[var(--color-border)] pt-4">
+                <div className="text-center text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-muted-foreground)]">or sign up with Google</div>
+                <AuthGoogleButton label="Sign up with Google" />
+              </div>
+            </div>
           }
         />
       </form>
