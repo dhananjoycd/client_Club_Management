@@ -177,40 +177,42 @@ export function PublicNavbar() {
 
       {isOpen ? (
         <div className="border-t border-[var(--color-border)] bg-[rgba(249,251,254,0.96)] md:hidden">
-          <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6">
-            <nav className="grid gap-2">
-              {publicLinks.map((link) => {
-                const isAnchorLink = link.href.startsWith("/#");
-                const linkHash = isAnchorLink ? link.href.slice(1) : "";
-                const isActive = isAnchorLink ? pathname === "/" && activeHash === linkHash : pathname === link.href;
+          <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-4 sm:px-6">
+            <nav className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/80 p-2">
+              <div className="grid gap-1.5">
+                {publicLinks.map((link) => {
+                  const isAnchorLink = link.href.startsWith("/#");
+                  const linkHash = isAnchorLink ? link.href.slice(1) : "";
+                  const isActive = isAnchorLink ? pathname === "/" && activeHash === linkHash : pathname === link.href;
 
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setIsOpen(false)}
-                    className={cn(
-                      "surface-card rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200",
-                      isActive
-                        ? "border-[var(--color-accent)] bg-white text-[var(--color-primary-strong)]"
-                        : "text-[var(--color-muted-foreground)]",
-                    )}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setIsOpen(false)}
+                      className={cn(
+                        "rounded-[1.1rem] px-4 py-2.5 text-sm font-medium transition-all duration-200",
+                        isActive
+                          ? "border border-[var(--color-accent)] bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]"
+                          : "border border-transparent text-[var(--color-muted-foreground)] hover:border-[var(--color-border)] hover:bg-[var(--color-primary-soft)]/40 hover:text-[var(--color-primary-strong)]",
+                      )}
+                    >
+                      {link.label}
+                    </Link>
+                  );
+                })}
+              </div>
             </nav>
 
             {isNavbarAuthLoading ? (
-              <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-white/80 p-4" aria-hidden="true">
+              <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/80 p-4" aria-hidden="true">
                 <div className="flex items-center gap-3">
                   <div className="h-11 w-11 animate-pulse rounded-full border border-[var(--color-border)] bg-white/80" />
                   <div className="h-11 flex-1 animate-pulse rounded-2xl border border-[var(--color-border)] bg-white/80" />
                 </div>
               </div>
             ) : (
-              <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-white/80 p-4">
+              <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/80 p-4">
                 <div className="flex items-center gap-3">
                   {avatarButton ? (
                     avatarButton
@@ -224,39 +226,40 @@ export function PublicNavbar() {
                       {user ? accountProfile?.name ?? user.name ?? user.email : "Guest access"}
                     </p>
                     <p className="mt-1 text-xs uppercase tracking-[0.16em] text-[var(--color-muted-foreground)]">
-                      {user ? "Account actions" : "Public access"}
+                      {user ? "Account actions" : "Quick access"}
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                  {user && dashboardHref ? (
-                    <Link
-                      href={dashboardHref === "/account" ? "/account/profile" : dashboardHref}
-                      onClick={() => setIsOpen(false)}
-                      className="secondary-button h-11 px-5 text-sm"
-                    >
-                      Profile
-                    </Link>
-                  ) : null}
-                  {!user ? (
-                    <Link href="/login" onClick={() => setIsOpen(false)} className="secondary-button h-11 px-5 text-sm">
-                      Login
-                    </Link>
-                  ) : null}
-                  {!user ? (
-                    <Link href="/register" onClick={() => setIsOpen(false)} className="secondary-button h-11 px-5 text-sm">
-                      Register
-                    </Link>
-                  ) : null}
-                  {showJoinNow ? (
-                    <Link href="/apply" onClick={() => setIsOpen(false)} className="primary-button h-11 px-5 text-sm">
-                      Join Now
-                    </Link>
-                  ) : null}
+                <div className="mt-4 grid gap-2">
                   {user ? (
-                    <Link href="/notices" onClick={() => setIsOpen(false)} className="secondary-button h-11 px-5 text-sm">
-                      Notices
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {dashboardHref ? (
+                        <Link
+                          href={dashboardHref === "/account" ? "/account/profile" : dashboardHref}
+                          onClick={() => setIsOpen(false)}
+                          className="secondary-button h-10 px-4 text-sm"
+                        >
+                          Profile
+                        </Link>
+                      ) : null}
+                      <Link href="/notices" onClick={() => setIsOpen(false)} className="secondary-button h-10 px-4 text-sm">
+                        Notices
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <Link href="/login" onClick={() => setIsOpen(false)} className="secondary-button h-10 px-4 text-sm">
+                        Login
+                      </Link>
+                      <Link href="/register" onClick={() => setIsOpen(false)} className="secondary-button h-10 px-4 text-sm">
+                        Register
+                      </Link>
+                    </div>
+                  )}
+                  {showJoinNow ? (
+                    <Link href="/apply" onClick={() => setIsOpen(false)} className="primary-button h-10 px-4 text-sm">
+                      Join Now
                     </Link>
                   ) : null}
                 </div>

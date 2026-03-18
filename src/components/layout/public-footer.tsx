@@ -39,10 +39,17 @@ export function PublicFooter() {
     <footer className="mt-12 border-t border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,#091429,#071020)] text-[rgba(237,244,255,0.92)] sm:mt-16">
       <div className="mx-auto grid w-full max-w-7xl grid-cols-2 gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1.2fr_0.8fr_0.9fr] lg:px-8 lg:py-14">
         <div className="col-span-2 space-y-4 lg:col-span-1">
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--color-accent)]">Club Portal</p>
-          <h2 className="max-w-md text-3xl font-semibold tracking-tight text-white">A cleaner digital home for events, members, and club activity.</h2>
-          <p className="max-w-xl text-sm leading-7 text-[rgba(226,232,240,0.72)]">
-            XYZ Tech Club connects students through practical events, teamwork, and campus tech culture.
+          <div className="inline-flex items-center rounded-full border border-[rgba(125,211,252,0.28)] bg-[rgba(125,211,252,0.08)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--color-accent)]">
+            Club Portal
+          </div>
+          <div className="space-y-3">
+            <h2 className="max-w-lg text-[clamp(2rem,4vw,3rem)] font-semibold leading-[1.05] tracking-tight text-white">
+              One place for club events, updates, and member life.
+            </h2>
+            <div className="h-1 w-20 rounded-full bg-[linear-gradient(90deg,var(--color-accent),rgba(125,211,252,0.15))]" />
+          </div>
+          <p className="max-w-xl text-sm leading-7 text-[rgba(226,232,240,0.72)] sm:text-[15px]">
+            Follow club notices, explore events, and stay connected with the people and activity shaping XYZ Tech Club on campus.
           </p>
         </div>
 

@@ -17,7 +17,13 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { WarningConfirmModal } from "@/components/shared/warning-confirm-modal";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { queryKeys } from "@/lib/query-keys";
-import { noticeAudienceValues, noticeSchema, NoticeSchema } from "@/schemas/notice.schema";
+import {
+  NOTICE_CONTENT_MAX_LENGTH,
+  NOTICE_TITLE_MAX_LENGTH,
+  noticeAudienceValues,
+  noticeSchema,
+  NoticeSchema,
+} from "@/schemas/notice.schema";
 import { noticeService } from "@/services/notice.service";
 
 const audienceLabels: Record<(typeof noticeAudienceValues)[number], string> = {
@@ -130,6 +136,10 @@ export function AdminNoticesManager() {
 
   const isCreating = createMutation.isPending;
   const isEditing = updateMutation.isPending;
+  const createTitleLength = createForm.watch("title")?.length ?? 0;
+  const createContentLength = createForm.watch("content")?.length ?? 0;
+  const editTitleLength = editForm.watch("title")?.length ?? 0;
+  const editContentLength = editForm.watch("content")?.length ?? 0;
 
   const handleCreateNotice: SubmitHandler<NoticeSchema> = (values) => {
     createMutation.mutate(values);
@@ -168,14 +178,22 @@ export function AdminNoticesManager() {
                   label="Title"
                   error={createForm.formState.errors.title}
                   disabled={isCreating}
+                  maxLength={NOTICE_TITLE_MAX_LENGTH}
                   {...createForm.register("title")}
                 />
+                <p className="text-right text-xs text-[var(--color-muted-foreground)]">
+                  {createTitleLength}/{NOTICE_TITLE_MAX_LENGTH}
+                </p>
                 <FormTextarea
                   label="Content"
                   error={createForm.formState.errors.content as never}
                   disabled={isCreating}
+                  maxLength={NOTICE_CONTENT_MAX_LENGTH}
                   {...createForm.register("content")}
                 />
+                <p className="text-right text-xs text-[var(--color-muted-foreground)]">
+                  {createContentLength}/{NOTICE_CONTENT_MAX_LENGTH}
+                </p>
                 <label className="grid gap-2">
                   <span className="text-sm font-medium text-[var(--color-primary)]">Audience</span>
                   <select className="input-base h-11 px-4 text-sm" disabled={isCreating} {...createForm.register("audience")}>
@@ -327,14 +345,22 @@ export function AdminNoticesManager() {
                 label="Title"
                 error={editForm.formState.errors.title}
                 disabled={isEditing}
+                maxLength={NOTICE_TITLE_MAX_LENGTH}
                 {...editForm.register("title")}
               />
+              <p className="text-right text-xs text-[var(--color-muted-foreground)]">
+                {editTitleLength}/{NOTICE_TITLE_MAX_LENGTH}
+              </p>
               <FormTextarea
                 label="Content"
                 error={editForm.formState.errors.content as never}
                 disabled={isEditing}
+                maxLength={NOTICE_CONTENT_MAX_LENGTH}
                 {...editForm.register("content")}
               />
+              <p className="text-right text-xs text-[var(--color-muted-foreground)]">
+                {editContentLength}/{NOTICE_CONTENT_MAX_LENGTH}
+              </p>
               <label className="grid gap-2">
                 <span className="text-sm font-medium text-[var(--color-primary)]">Audience</span>
                 <select className="input-base h-11 px-4 text-sm" disabled={isEditing} {...editForm.register("audience")}>

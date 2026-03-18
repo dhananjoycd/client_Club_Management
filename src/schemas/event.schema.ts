@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const eventCategories = ["Workshop", "Seminar", "Webinar", "Hackathon", "Competition", "Tech Talk", "Bootcamp", "Meetup"] as const;
+export const MIN_PAID_EVENT_PRICE_BDT = 100;
 
 export const eventSchema = z.object({
   title: z.string().trim().min(1, "Title is required."),
@@ -19,6 +20,15 @@ export const eventSchema = z.object({
 }).superRefine((value, ctx) => {
   if (value.eventType === "PAID" && (!value.price || value.price <= 0)) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["price"], message: "Price is required for paid events." });
+    return;
+  }
+
+  if (value.eventType === "PAID" && value.price < MIN_PAID_EVENT_PRICE_BDT) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["price"],
+      message: `Paid events must cost at least ${MIN_PAID_EVENT_PRICE_BDT} BDT.`,
+    });
   }
 });
 

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, CalendarDays, ChevronRight, Mail, MapPin, Phone, Sparkles, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, BellRing, CalendarDays, ChevronRight, LayoutDashboard, Mail, MapPin, Phone, ShieldCheck, Sparkles, UserPlus, Users, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { StatCard } from "@/components/cards/stat-card";
 import { CountUpNumber } from "@/components/motion/count-up-number";
@@ -41,6 +41,16 @@ type HeroSlide = {
 };
 
 const trustItems = ["Student community", "Workshop-led learning", "Project-based collaboration", "Event-driven growth"];
+const HOME_POPUP_VERSION = "1.0.0";
+const HOME_POPUP_STORAGE_KEY = `homepage-popup-seen-v${HOME_POPUP_VERSION}`;
+
+const homePopupFeatures = [
+  { icon: CalendarDays, text: "Explore upcoming club events" },
+  { icon: UserPlus, text: "Apply for membership online" },
+  { icon: BellRing, text: "Read notices and announcements" },
+  { icon: Users, text: "Manage profile and registrations" },
+  { icon: LayoutDashboard, text: "Access role-based admin and member dashboards" },
+];
 
 const defaultCommitteeGroupPhotoUrl = "https://media.istockphoto.com/id/1400051391/photo/portrait-of-successful-team-at-the-office.jpg?s=612x612&w=0&k=20&c=-JPTGPOpKyIgvFymzYRg1XecuUJsXgdY0k5DeDMBi30=";
 const defaultAboutSectionPhotoUrl = "https://www.faulkner.edu/wp-content/uploads/college-students-working-on-a-group-project-Faulkner-University.jpg";
@@ -94,6 +104,7 @@ const defaultHeroSlides: HeroSlide[] = [
 
 export function HomePageView({ settings, featuredEvents, latestNotices, testimonials, committeeMembers }: HomePageViewProps) {
   const [activeSlide, setActiveSlide] = useState(0);
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const organizationName = settings?.organizationName?.trim() || "XYZ Tech Club";
   const aboutText =
     settings?.aboutText?.trim() ||
@@ -147,6 +158,14 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
   const marqueeLoop = [...marqueeItems, ...marqueeItems];
 
   useEffect(() => {
+    const hasSeenPopup = window.localStorage.getItem(HOME_POPUP_STORAGE_KEY);
+
+    if (!hasSeenPopup) {
+      setShowWelcomePopup(true);
+    }
+  }, []);
+
+  useEffect(() => {
     const intervalId = window.setInterval(() => {
       setActiveSlide((current) => (current + 1) % heroSlides.length);
     }, 4500);
@@ -154,10 +173,86 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
     return () => window.clearInterval(intervalId);
   }, [heroSlides.length]);
 
+  useEffect(() => {
+    if (!showWelcomePopup) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [showWelcomePopup]);
+
+  const dismissWelcomePopup = () => {
+    window.localStorage.setItem(HOME_POPUP_STORAGE_KEY, "true");
+    setShowWelcomePopup(false);
+  };
+
   const currentSlide = heroSlides[activeSlide];
 
   return (
-    <main className="text-[var(--color-foreground)]">
+    <>
+      {showWelcomePopup ? (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/55 px-4 py-6 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="home-welcome-popup-title">
+          <div className="relative w-full max-w-2xl overflow-hidden rounded-[2rem] border border-[rgba(125,211,252,0.24)] bg-[linear-gradient(160deg,rgba(255,255,255,0.98),rgba(240,249,255,0.98))] shadow-[0_30px_80px_rgba(8,39,90,0.28)]">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.18),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(15,76,189,0.12),transparent_24%)]" />
+            <div className="relative p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-3">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-[rgba(14,165,233,0.18)] bg-[rgba(14,165,233,0.1)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-secondary)]">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    What&apos;s new
+                  </span>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h2 id="home-welcome-popup-title" className="text-2xl font-semibold tracking-tight text-[var(--color-primary-strong)] sm:text-3xl">Welcome to XYZ Tech Club</h2>
+                    <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-primary)]">
+                      <ShieldCheck className="h-3.5 w-3.5" />
+                      Version {HOME_POPUP_VERSION}
+                    </span>
+                  </div>
+                  <p className="max-w-2xl text-sm leading-7 text-[var(--color-muted-foreground)] sm:text-base">What you can do in Version {HOME_POPUP_VERSION}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={dismissWelcomePopup}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-white/80 text-[var(--color-primary)] transition hover:border-[var(--color-accent)] hover:bg-white"
+                  aria-label="Close welcome popup"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="mt-6 grid gap-3">
+                {homePopupFeatures.map((item) => {
+                  const Icon = item.icon;
+
+                  return (
+                    <div key={item.text} className="flex items-start gap-3 rounded-[1.25rem] border border-[var(--color-border)] bg-white/70 px-4 py-3">
+                      <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-accent-soft)] text-[var(--color-secondary)]">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-[var(--color-primary-strong)] sm:text-[15px]">{item.text}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 flex flex-col gap-4 border-t border-[var(--color-border)] pt-5 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-[var(--color-muted-foreground)]">This message appears only on your first visit.</p>
+                <button type="button" onClick={dismissWelcomePopup} className="primary-button inline-flex h-11 items-center gap-2 px-5 text-sm">
+                  Explore now
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <main className="text-[var(--color-foreground)]">
       <section className="border-b border-[rgba(14,165,183,0.22)] bg-[linear-gradient(90deg,#0b2f6f,#0f4cbd,#0ea5b7)] text-white shadow-[0_10px_30px_rgba(15,76,189,0.18)]">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:gap-6 lg:px-8">
           <div className="flex shrink-0 items-center gap-3">
@@ -651,6 +746,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
         </section>
       </div>
     </main>
+    </>
   );
 }
 

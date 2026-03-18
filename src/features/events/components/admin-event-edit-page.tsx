@@ -16,7 +16,7 @@ import { LoadingState } from "@/components/feedback/loading-state";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { queryKeys } from "@/lib/query-keys";
-import { eventSchema, EventSchema } from "@/schemas/event.schema";
+import { eventSchema, EventSchema, MIN_PAID_EVENT_PRICE_BDT } from "@/schemas/event.schema";
 import { eventService } from "@/services/event.service";
 import { eventCategories } from "@/types/event.types";
 
@@ -97,10 +97,17 @@ function EventFormFields({
           step="0.01"
           error={errors.price as never}
           disabled={disabled || eventType !== "PAID"}
+          min={eventType === "PAID" ? MIN_PAID_EVENT_PRICE_BDT : 0}
+          placeholder={eventType === "PAID" ? `Minimum ${MIN_PAID_EVENT_PRICE_BDT} BDT` : "0.00"}
           {...register("price", { valueAsNumber: true })}
         />
         <FormField label="Currency" value="BDT" disabled readOnly />
       </div>
+      {eventType === "PAID" ? (
+        <p className="text-sm text-[var(--color-muted-foreground)]">
+          Paid events must be priced at least {MIN_PAID_EVENT_PRICE_BDT} BDT.
+        </p>
+      ) : null}
       <FormField label="Event image URL" error={errors.imageUrl} disabled={disabled} {...register("imageUrl")} />
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="flex items-center gap-3 rounded-[1rem] border border-[var(--color-border)] bg-white/70 px-4 py-3 text-sm font-medium text-[var(--color-primary-strong)]">
