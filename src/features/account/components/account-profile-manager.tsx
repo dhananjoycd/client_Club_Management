@@ -45,6 +45,7 @@ export function AccountProfileManager({ showRegistrations = true }: AccountProfi
   const queryClient = useQueryClient();
   const redirectTo = searchParams.get("redirect");
   const [activeRegistrationFilter, setActiveRegistrationFilter] = React.useState<RegistrationFilter>("ALL");
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
   const profileQuery = useQuery({ queryKey: queryKeys.account.profile, queryFn: accountService.getProfile, retry: false });
   const profile = profileQuery.data?.data;
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ProfileSchema>({
@@ -77,6 +78,7 @@ export function AccountProfileManager({ showRegistrations = true }: AccountProfi
         queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.member }),
         queryClient.invalidateQueries({ queryKey: queryKeys.registrations.all }),
       ]);
+      setIsEditModalOpen(false);
       if (redirectTo && response.data?.profileComplete) {
         router.push(redirectTo);
       }
@@ -90,20 +92,25 @@ export function AccountProfileManager({ showRegistrations = true }: AccountProfi
 
   const filteredRegistrations = profile.registrations.filter((registration) => matchesRegistrationFilter(registration, activeRegistrationFilter));
   const membershipFieldsLocked = profile.membershipFieldsLocked;
+  const roleLabel = profile.role.replace(/_/g, " ").toLowerCase().replace(/(^|\s)\S/g, (char) => char.toUpperCase());
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1.12fr_0.88fr]">
+    <div className="grid gap-6">
       <SectionWrapper title="My Profile" description="Keep your account details complete so events can auto-fill registration data.">
-        {!profile.profileComplete ? (
-          <div className="mb-5 rounded-[1.5rem] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-            Missing fields: {profile.missingFields.join(", ")}. Complete these before applying for membership or registering for an event.
+        <div className="mb-5">
+          <div className="max-w-2xl">
+            {!profile.profileComplete ? (
+              <div className="rounded-[1.5rem] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                Missing fields: {profile.missingFields.join(", ")}. Complete these before applying for membership or registering for an event.
+              </div>
+            ) : (
+              <div className="rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+                Your profile is event-ready. Registration forms can now use your saved account data automatically.
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="mb-5 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-            Your profile is event-ready. Registration forms can now use your saved account data automatically.
-          </div>
-        )}
-        <div className="grid gap-4 md:grid-cols-2">
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {[["Name", profile.name ?? "Not provided"], ["Email", profile.email], ["Phone", profile.phone ?? "Not provided"], ["Session", profile.academicSession ?? "Not provided"], ["Department", profile.department ?? "Not provided"], ["Student ID", profile.studentId ?? "Not provided"], ["District", profile.district ?? "Not provided"], ["Role", profile.role]].map(([label, value]) => (
             <div key={label} className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-page)] p-5">
               <p className="text-sm font-medium text-[var(--color-muted-foreground)]">{label}</p>
@@ -140,51 +147,118 @@ export function AccountProfileManager({ showRegistrations = true }: AccountProfi
             </div>
           ) : null}
         </div>
+        <div className="mt-5 flex justify-end">
+          <button
+            type="button"
+            onClick={() => setIsEditModalOpen(true)}
+            className="primary-button h-11 px-5 text-sm"
+          >
+            Edit profile
+          </button>
+        </div>
       </SectionWrapper>
 
-      <SectionWrapper title="Edit profile" description="These fields are used to auto-fill event registrations after login.">
-        <form className="grid gap-4" onSubmit={handleSubmit((values) => updateMutation.mutate({
-          name: values.name,
-          phone: values.phone || undefined,
-          academicSession: values.academicSession || undefined,
-          department: values.department || undefined,
-          bio: values.bio,
-          profilePhoto: values.profilePhoto || undefined,
-          studentId: values.studentId || undefined,
-          district: values.district?.trim() ?? "",
-        }))} noValidate>
-          <FormField label="Full name" error={errors.name} disabled={updateMutation.isPending} {...register("name")} />
-          <FormField label="Email" value={profile.email} disabled />
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Phone" error={errors.phone} disabled={updateMutation.isPending || membershipFieldsLocked} {...register("phone")} />
-            <label className="grid gap-2">
-              <span className="text-sm font-medium text-[var(--color-primary-strong)]">Academic session</span>
-              <select className="input-base h-12 px-4 text-sm" disabled={updateMutation.isPending || membershipFieldsLocked} {...register("academicSession")}>
-                <option value="">Select session</option>
-                {academicSessionOptions.map((session) => (
-                  <option key={session} value={session}>
-                    {session}
-                  </option>
-                ))}
-              </select>
-              {errors.academicSession ? <span className="text-sm text-rose-600">{errors.academicSession.message}</span> : null}
-            </label>
+
+      {isEditModalOpen ? (
+        <div className="fixed inset-0 z-[110] overflow-y-auto bg-slate-950/55 px-3 py-4 backdrop-blur-sm sm:px-4 sm:py-6">
+          <div className="flex min-h-full items-center justify-center">
+            <div className="surface-card w-full max-w-4xl rounded-[2rem] border border-white/60 p-4 sm:p-6 lg:p-7">
+              <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-page)] p-4 sm:p-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="max-w-2xl">
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--color-accent)]">Edit profile</p>
+                    <h3 className="mt-2 text-xl font-semibold text-[var(--color-primary-strong)] sm:text-2xl">Update your account details</h3>
+                    <p className="mt-2 text-sm leading-6 text-[var(--color-muted-foreground)]">These fields support membership applications and event registration auto-fill across XYZ Tech Club.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditModalOpen(false)}
+                    className="secondary-button h-10 shrink-0 px-4 text-sm"
+                  >
+                    Close
+                  </button>
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  <div className="rounded-[1.35rem] border border-[var(--color-border)] bg-white/80 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">Account</p>
+                    <p className="mt-2 text-sm font-semibold text-[var(--color-primary)] break-words">{profile.email}</p>
+                  </div>
+                  <div className="rounded-[1.35rem] border border-[var(--color-border)] bg-white/80 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">Role</p>
+                    <p className="mt-2 text-sm font-semibold text-[var(--color-primary)]">{roleLabel}</p>
+                  </div>
+                  <div className="rounded-[1.35rem] border border-[var(--color-border)] bg-white/80 p-4 sm:col-span-2 xl:col-span-1">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">Membership fields</p>
+                    <p className="mt-2 text-sm font-semibold text-[var(--color-primary)]">{membershipFieldsLocked ? "Locked" : "Editable"}</p>
+                  </div>
+                </div>
+              </div>
+
+              <form className="mt-5 grid gap-4" onSubmit={handleSubmit((values) => updateMutation.mutate({
+                name: values.name,
+                phone: values.phone || undefined,
+                academicSession: values.academicSession || undefined,
+                department: values.department || undefined,
+                bio: values.bio,
+                profilePhoto: values.profilePhoto || undefined,
+                studentId: values.studentId || undefined,
+                district: values.district?.trim() ?? "",
+              }))} noValidate>
+                <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-page)] p-4 sm:p-5">
+                  <p className="text-sm font-semibold text-[var(--color-primary-strong)]">Core profile</p>
+                  <div className="mt-4 grid gap-4">
+                    <FormField label="Full name" error={errors.name} disabled={updateMutation.isPending} {...register("name")} />
+                    <FormField label="Email" value={profile.email} disabled />
+                  </div>
+                </div>
+
+                <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-page)] p-4 sm:p-5">
+                  <p className="text-sm font-semibold text-[var(--color-primary-strong)]">Membership and registration data</p>
+                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <FormField label="Phone" error={errors.phone} disabled={updateMutation.isPending || membershipFieldsLocked} {...register("phone")} />
+                    <label className="grid gap-2">
+                      <span className="text-sm font-medium text-[var(--color-primary-strong)]">Academic session</span>
+                      <select className="input-base h-12 px-4 text-sm" disabled={updateMutation.isPending || membershipFieldsLocked} {...register("academicSession")}>
+                        <option value="">Select session</option>
+                        {academicSessionOptions.map((session) => (
+                          <option key={session} value={session}>
+                            {session}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.academicSession ? <span className="text-sm text-rose-600">{errors.academicSession.message}</span> : null}
+                    </label>
+                    <FormField label="Department" error={errors.department} disabled={updateMutation.isPending || membershipFieldsLocked} {...register("department")} />
+                    <FormField label="Student ID" error={errors.studentId as never} disabled={updateMutation.isPending || membershipFieldsLocked} {...register("studentId")} />
+                    <div className="sm:col-span-2">
+                      <FormField label="District" error={errors.district as never} disabled={updateMutation.isPending || membershipFieldsLocked} {...register("district")} />
+                    </div>
+                  </div>
+                  {profile.memberProfile ? <p className="mt-4 text-sm leading-6 text-[var(--color-muted-foreground)]">Membership fields are locked after admin approval, so phone, session, department, student ID, and district can no longer be changed here.</p> : null}
+                  {!profile.memberProfile && profile.latestApplicationStatus === "PENDING" ? <p className="mt-4 text-sm leading-6 text-[var(--color-muted-foreground)]">Your membership application is under review, so phone, session, department, student ID, and district stay locked until an admin finishes the review.</p> : null}
+                </div>
+
+                <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-page)] p-4 sm:p-5">
+                  <p className="text-sm font-semibold text-[var(--color-primary-strong)]">Public profile</p>
+                  <div className="mt-4 grid gap-4">
+                    <FormTextarea label="Bio" error={errors.bio as never} disabled={updateMutation.isPending} {...register("bio")} />
+                    <FormField label="Profile photo URL" error={errors.profilePhoto as never} disabled={updateMutation.isPending} {...register("profilePhoto")} />
+                  </div>
+                </div>
+
+                <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-page)] p-4 sm:p-5">
+                  <FormActions isSubmitting={updateMutation.isPending} submitLabel="Save profile" helperText="Phone, session, department, student ID, and district are reused for membership applications and event registration after login." />
+                </div>
+              </form>
+            </div>
           </div>
-          <FormField label="Department" error={errors.department} disabled={updateMutation.isPending || membershipFieldsLocked} {...register("department")} />
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Student ID" error={errors.studentId as never} disabled={updateMutation.isPending || membershipFieldsLocked} {...register("studentId")} />
-            <FormField label="District" error={errors.district as never} disabled={updateMutation.isPending || membershipFieldsLocked} {...register("district")} />
-          </div>
-          {profile.memberProfile ? <p className="text-sm text-[var(--color-muted-foreground)]">Membership fields are locked after admin approval, so phone, session, department, student ID, and district can no longer be changed here.</p> : null}
-          {!profile.memberProfile && profile.latestApplicationStatus === "PENDING" ? <p className="text-sm text-[var(--color-muted-foreground)]">Your membership application is under review, so phone, session, department, student ID, and district stay locked until an admin finishes the review.</p> : null}
-          <FormTextarea label="Bio" error={errors.bio as never} disabled={updateMutation.isPending} {...register("bio")} />
-          <FormField label="Profile photo URL" error={errors.profilePhoto as never} disabled={updateMutation.isPending} {...register("profilePhoto")} />
-          <FormActions isSubmitting={updateMutation.isPending} submitLabel="Save profile" helperText="Phone, session, department, student ID, and district are reused for membership applications and event registration after login." />
-        </form>
-      </SectionWrapper>
+        </div>
+      ) : null}
+
 
       {showRegistrations ? (
-      <SectionWrapper className="xl:col-span-2" title="My registrations" description="Free and paid event registrations linked to your account.">
+      <SectionWrapper title="My registrations" description="Free and paid event registrations linked to your account.">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-[var(--color-muted-foreground)]">Narrow your registrations by type or current status.</p>
           <RegistrationFilterBar value={activeRegistrationFilter} onChange={setActiveRegistrationFilter} />

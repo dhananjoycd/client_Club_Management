@@ -156,6 +156,7 @@ export function AdminEventsManager() {
   const [activeFilter, setActiveFilter] = useState<BoardFilter>("ALL");
   const [page, setPage] = useState(1);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const eventsQuery = useQuery({
     queryKey: queryKeys.events.admin,
@@ -221,6 +222,7 @@ export function AdminEventsManager() {
     onSuccess: async (response) => {
       toast.success(response.message ?? "Event created successfully.");
       createForm.reset(defaultValues);
+      setIsCreateOpen(false);
       await invalidateEventQueries();
     },
     onError: (error) => toast.error(getApiErrorMessage(error, "Event creation failed.")),
@@ -253,22 +255,40 @@ export function AdminEventsManager() {
     <>
       <div className="grid gap-6">
         <SectionWrapper
-          title="Create event"
-          description="Publish a new XYZ Tech Club event with category, pricing, featured state, and registration controls."
+          title="New event"
+          description="Open the event form only when you are ready to publish a new club activity."
         >
-          <form className="grid gap-4" onSubmit={createForm.handleSubmit(handleCreateEvent)} noValidate>
-            <EventFormFields
-              register={createForm.register}
-              watch={createForm.watch}
-              errors={createForm.formState.errors}
-              disabled={createMutation.isPending}
-            />
-            <FormActions
-              isSubmitting={createMutation.isPending}
-              submitLabel="Create event"
-              helperText="Free and paid events both appear in the XYZ Tech Club event board below after creation."
-            />
-          </form>
+          <div className="grid gap-4">
+            <button
+              type="button"
+              onClick={() => setIsCreateOpen((current) => !current)}
+              className="flex w-full items-center justify-between gap-4 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-page)] px-5 py-4 text-left transition hover:border-[var(--color-accent)] hover:bg-white"
+              aria-expanded={isCreateOpen}
+            >
+              <div>
+                <p className="text-sm font-semibold text-[var(--color-primary-strong)]">Open event form</p>
+                <p className="mt-1 text-sm leading-6 text-[var(--color-muted-foreground)]">{isCreateOpen ? "Hide the event form once you are done creating activities." : "Open the event form to publish a new XYZ Tech Club activity."}</p>
+              </div>
+              <span className="inline-flex h-11 min-w-11 items-center justify-center rounded-full border border-[var(--color-border)] bg-white/80 px-4 text-base font-semibold text-[var(--color-primary)]">
+                {isCreateOpen ? "-" : "+"}
+              </span>
+            </button>
+            {isCreateOpen ? (
+              <form className="grid gap-4" onSubmit={createForm.handleSubmit(handleCreateEvent)} noValidate>
+                <EventFormFields
+                  register={createForm.register}
+                  watch={createForm.watch}
+                  errors={createForm.formState.errors}
+                  disabled={createMutation.isPending}
+                />
+                <FormActions
+                  isSubmitting={createMutation.isPending}
+                  submitLabel="Create event"
+                  helperText="Free and paid events both appear in the XYZ Tech Club event board below after creation."
+                />
+              </form>
+            ) : null}
+          </div>
         </SectionWrapper>
 
         <SectionWrapper

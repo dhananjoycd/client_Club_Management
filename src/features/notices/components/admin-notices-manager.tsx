@@ -40,6 +40,7 @@ export function AdminNoticesManager() {
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const noticesQuery = useQuery({
     queryKey: queryKeys.notices.adminList(`page-${page}-search-${searchTerm}`),
@@ -97,6 +98,7 @@ export function AdminNoticesManager() {
       toast.success(response.message ?? "Notice created successfully.");
       await invalidateNoticeQueries();
       createForm.reset({ title: "", content: "", audience: "ALL", sendEmail: false });
+      setIsCreateOpen(false);
       setPage(1);
       setSearchTerm("");
     },
@@ -142,46 +144,64 @@ export function AdminNoticesManager() {
     <>
       <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
         <SectionWrapper
-          title="Create notice"
-          description="Publish a new notice to the backend and optionally send it by email to the selected audience."
+          title="New notice"
+          description="Set up a notice when your team is ready to publish an update."
         >
-          <form className="grid gap-4" onSubmit={createForm.handleSubmit(handleCreateNotice)} noValidate>
-            <FormField
-              label="Title"
-              error={createForm.formState.errors.title}
-              disabled={isCreating}
-              {...createForm.register("title")}
-            />
-            <FormTextarea
-              label="Content"
-              error={createForm.formState.errors.content as never}
-              disabled={isCreating}
-              {...createForm.register("content")}
-            />
-            <label className="grid gap-2">
-              <span className="text-sm font-medium text-[var(--color-primary)]">Audience</span>
-              <select className="input-base h-11 px-4 text-sm" disabled={isCreating} {...createForm.register("audience")}>
-                {noticeAudienceValues.map((value) => (
-                  <option key={value} value={value}>
-                    {audienceLabels[value]}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="flex items-start gap-3 rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-page)] px-4 py-3 text-sm text-[var(--color-muted-foreground)]">
-              <input
-                type="checkbox"
-                className="mt-1 h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-primary)]"
-                disabled={isCreating}
-                {...createForm.register("sendEmail")}
-              />
-              <span>
-                <span className="block font-medium text-[var(--color-primary)]">Send this notice by email</span>
-                The selected audience will receive this notice by email too.
+          <div className="grid gap-4">
+            <button
+              type="button"
+              onClick={() => setIsCreateOpen((current) => !current)}
+              className="flex w-full items-center justify-between gap-4 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-page)] px-5 py-4 text-left transition hover:border-[var(--color-accent)] hover:bg-white"
+              aria-expanded={isCreateOpen}
+            >
+              <div>
+                <p className="text-sm font-semibold text-[var(--color-primary-strong)]">Open notice form</p>
+                <p className="mt-1 text-sm leading-6 text-[var(--color-muted-foreground)]">{isCreateOpen ? "Hide the notice form once you are done creating updates." : "Open the notice form to publish a fresh update for the selected audience."}</p>
+              </div>
+              <span className="inline-flex h-11 min-w-11 items-center justify-center rounded-full border border-[var(--color-border)] bg-white/80 px-4 text-base font-semibold text-[var(--color-primary)]">
+                {isCreateOpen ? "-" : "+"}
               </span>
-            </label>
-            <FormActions isSubmitting={isCreating} submitLabel="Create notice" />
-          </form>
+            </button>
+            {isCreateOpen ? (
+              <form className="grid gap-4" onSubmit={createForm.handleSubmit(handleCreateNotice)} noValidate>
+                <FormField
+                  label="Title"
+                  error={createForm.formState.errors.title}
+                  disabled={isCreating}
+                  {...createForm.register("title")}
+                />
+                <FormTextarea
+                  label="Content"
+                  error={createForm.formState.errors.content as never}
+                  disabled={isCreating}
+                  {...createForm.register("content")}
+                />
+                <label className="grid gap-2">
+                  <span className="text-sm font-medium text-[var(--color-primary)]">Audience</span>
+                  <select className="input-base h-11 px-4 text-sm" disabled={isCreating} {...createForm.register("audience")}>
+                    {noticeAudienceValues.map((value) => (
+                      <option key={value} value={value}>
+                        {audienceLabels[value]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="flex items-start gap-3 rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-page)] px-4 py-3 text-sm text-[var(--color-muted-foreground)]">
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-primary)]"
+                    disabled={isCreating}
+                    {...createForm.register("sendEmail")}
+                  />
+                  <span>
+                    <span className="block font-medium text-[var(--color-primary)]">Send this notice by email</span>
+                    The selected audience will receive this notice by email too.
+                  </span>
+                </label>
+                <FormActions isSubmitting={isCreating} submitLabel="Create notice" />
+              </form>
+            ) : null}
+          </div>
         </SectionWrapper>
 
         <SectionWrapper title="All notices" description="Search, paginate, and manage notices from each card.">
