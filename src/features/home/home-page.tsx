@@ -17,7 +17,6 @@ import {
   benefitItems,
   faqItems,
   committeePreview,
-  testimonialItems,
 } from "@/features/home/home-content";
 import { EventItem } from "@/types/event.types";
 import { NoticeItem } from "@/types/notice.types";
@@ -115,7 +114,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
     tag: configuredHeroSlides[index]?.tag?.trim() || slide.tag,
   }));
   const displayFaqs: SiteFaqItem[] = configuredFaqs.length > 0 ? configuredFaqs : faqItems;
-  const displayTestimonials = testimonials.length > 0 ? testimonials.map((item) => ({ ...item, author: item.authorName })) : testimonialItems;
+  const displayTestimonials = testimonials.slice(0, 3).map((item) => ({ ...item, author: item.authorName }));
   const displayCommitteeMembers = committeeMembers.length > 0 ? committeeMembers : committeePreview;
   const impactStats = [
     {
@@ -530,45 +529,58 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
           title="Testimonials"
           description="Real feedback from members, participants, and mentors helps visitors trust the club much faster."
         >
-          <div className="grid grid-cols-1 gap-5 xl:grid-cols-[0.95fr_1.05fr]">
-            <div className="relative overflow-hidden rounded-[1.75rem] border border-[rgba(125,211,252,0.26)] bg-[linear-gradient(145deg,#08275a_0%,#0b3b88_52%,#0ea5b7_100%)] p-6 text-white shadow-[0_24px_60px_rgba(8,39,90,0.2)] sm:p-8">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(34,199,214,0.18),transparent_26%)]" />
-              <div className="relative flex h-full flex-col justify-between gap-6">
-                <div>
-                  <p className="text-sm font-medium uppercase tracking-[0.22em] text-[rgba(214,240,255,0.82)]">Member voices</p>
-                  <p className="mt-5 text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl">
-                    &ldquo;{displayTestimonials[0]?.quote}&rdquo;
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-base font-semibold text-white">{displayTestimonials[0]?.author}</p>
-                  <p className="text-xs uppercase tracking-[0.2em] text-[rgba(214,240,255,0.78)]">{displayTestimonials[0]?.meta}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {displayTestimonials.slice(1).map((item) => (
-                <article key={item.author} className="surface-card flex h-full flex-col justify-between rounded-[1.75rem] p-5 sm:p-6">
-                  <p className="text-sm leading-7 text-[var(--color-foreground)] sm:text-base">&ldquo;{item.quote}&rdquo;</p>
-                  <div className="mt-6 border-t border-[var(--color-border)] pt-4">
-                    <p className="text-sm font-semibold text-[var(--color-primary-strong)]">{item.author}</p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">{item.meta}</p>
+          {displayTestimonials.length > 0 ? (
+            <div className="grid grid-cols-1 gap-5 xl:grid-cols-[0.95fr_1.05fr]">
+              <div className="relative overflow-hidden rounded-[1.75rem] border border-[rgba(125,211,252,0.26)] bg-[linear-gradient(145deg,#08275a_0%,#0b3b88_52%,#0ea5b7_100%)] p-6 text-white shadow-[0_24px_60px_rgba(8,39,90,0.2)] sm:p-8">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(34,199,214,0.18),transparent_26%)]" />
+                <div className="relative flex h-full flex-col justify-between gap-6">
+                  <div>
+                    <p className="text-sm font-medium uppercase tracking-[0.22em] text-[rgba(214,240,255,0.82)]">Member voices</p>
+                    <p className="mt-5 text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl">
+                      &ldquo;{displayTestimonials[0]?.quote}&rdquo;
+                    </p>
                   </div>
-                </article>
-              ))}
-              <div className="rounded-[1.75rem] border border-dashed border-[var(--color-border)] bg-white/55 p-5 sm:p-6 md:col-span-2">
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-secondary)]">Why this matters</p>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-muted-foreground)] sm:text-base">
-                  Testimonials give social proof. They help new visitors understand that XYZ Tech Club is active, useful, and trusted by real students and mentors.
-                </p>
-                <Link href="/testimonials" className="secondary-button mt-5 inline-flex h-11 items-center gap-2 px-5 text-sm">
-                  See All Testimonials
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
+                  <div className="space-y-2">
+                    <p className="text-base font-semibold text-white">{displayTestimonials[0]?.author}</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-[rgba(214,240,255,0.78)]">{displayTestimonials[0]?.meta}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {displayTestimonials.slice(1).map((item) => (
+                  <article key={item.id} className="surface-card flex h-full flex-col justify-between rounded-[1.75rem] p-5 sm:p-6">
+                    <p className="text-sm leading-7 text-[var(--color-foreground)] sm:text-base">&ldquo;{item.quote}&rdquo;</p>
+                    <div className="mt-6 border-t border-[var(--color-border)] pt-4">
+                      <p className="text-sm font-semibold text-[var(--color-primary-strong)]">{item.author}</p>
+                      <p className="mt-1 text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">{item.meta}</p>
+                    </div>
+                  </article>
+                ))}
+                <div className="rounded-[1.75rem] border border-dashed border-[var(--color-border)] bg-white/55 p-5 sm:p-6 md:col-span-2">
+                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-secondary)]">Why this matters</p>
+                  <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-muted-foreground)] sm:text-base">
+                    Testimonials give social proof. They help new visitors understand that XYZ Tech Club is active, useful, and trusted by real students and mentors.
+                  </p>
+                  <Link href="/testimonials" className="secondary-button mt-5 inline-flex h-11 items-center gap-2 px-5 text-sm">
+                    See All Testimonials
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="rounded-[1.75rem] border border-dashed border-[var(--color-border)] bg-white/55 p-6 sm:p-8">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-secondary)]">Approved testimonials</p>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-muted-foreground)] sm:text-base">
+                This section will update automatically once admins approve the first community testimonial submission.
+              </p>
+              <Link href="/testimonials" className="secondary-button mt-5 inline-flex h-11 items-center gap-2 px-5 text-sm">
+                Open Testimonials Page
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          )}
         </SectionWrapper>
 
         <section id="committee" className="grid grid-cols-1 gap-6 lg:grid-cols-[1.16fr_0.84fr]">

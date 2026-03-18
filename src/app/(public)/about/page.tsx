@@ -193,10 +193,11 @@ export default async function AboutPage() {
               <CommitteeMemberCard key={`${member.name}-${member.role}`} member={member} />
             ))}
           </div>
-          <div className="mt-6 flex justify-end">
+          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link href="/committee" className="secondary-button h-12 w-full px-6 text-sm sm:w-auto">
               Explore Full Committee
             </Link>
+   
           </div>
         </SectionWrapper>
 
@@ -206,13 +207,16 @@ export default async function AboutPage() {
           <p className="mt-4 max-w-3xl text-sm leading-7 text-[rgba(226,232,240,0.8)] sm:text-base">
             If you want structured growth, real event experience, collaborative projects, and an active peer network, this is the right place to start.
           </p>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <MembershipApplyCta
               label="Apply for Membership"
               className="primary-button h-12 w-full px-6 text-sm sm:w-auto"
             />
             <Link href="/events" className="secondary-button h-12 w-full border-white/14 bg-white/6 px-6 text-sm text-white hover:bg-white/10 hover:text-white sm:w-auto">
               Explore Events
+            </Link>
+            <Link href="/testimonials" className="secondary-button h-12 w-full border-white/14 bg-white/6 px-6 text-sm text-white hover:bg-white/10 hover:text-white sm:w-auto">
+              Read Testimonials
             </Link>
           </div>
         </section></MotionReveal>

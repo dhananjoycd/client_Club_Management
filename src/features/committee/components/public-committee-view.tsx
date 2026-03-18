@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { CommitteeMemberCard } from "@/components/committee/committee-member-card";
 import { PageHeader } from "@/components/shared/page-header";
@@ -142,6 +143,15 @@ export function PublicCommitteeView({ sessions, initialSessionId }: PublicCommit
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     {selectedSession.assignments.map((member) => <CommitteeMemberCard key={member.id || `${member.name}-${member.role}`} member={member} />)}
                   </div>
+                <div className="rounded-[1.75rem] border border-[rgba(125,211,252,0.22)] bg-[linear-gradient(145deg,#08275a_0%,#0b3b88_52%,#0ea5b7_100%)] p-6 text-white shadow-[0_24px_60px_rgba(8,39,90,0.2)] sm:p-8">
+                  <p className="text-sm font-medium uppercase tracking-[0.22em] text-[rgba(214,240,255,0.82)]">Interested in the next committee?</p>
+                  <h3 className="mt-4 text-3xl font-semibold tracking-tight text-white">Become an active member before the next committee session opens.</h3>
+                  <p className="mt-4 max-w-3xl text-sm leading-7 text-[rgba(236,244,255,0.84)] sm:text-base">Join the club, stay involved in events, and build the kind of contribution record that can lead to future committee responsibilities.</p>
+                  <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                    <MembershipApplyCta label="Apply for Membership" className="primary-button h-12 w-full px-6 text-sm sm:w-auto" />
+                    <Link href="/events" className="secondary-button h-12 w-full border-white/14 bg-white/6 px-6 text-sm text-white hover:bg-white/10 hover:text-white sm:w-auto">Explore Events</Link>
+                  </div>
+                </div>
                 </div>
               ) : null}
             </>

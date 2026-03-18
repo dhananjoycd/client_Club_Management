@@ -21,6 +21,7 @@ import { academicSessionOptions } from "@/lib/academic-session";
 import { RegistrationFilter, getPaymentStatusLabel, getPaymentVerificationStatusLabel, getRegistrationStatusLabel, matchesRegistrationFilter } from "@/lib/registration-display";
 import { queryKeys } from "@/lib/query-keys";
 import { accountService } from "@/services/account.service";
+import { authService } from "@/services/auth.service";
 
 const profileSchema = z.object({
   name: z.string().trim().min(1, "Name is required."),
@@ -67,6 +68,19 @@ export function AccountProfileManager({ showRegistrations = true }: AccountProfi
       });
     }
   }, [profile, reset]);
+
+  const logoutMutation = useMutation({
+    mutationFn: authService.logout,
+    onSuccess: async (response) => {
+      toast.success(response.message ?? "Logged out successfully.");
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.auth.session }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.account.profile }),
+      ]);
+      router.push("/");
+    },
+    onError: (error) => toast.error(getApiErrorMessage(error, "Logout failed.")),
+  });
 
   const updateMutation = useMutation({
     mutationFn: accountService.updateProfile,
@@ -147,7 +161,15 @@ export function AccountProfileManager({ showRegistrations = true }: AccountProfi
             </div>
           ) : null}
         </div>
-        <div className="mt-5 flex justify-end">
+        <div className="mt-5 flex flex-wrap justify-end gap-3">
+          <button
+            type="button"
+            onClick={() => logoutMutation.mutate()}
+            disabled={logoutMutation.isPending}
+            className="secondary-button h-11 px-5 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {logoutMutation.isPending ? "Logging out..." : "Logout"}
+          </button>
           <button
             type="button"
             onClick={() => setIsEditModalOpen(true)}

@@ -5,10 +5,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import { getApiErrorMessage } from "@/lib/api-error";
 import { queryKeys } from "@/lib/query-keys";
 import { authService } from "@/services/auth.service";
 import { accountService } from "@/services/account.service";
@@ -20,6 +18,7 @@ const publicLinks = [
   { href: "/about", label: "About" },
   { href: "/events", label: "Events" },
   { href: "/notices", label: "Notices" },
+  { href: "/testimonials", label: "Testimonials" },
   { href: "/committee", label: "Committee" },
   { href: "/contact", label: "Contact" },
 ];
@@ -38,7 +37,6 @@ export function PublicNavbar() {
   const [activeHash, setActiveHash] = useState("");
   const pathname = usePathname();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const sessionQuery = useQuery({ queryKey: queryKeys.auth.session, queryFn: authService.getSession, retry: false });
   const settingsQuery = useQuery({ queryKey: queryKeys.settings.detail, queryFn: settingsService.getSettings, retry: false });
   const accountProfileQuery = useQuery({
@@ -53,19 +51,6 @@ export function PublicNavbar() {
     retry: false,
     enabled: Boolean(sessionQuery.data?.data?.user),
   });
-  const logoutMutation = useMutation({
-    mutationFn: authService.logout,
-    onSuccess: async (response) => {
-      toast.success(response.message ?? "Logged out successfully.");
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.auth.session }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.account.profile }),
-      ]);
-      router.push("/");
-    },
-    onError: (error) => toast.error(getApiErrorMessage(error, "Logout failed.")),
-  });
-
   const user = sessionQuery.data?.data?.user;
   const settings = settingsQuery.data?.data;
   const accountProfile = accountProfileQuery.data?.data;
@@ -174,7 +159,7 @@ export function PublicNavbar() {
               {!user ? <Link href="/login" className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Login</Link> : null}
               {!user ? <Link href="/register" className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Register</Link> : null}
               {showJoinNow ? <Link href="/apply" className="primary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(37,99,235,0.28)]">Join Now</Link> : null}
-              {user ? <button type="button" onClick={() => logoutMutation.mutate()} className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Logout</button> : null}
+              {user ? <Link href="/notices" className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Notices</Link> : null}
             </>
           )}
         </div>
@@ -192,41 +177,92 @@ export function PublicNavbar() {
 
       {isOpen ? (
         <div className="border-t border-[var(--color-border)] bg-[rgba(249,251,254,0.96)] md:hidden">
-          <nav className="mx-auto grid w-full max-w-7xl gap-2 px-4 py-4 sm:px-6">
-            {publicLinks.map((link) => {
-              const isAnchorLink = link.href.startsWith("/#");
-              const linkHash = isAnchorLink ? link.href.slice(1) : "";
-              const isActive = isAnchorLink ? pathname === "/" && activeHash === linkHash : pathname === link.href;
+          <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6">
+            <nav className="grid gap-2">
+              {publicLinks.map((link) => {
+                const isAnchorLink = link.href.startsWith("/#");
+                const linkHash = isAnchorLink ? link.href.slice(1) : "";
+                const isActive = isAnchorLink ? pathname === "/" && activeHash === linkHash : pathname === link.href;
 
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className={cn(
-                    "surface-card rounded-2xl px-4 py-3 text-sm font-medium",
-                    isActive ? "text-[var(--color-primary-strong)]" : "text-[var(--color-muted-foreground)]",
-                  )}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsOpen(false)}
+                    className={cn(
+                      "surface-card rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200",
+                      isActive
+                        ? "border-[var(--color-accent)] bg-white text-[var(--color-primary-strong)]"
+                        : "text-[var(--color-muted-foreground)]",
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </nav>
+
             {isNavbarAuthLoading ? (
-              <div className="grid gap-2" aria-hidden="true">
-                <div className="h-12 animate-pulse rounded-2xl border border-[var(--color-border)] bg-white/80" />
-                <div className="h-12 animate-pulse rounded-2xl border border-[var(--color-border)] bg-white/80" />
+              <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-white/80 p-4" aria-hidden="true">
+                <div className="flex items-center gap-3">
+                  <div className="h-11 w-11 animate-pulse rounded-full border border-[var(--color-border)] bg-white/80" />
+                  <div className="h-11 flex-1 animate-pulse rounded-2xl border border-[var(--color-border)] bg-white/80" />
+                </div>
               </div>
             ) : (
-              <>
-                {avatarButton ? <div className="flex justify-start">{avatarButton}</div> : null}
-                {!user ? <Link href="/login" onClick={() => setIsOpen(false)} className="secondary-button h-12 px-5 text-sm">Login</Link> : null}
-                {!user ? <Link href="/register" onClick={() => setIsOpen(false)} className="secondary-button h-12 px-5 text-sm">Register</Link> : null}
-                {showJoinNow ? <Link href="/apply" onClick={() => setIsOpen(false)} className="primary-button h-12 px-5 text-sm">Join Now</Link> : null}
-                {user ? <button type="button" onClick={() => { setIsOpen(false); logoutMutation.mutate(); }} className="secondary-button h-12 px-5 text-sm">Logout</button> : null}
-              </>
+              <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-white/80 p-4">
+                <div className="flex items-center gap-3">
+                  {avatarButton ? (
+                    avatarButton
+                  ) : (
+                    <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--color-border)] bg-white text-sm font-semibold text-[var(--color-primary-strong)]">
+                      {organizationName.slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-[var(--color-primary-strong)]">
+                      {user ? accountProfile?.name ?? user.name ?? user.email : "Guest access"}
+                    </p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.16em] text-[var(--color-muted-foreground)]">
+                      {user ? "Account actions" : "Public access"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                  {user && dashboardHref ? (
+                    <Link
+                      href={dashboardHref === "/account" ? "/account/profile" : dashboardHref}
+                      onClick={() => setIsOpen(false)}
+                      className="secondary-button h-11 px-5 text-sm"
+                    >
+                      Profile
+                    </Link>
+                  ) : null}
+                  {!user ? (
+                    <Link href="/login" onClick={() => setIsOpen(false)} className="secondary-button h-11 px-5 text-sm">
+                      Login
+                    </Link>
+                  ) : null}
+                  {!user ? (
+                    <Link href="/register" onClick={() => setIsOpen(false)} className="secondary-button h-11 px-5 text-sm">
+                      Register
+                    </Link>
+                  ) : null}
+                  {showJoinNow ? (
+                    <Link href="/apply" onClick={() => setIsOpen(false)} className="primary-button h-11 px-5 text-sm">
+                      Join Now
+                    </Link>
+                  ) : null}
+                  {user ? (
+                    <Link href="/notices" onClick={() => setIsOpen(false)} className="secondary-button h-11 px-5 text-sm">
+                      Notices
+                    </Link>
+                  ) : null}
+                </div>
+              </div>
             )}
-          </nav>
+          </div>
         </div>
       ) : null}
     </header>

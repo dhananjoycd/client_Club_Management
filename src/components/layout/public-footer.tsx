@@ -42,18 +42,20 @@ export function PublicFooter() {
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--color-accent)]">Club Portal</p>
           <h2 className="max-w-md text-3xl font-semibold tracking-tight text-white">A cleaner digital home for events, members, and club activity.</h2>
           <p className="max-w-xl text-sm leading-7 text-[rgba(226,232,240,0.72)]">
-            Manage announcements, showcase events, and help new members understand what your community is building.
+            XYZ Tech Club connects students through practical events, teamwork, and campus tech culture.
           </p>
         </div>
 
         <div className="space-y-3 text-sm">
-          <p className="font-semibold text-white">Explore</p>
+          <p className="font-semibold text-white">Quick links</p>
           <div className="grid gap-2 text-[rgba(226,232,240,0.72)]">
+            <Link href="/" className="transition hover:text-[var(--color-accent)]">Home</Link>
             <Link href="/about" className="transition hover:text-[var(--color-accent)]">About</Link>
             <Link href="/events" className="transition hover:text-[var(--color-accent)]">Events</Link>
-            {!isRestrictedUser ? <Link href="/apply" className="transition hover:text-[var(--color-accent)]">Apply</Link> : null}
             <Link href="/notices" className="transition hover:text-[var(--color-accent)]">Notices</Link>
             <Link href="/committee" className="transition hover:text-[var(--color-accent)]">Committee</Link>
+            <Link href="/testimonials" className="transition hover:text-[var(--color-accent)]">Testimonials</Link>
+            {!isRestrictedUser ? <Link href="/apply" className="transition hover:text-[var(--color-accent)]">Apply</Link> : null}
           </div>
         </div>
 

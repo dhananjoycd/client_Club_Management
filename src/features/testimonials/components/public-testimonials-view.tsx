@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, MessageSquareQuote } from "lucide-react";
 import Link from "next/link";
@@ -21,6 +21,28 @@ const statusVariant = (status: string) => {
   if (status === "APPROVED") return "active" as const;
   if (status === "REJECTED") return "inactive" as const;
   return "pending" as const;
+};
+
+const formatRoleContext = (profile: NonNullable<ReturnType<typeof buildProfileMetaInput>>) => {
+  const segments = [profile.membershipLabel, profile.department, profile.academicSession].filter(Boolean);
+  return segments.join(" | ");
+};
+
+const buildProfileMetaInput = (profile: {
+  isClubMember?: boolean;
+  role?: string;
+  department?: string | null;
+  academicSession?: string | null;
+} | null | undefined) => {
+  if (!profile) return null;
+
+  const membershipLabel = profile.isClubMember ? "Club member" : profile.role === "EVENT_MANAGER" ? "Event manager" : "Community member";
+
+  return {
+    membershipLabel,
+    department: profile.department?.trim() || "",
+    academicSession: profile.academicSession?.trim() || "",
+  };
 };
 
 export function PublicTestimonialsView() {
@@ -47,7 +69,6 @@ export function PublicTestimonialsView() {
     onSuccess: async (response) => {
       toast.success(response.message ?? "Testimonial submitted for admin review.");
       setQuote("");
-      setMeta("");
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.testimonials.publicList }),
         queryClient.invalidateQueries({ queryKey: queryKeys.testimonials.mine }),
@@ -55,6 +76,22 @@ export function PublicTestimonialsView() {
     },
     onError: (error) => toast.error(getApiErrorMessage(error, "Testimonial submission failed.")),
   });
+
+  const testimonials = publicTestimonialsQuery.data?.data ?? [];
+  const featured = testimonials[0];
+  const others = testimonials.slice(1);
+  const user = sessionQuery.data?.data?.user;
+  const profile = profileQuery.data?.data;
+  const myTestimonials = myTestimonialsQuery.data?.data ?? [];
+  const autoMeta = useMemo(() => {
+    const metaInput = buildProfileMetaInput(profile);
+    return metaInput ? formatRoleContext(metaInput) : "";
+  }, [profile]);
+  const hasPendingSubmission = myTestimonials.some((item) => item.status === "PENDING");
+
+  useEffect(() => {
+    if (autoMeta) setMeta(autoMeta);
+  }, [autoMeta]);
 
   if (publicTestimonialsQuery.isLoading) {
     return <LoadingState title="Loading testimonials" description="Preparing the latest member voices from XYZ Tech Club." />;
@@ -64,12 +101,6 @@ export function PublicTestimonialsView() {
     return <EmptyState title="Unable to load testimonials" description={getApiErrorMessage(publicTestimonialsQuery.error, "Please try again in a moment.")} />;
   }
 
-  const testimonials = publicTestimonialsQuery.data?.data ?? [];
-  const featured = testimonials[0];
-  const others = testimonials.slice(1);
-  const user = sessionQuery.data?.data?.user;
-  const profile = profileQuery.data?.data;
-  const myTestimonials = myTestimonialsQuery.data?.data ?? [];
 
   return (
     <main className="px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
@@ -151,7 +182,25 @@ export function PublicTestimonialsView() {
                 className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/70 p-5"
                 onSubmit={(event) => {
                   event.preventDefault();
-                  submitMutation.mutate({ quote, meta });
+                  const trimmedQuote = quote.trim();
+                  const resolvedMeta = autoMeta.trim();
+
+                  if (!resolvedMeta) {
+                    toast.error("Your profile context is missing. Update your profile before submitting a testimonial.");
+                    return;
+                  }
+
+                  if (hasPendingSubmission) {
+                    toast.error("You already have a testimonial waiting for admin review.");
+                    return;
+                  }
+
+                  if (trimmedQuote.length < 20) {
+                    toast.error("Write at least 20 characters in your testimonial.");
+                    return;
+                  }
+
+                  submitMutation.mutate({ quote: trimmedQuote, meta: resolvedMeta });
                 }}
               >
                 <div className="flex items-start gap-3">
@@ -163,15 +212,19 @@ export function PublicTestimonialsView() {
                 </div>
                 <label className="mt-5 grid gap-2">
                   <span className="text-sm font-medium text-[var(--color-primary-strong)]">Short role or context</span>
-                  <input value={meta} onChange={(event) => setMeta(event.target.value)} className="input-base h-12 px-4 text-sm" placeholder="Member, workshop participant, mentor..." />
+                  <input value={meta} readOnly className="input-base h-12 cursor-not-allowed bg-slate-50 px-4 text-sm text-[var(--color-muted-foreground)]" placeholder="Your profile context will appear here" />
+                  <p className="text-xs text-[var(--color-muted-foreground)]">This context is auto-filled from your profile and sent to the admin review panel with your testimonial.</p>
                 </label>
                 <label className="mt-4 grid gap-2">
                   <span className="text-sm font-medium text-[var(--color-primary-strong)]">Your testimonial</span>
                   <textarea value={quote} onChange={(event) => setQuote(event.target.value)} rows={6} className="input-base min-h-[180px] px-4 py-3 text-sm" placeholder="Share a real, specific experience from XYZ Tech Club..." />
                 </label>
                 <div className="mt-5 flex items-center justify-between gap-4">
-                  <p className="text-xs text-[var(--color-muted-foreground)]">Admin will review this before it appears publicly.</p>
-                  <button type="submit" disabled={submitMutation.isPending} className="primary-button h-11 px-5 text-sm disabled:cursor-not-allowed disabled:opacity-60">
+                  <div className="space-y-1">
+                    <p className="text-xs text-[var(--color-muted-foreground)]">Admin will review this before it appears publicly.</p>
+                    {hasPendingSubmission ? <p className="text-xs text-amber-700">You already have one testimonial pending review.</p> : null}
+                  </div>
+                  <button type="submit" disabled={submitMutation.isPending || hasPendingSubmission || !autoMeta.trim()} className="primary-button h-11 px-5 text-sm disabled:cursor-not-allowed disabled:opacity-60">
                     {submitMutation.isPending ? "Submitting..." : "Submit testimonial"}
                   </button>
                 </div>
@@ -185,6 +238,17 @@ export function PublicTestimonialsView() {
             </Link>
           </div>
         </SectionWrapper>
+
+        <section className="surface-card-dark rounded-[2rem] p-6 text-white shadow-[0_28px_70px_rgba(8,22,49,0.2)] sm:p-8">
+          <p className="text-sm font-medium uppercase tracking-[0.22em] text-[rgba(164,233,240,0.72)]">Keep exploring</p>
+          <h2 className="mt-4 text-3xl font-semibold tracking-tight">See how community feedback connects to the rest of XYZ Tech Club.</h2>
+          <p className="mt-4 max-w-3xl text-sm leading-7 text-[rgba(226,232,240,0.8)] sm:text-base">After reading member voices, explore upcoming events or learn more about the club culture behind these experiences.</p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <Link href="/events" className="primary-button h-12 w-full px-6 text-sm sm:w-auto">Explore Events</Link>
+            <MembershipApplyCta label="Join the Club" className="secondary-button h-12 w-full border-white/14 bg-white/6 px-6 text-sm text-white hover:bg-white/10 hover:text-white sm:w-auto" />
+          </div>
+        </section>
+
       </div>
     </main>
   );

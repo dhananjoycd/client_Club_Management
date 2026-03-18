@@ -23,6 +23,12 @@ const statusOptions: Array<{ value: TestimonialStatus | "ALL"; label: string }> 
   { value: "REJECTED", label: "Rejected" },
 ];
 const badgeVariant = (status: TestimonialStatus) => status === "APPROVED" ? "active" as const : status === "REJECTED" ? "inactive" as const : "pending" as const;
+const adminNoteSuggestions = [
+  "Thank you for sharing your experience with XYZ Tech Club.",
+  "This testimonial is clear and reflects a real club experience.",
+  "Please revise the wording slightly and resubmit for approval.",
+  "Add a bit more specific detail about the event or learning outcome.",
+];
 
 export function AdminTestimonialsManager() {
   const queryClient = useQueryClient();
@@ -32,7 +38,7 @@ export function AdminTestimonialsManager() {
   const [selected, setSelected] = useState<AdminTestimonial | null>(null);
   const [reviewReason, setReviewReason] = useState("");
   const [isFeatured, setIsFeatured] = useState(false);
-  const [displayOrder, setDisplayOrder] = useState("0");
+  const [displayOrder, setDisplayOrder] = useState("1");
 
   const testimonialsQuery = useQuery({
     queryKey: queryKeys.testimonials.adminList(`page-${page}-status-${statusFilter}-search-${searchTerm}`),
@@ -51,14 +57,14 @@ export function AdminTestimonialsManager() {
       status,
       reviewReason: reviewReason || undefined,
       isFeatured: status === "APPROVED" ? isFeatured : undefined,
-      displayOrder: status === "APPROVED" ? Number.parseInt(displayOrder || "0", 10) || 0 : undefined,
+      displayOrder: status === "APPROVED" ? Math.max(1, Number.parseInt(displayOrder || "1", 10) || 1) : undefined,
     }),
     onSuccess: async (response) => {
       toast.success(response.message ?? "Testimonial reviewed successfully.");
       setSelected(null);
       setReviewReason("");
       setIsFeatured(false);
-      setDisplayOrder("0");
+      setDisplayOrder("1");
       await queryClient.invalidateQueries({ queryKey: queryKeys.testimonials.all });
     },
     onError: (error) => toast.error(getApiErrorMessage(error, "Testimonial review failed.")),
@@ -71,7 +77,7 @@ export function AdminTestimonialsManager() {
     setSelected(item);
     setReviewReason(item.reviewReason || "");
     setIsFeatured(item.isFeatured);
-    setDisplayOrder(String(item.displayOrder ?? 0));
+    setDisplayOrder(String(Math.max(1, item.displayOrder ?? 1)));
   };
 
   if (!testimonialsQuery.data && testimonialsQuery.isLoading) {
@@ -138,13 +144,27 @@ export function AdminTestimonialsManager() {
                     <p className="text-sm leading-7 text-[var(--color-foreground)]">&ldquo;{selected.quote}&rdquo;</p>
                     <p className="mt-3 text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">{selected.meta}</p>
                   </div>
-                  <label className="grid gap-2">
-                    <span className="text-sm font-medium text-[var(--color-primary-strong)]">Admin note</span>
-                    <textarea value={reviewReason} onChange={(event) => setReviewReason(event.target.value)} rows={4} className="input-base min-h-[120px] px-4 py-3 text-sm" placeholder="Optional note for approval or rejection..." />
-                  </label>
+                  <div className="grid gap-3">
+                    <label className="grid gap-2">
+                      <span className="text-sm font-medium text-[var(--color-primary-strong)]">Admin note</span>
+                      <textarea value={reviewReason} onChange={(event) => setReviewReason(event.target.value)} rows={4} className="input-base min-h-[120px] px-4 py-3 text-sm" placeholder="Optional note for approval or rejection..." />
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {adminNoteSuggestions.map((note) => (
+                        <button
+                          key={note}
+                          type="button"
+                          onClick={() => setReviewReason(note)}
+                          className="rounded-full border border-[var(--color-border)] bg-white px-3 py-2 text-xs font-medium text-[var(--color-primary)] transition hover:border-[var(--color-accent)] hover:bg-[var(--color-page)]"
+                        >
+                          {note}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   <label className="grid gap-2">
                     <span className="text-sm font-medium text-[var(--color-primary-strong)]">Display order</span>
-                    <input value={displayOrder} onChange={(event) => setDisplayOrder(event.target.value)} className="input-base h-12 px-4 text-sm" inputMode="numeric" />
+                    <input value={displayOrder} onChange={(event) => setDisplayOrder(String(Math.max(1, Number.parseInt(event.target.value || "1", 10) || 1)))} className="input-base h-12 px-4 text-sm" inputMode="numeric" min="1" />
                   </label>
                   <label className="flex items-center gap-3 rounded-[1rem] border border-[var(--color-border)] bg-white/80 px-4 py-3 text-sm text-[var(--color-primary-strong)]">
                     <input type="checkbox" checked={isFeatured} onChange={(event) => setIsFeatured(event.target.checked)} className="h-4 w-4" />
