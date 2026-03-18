@@ -30,6 +30,11 @@ export const queryKeys = {
     all: ["members"] as const,
     me: ["members", "me"] as const,
   },
+  users: {
+    all: ["users"] as const,
+    list: (scope: string) => ["users", scope] as const,
+    detail: (id: string) => ["users", "detail", id] as const,
+  },
   registrations: {
     all: ["registrations"] as const,
   },
