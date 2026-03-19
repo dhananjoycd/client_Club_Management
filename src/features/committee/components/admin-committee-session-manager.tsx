@@ -59,6 +59,7 @@ export function AdminCommitteeSessionManager({ sessionId }: { sessionId: string 
   const [deleteSessionId, setDeleteSessionId] = useState<string | null>(null);
   const [editingAssignment, setEditingAssignment] = useState<EditableCommitteeMember | null>(null);
   const [editWing, setEditWing] = useState("");
+  const [editCustomWing, setEditCustomWing] = useState("");
   const [editPosition, setEditPosition] = useState("");
   const [editCustomPosition, setEditCustomPosition] = useState("");
   const [editSortOrder, setEditSortOrder] = useState("0");
@@ -133,7 +134,7 @@ export function AdminCommitteeSessionManager({ sessionId }: { sessionId: string 
   const eligibleMembers = eligibleMembersQuery.data?.data ?? [];
   const resolvedCommitteeWing = getEffectiveWing(committeeWing, customCommitteeWing);
   const addPositionOptions = getPositionOptionsForWing(resolvedCommitteeWing);
-  const editResolvedWing = getEffectiveWing(editWing);
+  const editResolvedWing = getEffectiveWing(editWing, editCustomWing);
   const editPositionOptions = getPositionOptionsForWing(editResolvedWing);
 
   useEffect(() => {
@@ -143,8 +144,11 @@ export function AdminCommitteeSessionManager({ sessionId }: { sessionId: string 
   const openEditModal = (member: CommitteeDisplayMember) => {
     if (!session) return;
     setEditingAssignment({ ...member, sessionId: session.id });
-    setEditWing(member.wing ?? defaultCommitteeWingOptions[0]);
-    const suggestedPositions = getPositionOptionsForWing(member.wing ?? defaultCommitteeWingOptions[0]);
+    const memberWing = member.wing ?? defaultCommitteeWingOptions[0];
+    const isDefaultWing = defaultCommitteeWingOptions.includes(memberWing);
+    const suggestedPositions = getPositionOptionsForWing(memberWing);
+    setEditWing(isDefaultWing ? memberWing : "CUSTOM");
+    setEditCustomWing(isDefaultWing ? "" : memberWing);
     setEditPosition(suggestedPositions.includes(member.role ?? "") ? (member.role ?? suggestedPositions[0]) : "CUSTOM");
     setEditCustomPosition(suggestedPositions.includes(member.role ?? "") ? "" : (member.role ?? ""));
     setEditSortOrder(String(member.sortOrder ?? 0));
@@ -190,7 +194,12 @@ export function AdminCommitteeSessionManager({ sessionId }: { sessionId: string 
   });
   const usedSortOrders = new Set(session.assignments.map((item) => item.sortOrder).filter((value): value is number => typeof value === "number"));
   const maxDisplayOrder = Math.max(session.assignments.length + 3, 7);
-
+  const editUsedSortOrders = new Set(
+    session.assignments
+      .filter((item) => item.id !== editingAssignment?.id)
+      .map((item) => item.sortOrder)
+      .filter((value): value is number => typeof value === "number"),
+  );
   return (
     <>
       <SectionWrapper title="Committee workspace" description={session.description || `Manage the ${session.label} committee session from one dedicated workspace.`}>
@@ -360,16 +369,21 @@ export function AdminCommitteeSessionManager({ sessionId }: { sessionId: string 
             </div>
             <form className="mt-5 grid gap-4" onSubmit={(event) => {
               event.preventDefault();
+              const resolvedEditWing = editWing === "CUSTOM" ? editCustomWing.trim() : editWing;
               const resolvedEditPosition = editPosition === "CUSTOM" ? editCustomPosition.trim() : editPosition;
+              const parsedEditSortOrder = Number.parseInt(editSortOrder || "", 10);
               const duplicateEditPosition = session.assignments.some((item) => item.id !== editingAssignment.id && normalizeCommitteePosition(item.role || "") === normalizeCommitteePosition(resolvedEditPosition));
+              if (!resolvedEditWing) return toast.error("Select or enter a committee wing.");
               if (!resolvedEditPosition) return toast.error("Select or enter a position title.");
               if (duplicateEditPosition) return toast.error(`${resolvedEditPosition} is already used in ${session.label}. Choose a different position title.`);
+              if (!Number.isInteger(parsedEditSortOrder)) return toast.error("Select a valid display order.");
+              if (editUsedSortOrders.has(parsedEditSortOrder)) return toast.error(`Display order ${parsedEditSortOrder} is already used in ${session.label}. Choose another one.`);
               updateAssignmentMutation.mutate({
                 id: editingAssignment.id as string,
                 payload: {
-                  committeeWing: editWing,
+                  committeeWing: resolvedEditWing,
                   positionTitle: resolvedEditPosition,
-                  sortOrder: Number.parseInt(editSortOrder || "0", 10) || 0,
+                  sortOrder: parsedEditSortOrder,
                   bioOverride: editBio || undefined,
                   photoUrlOverride: editPhotoUrl || undefined,
                   facebookUrl: editFacebookUrl || undefined,
@@ -378,12 +392,88 @@ export function AdminCommitteeSessionManager({ sessionId }: { sessionId: string 
                 },
               });
             }}>
-              <div className="grid gap-4 md:grid-cols-2">
-                <label className="grid gap-2"><span className="text-sm font-medium text-[var(--color-primary-strong)]">Committee wing</span><select value={editWing} onChange={(event) => { const nextWing = event.target.value; setEditWing(nextWing); const nextOptions = getPositionOptionsForWing(nextWing); if (editPosition !== "CUSTOM" && !nextOptions.includes(editPosition)) setEditPosition(nextOptions[0]); }} className="input-base h-12 px-4 text-sm">{defaultCommitteeWingOptions.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
-                <label className="grid gap-2"><span className="text-sm font-medium text-[var(--color-primary-strong)]">Position</span><select value={editPosition} onChange={(event) => setEditPosition(event.target.value)} className="input-base h-12 px-4 text-sm">{editPositionOptions.map((option) => <option key={option} value={option}>{option}</option>)}<option value="CUSTOM">Custom position</option></select></label>
+              <div>
+                <p className="text-sm font-semibold text-[var(--color-primary-strong)]">Update committee role for {editingAssignment.name}</p>
+                <p className="mt-1 text-sm leading-6 text-[var(--color-muted-foreground)]">Use the same wing, position, and display-order rules as the add member form so the committee structure stays consistent.</p>
               </div>
-              {editPosition === "CUSTOM" ? <label className="grid gap-2"><span className="text-sm font-medium text-[var(--color-primary-strong)]">Custom position</span><input value={editCustomPosition} onChange={(event) => setEditCustomPosition(event.target.value)} className="input-base h-12 px-4 text-sm" placeholder="Advisor, Moderator, Team Lead..." /></label> : null}
-              <label className="grid gap-2"><span className="text-sm font-medium text-[var(--color-primary-strong)]">Sort order</span><input value={editSortOrder} onChange={(event) => setEditSortOrder(event.target.value)} className="input-base h-12 px-4 text-sm" inputMode="numeric" /></label>
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="grid gap-2">
+                  <span className="text-sm font-medium text-[var(--color-primary-strong)]">Committee wing</span>
+                  <select
+                    value={editWing}
+                    onChange={(event) => {
+                      const nextWing = event.target.value;
+                      const resolvedNextWing = nextWing === "CUSTOM" ? editCustomWing.trim() : nextWing;
+                      const nextOptions = getPositionOptionsForWing(resolvedNextWing);
+                      setEditWing(nextWing);
+                      if (nextWing !== "CUSTOM") setEditCustomWing("");
+                      if (editPosition !== "CUSTOM" && !nextOptions.includes(editPosition)) setEditPosition(nextOptions[0]);
+                    }}
+                    className="input-base h-12 px-4 text-sm"
+                  >
+                    {defaultCommitteeWingOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+                    <option value="CUSTOM">Custom wing</option>
+                  </select>
+                </label>
+                <label className="grid gap-2">
+                  <span className="text-sm font-medium text-[var(--color-primary-strong)]">Position</span>
+                  <select value={editPosition} onChange={(event) => setEditPosition(event.target.value)} className="input-base h-12 px-4 text-sm">
+                    {editPositionOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+                    <option value="CUSTOM">Custom position</option>
+                  </select>
+                </label>
+              </div>
+              {(editWing === "CUSTOM" || editPosition === "CUSTOM") ? (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {editWing === "CUSTOM" ? (
+                    <label className="grid gap-2">
+                      <span className="text-sm font-medium text-[var(--color-primary-strong)]">Custom wing</span>
+                      <input
+                        value={editCustomWing}
+                        onChange={(event) => {
+                          const nextCustomWing = event.target.value;
+                          const nextOptions = getPositionOptionsForWing(nextCustomWing.trim());
+                          setEditCustomWing(nextCustomWing);
+                          if (editPosition !== "CUSTOM" && !nextOptions.includes(editPosition)) setEditPosition(nextOptions[0]);
+                        }}
+                        className="input-base h-12 px-4 text-sm"
+                        placeholder="Research, Outreach, Advisory..."
+                      />
+                    </label>
+                  ) : <div />}
+                  {editPosition === "CUSTOM" ? (
+                    <label className="grid gap-2">
+                      <span className="text-sm font-medium text-[var(--color-primary-strong)]">Custom position</span>
+                      <input value={editCustomPosition} onChange={(event) => setEditCustomPosition(event.target.value)} className="input-base h-12 px-4 text-sm" placeholder="Advisor, Moderator, Team Lead..." />
+                    </label>
+                  ) : <div />}
+                </div>
+              ) : null}
+              <div className="grid gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <span className="text-sm font-medium text-[var(--color-primary-strong)]">Display order</span>
+                  <span className="text-xs font-medium text-[var(--color-muted-foreground)]">Next available: {Array.from({ length: maxDisplayOrder }, (_, index) => index + 1).find((order) => !editUsedSortOrders.has(order)) ?? maxDisplayOrder + 1}</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {Array.from({ length: maxDisplayOrder }, (_, index) => index + 1).map((order) => {
+                    const alreadyUsed = editUsedSortOrders.has(order);
+                    const isActive = editSortOrder === String(order);
+                    return (
+                      <button
+                        key={order}
+                        type="button"
+                        onClick={() => {
+                          if (alreadyUsed) return toast.error(`Display order ${order} is already used in ${session.label}.`);
+                          setEditSortOrder(String(order));
+                        }}
+                        className={`inline-flex h-11 min-w-11 items-center justify-center rounded-full border px-4 text-sm font-medium transition ${alreadyUsed ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400" : isActive ? "border-[var(--color-accent)] bg-[var(--color-primary)] text-white shadow-[0_12px_28px_rgba(13,64,147,0.18)]" : "border-[var(--color-border)] bg-white text-[var(--color-primary-strong)] hover:border-[var(--color-accent)] hover:text-[var(--color-primary)]"}`}
+                      >
+                        {order}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
               <label className="grid gap-2"><span className="text-sm font-medium text-[var(--color-primary-strong)]">Public bio override</span><textarea value={editBio} onChange={(event) => setEditBio(event.target.value)} rows={4} className="input-base min-h-[120px] px-4 py-3 text-sm" placeholder="Optional short bio for the committee page." /></label>
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="grid gap-2"><span className="text-sm font-medium text-[var(--color-primary-strong)]">Photo URL override</span><input value={editPhotoUrl} onChange={(event) => setEditPhotoUrl(event.target.value)} className="input-base h-12 px-4 text-sm" /></label>
@@ -430,3 +520,10 @@ export function AdminCommitteeSessionManager({ sessionId }: { sessionId: string 
     </>
   );
 }
+
+
+
+
+
+
+
