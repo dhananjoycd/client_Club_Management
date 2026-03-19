@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 type FormActionsProps = {
   isSubmitting?: boolean;
   submitLabel: string;
+  submittingLabel?: string;
   helperText?: string;
   secondaryAction?: ReactNode;
 };
@@ -13,6 +14,7 @@ type SubmitButtonProps = ButtonHTMLAttributes<HTMLButtonElement>;
 export function FormActions({
   isSubmitting,
   submitLabel,
+  submittingLabel = "Submitting...",
   helperText,
   secondaryAction,
   ...buttonProps
@@ -22,12 +24,17 @@ export function FormActions({
       <button
         type="submit"
         className={cn(
-          "inline-flex h-11 items-center justify-center rounded-2xl bg-[var(--color-primary)] px-4 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+          "inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[var(--color-primary)] px-4 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
         )}
         disabled={isSubmitting || buttonProps.disabled}
         {...buttonProps}
       >
-        {isSubmitting ? "Submitting..." : submitLabel}
+        {isSubmitting ? (
+          <>
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" />
+            <span>{submittingLabel}</span>
+          </>
+        ) : submitLabel}
       </button>
       {helperText ? <p className="text-sm text-[var(--color-muted-foreground)]">{helperText}</p> : null}
       {secondaryAction ? <div>{secondaryAction}</div> : null}

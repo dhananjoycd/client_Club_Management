@@ -80,6 +80,7 @@ export function LoginForm() {
         <FormActions
           isSubmitting={loginMutation.isPending}
           submitLabel="Sign in"
+          submittingLabel="Signing you in..."
           helperText="Sign in to access your dashboard, registrations, and account updates."
           secondaryAction={
             currentUser ? (

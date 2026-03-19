@@ -70,6 +70,7 @@ export function RegisterForm() {
         <FormActions
           isSubmitting={registerMutation.isPending}
           submitLabel="Create account"
+          submittingLabel="Creating your account..."
           helperText="Create your account first, then verify your email before signing in and joining member features."
           secondaryAction={
             <div className="grid gap-4 pt-2">
