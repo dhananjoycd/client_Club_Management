@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { joinUrl } from "@/lib/utils";
 
@@ -12,9 +12,9 @@ type AuthGoogleButtonProps = {
   disabled?: boolean;
 };
 
-const toAbsoluteUrl = (value: string) => {
+const toAbsoluteUrl = (value: string, origin: string) => {
   if (/^https?:\/\//i.test(value)) return value;
-  return new URL(value, window.location.origin).toString();
+  return origin ? new URL(value, origin).toString() : "";
 };
 
 export function AuthGoogleButton({
@@ -25,18 +25,25 @@ export function AuthGoogleButton({
   disabled = false,
 }: AuthGoogleButtonProps) {
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [origin, setOrigin] = useState("");
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ? joinUrl(process.env.NEXT_PUBLIC_API_URL, "") : "";
   const socialSignInUrl = apiBaseUrl ? joinUrl(apiBaseUrl, "/auth/sign-in/social") : "";
-  const callbackURL = toAbsoluteUrl(callbackPath || "/account");
-  const newUserCallbackURL = toAbsoluteUrl(newUserCallbackPath);
-  const errorCallbackURL = toAbsoluteUrl(errorCallbackPath);
+  const callbackURL = toAbsoluteUrl(callbackPath || "/account", origin);
+  const newUserCallbackURL = toAbsoluteUrl(newUserCallbackPath, origin);
+  const errorCallbackURL = toAbsoluteUrl(errorCallbackPath, origin);
+  const isUnavailable = !socialSignInUrl || !origin;
 
   return (
     <form
-      action={socialSignInUrl}
+      action={socialSignInUrl || undefined}
       method="post"
       onSubmit={(event) => {
-        if (!socialSignInUrl) {
+        if (isUnavailable) {
           event.preventDefault();
           toast.error("Google login is not available right now.");
           return;
@@ -51,7 +58,7 @@ export function AuthGoogleButton({
       <input type="hidden" name="errorCallbackURL" value={errorCallbackURL} />
       <button
         type="submit"
-        disabled={disabled || isRedirecting}
+        disabled={disabled || isRedirecting || isUnavailable}
         className="inline-flex h-11 w-full items-center justify-center gap-3 rounded-2xl border border-[var(--color-border)] bg-white px-4 text-sm font-semibold text-[var(--color-primary-strong)] transition hover:border-[var(--color-accent)] hover:bg-[var(--color-page)] disabled:cursor-not-allowed disabled:opacity-60"
       >
         <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-page)] text-xs font-bold text-[var(--color-primary)]">
