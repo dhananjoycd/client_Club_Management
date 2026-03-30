@@ -10,6 +10,11 @@ export const registrationService = {
     return data;
   },
 
+  async verifyPayment(id: string) {
+    const { data } = await api.patch<ApiResponse<RegistrationItem>>(`/registrations/${id}/verify-payment`);
+    return data;
+  },
+
   async cancelRegistration(id: string) {
     const { data } = await api.patch<ApiResponse<RegistrationItem>>(`/registrations/${id}/cancel`);
     return data;

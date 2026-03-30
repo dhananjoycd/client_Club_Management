@@ -1,15 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Search } from "lucide-react";
+import { toast } from "sonner";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { TableLoadingState } from "@/components/feedback/table-loading-state";
 import { FilterChip } from "@/components/shared/filter-chip";
 import { PaginationControls } from "@/components/shared/pagination-controls";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { WarningConfirmModal } from "@/components/shared/warning-confirm-modal";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { getPaymentStatusLabel, getPaymentVerificationStatusLabel, getRegistrationStatusLabel } from "@/lib/registration-display";
 import { queryKeys } from "@/lib/query-keys";
@@ -27,16 +29,33 @@ const badgeVariant = (status?: string | null) => {
 };
 
 export function AdminPaymentsManager() {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState<PaymentFilter>("ALL");
   const [page, setPage] = useState(1);
   const [detailsPayment, setDetailsPayment] = useState<RegistrationItem | null>(null);
+  const [verificationTarget, setVerificationTarget] = useState<RegistrationItem | null>(null);
 
   const registrationsQuery = useQuery({
     queryKey: queryKeys.payments.list(`search-${searchTerm}-filter-${activeFilter}-page-${page}`),
     queryFn: () => registrationService.getRegistrations({ limit: 100 }),
     retry: false,
     placeholderData: (previousData) => previousData,
+  });
+
+  const verifyPaymentMutation = useMutation({
+    mutationFn: registrationService.verifyPayment,
+    onSuccess: async (response, registrationId) => {
+      toast.success(response.message ?? "Payment verified successfully.");
+      setVerificationTarget(null);
+      setDetailsPayment((current) => (current?.id === registrationId ? response.data : current));
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.payments.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.registrations.all }),
+        registrationsQuery.refetch(),
+      ]);
+    },
+    onError: (error) => toast.error(getApiErrorMessage(error, "Payment verification failed.")),
   });
 
   const paidRegistrations = useMemo(() => {
@@ -191,9 +210,21 @@ export function AdminPaymentsManager() {
                           </td>
                           <td className="px-5 py-4 text-[var(--color-muted-foreground)]">{format(new Date(registration.registeredAt), "dd MMM yyyy")}</td>
                           <td className="px-5 py-4">
-                            <button type="button" onClick={() => setDetailsPayment(registration)} className="secondary-button h-10 px-4 text-sm">
-                              Details
-                            </button>
+                            <div className="flex flex-wrap gap-2">
+                              <button type="button" onClick={() => setDetailsPayment(registration)} className="secondary-button h-10 px-4 text-sm">
+                                Details
+                              </button>
+                              {registration.paymentVerificationStatus === "PENDING_VERIFICATION" ? (
+                                <button
+                                  type="button"
+                                  onClick={() => setVerificationTarget(registration)}
+                                  disabled={verifyPaymentMutation.isPending}
+                                  className="primary-button h-10 px-4 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  Verify Payment
+                                </button>
+                              ) : null}
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -281,7 +312,31 @@ export function AdminPaymentsManager() {
           </div>
         </div>
       ) : null}
+
+      <WarningConfirmModal
+        open={Boolean(verificationTarget)}
+        title="Verify this payment now?"
+        description="Use this only when Stripe already shows the checkout session as paid but the webhook has not marked the registration verified yet. Webhook-verified payments will not show this action."
+        confirmLabel="Verify payment"
+        cancelLabel="Keep pending"
+        isLoading={verifyPaymentMutation.isPending}
+        onConfirm={() => {
+          if (!verificationTarget) return;
+          verifyPaymentMutation.mutate(verificationTarget.id);
+        }}
+        onCancel={() => {
+          if (verifyPaymentMutation.isPending) return;
+          setVerificationTarget(null);
+        }}
+      >
+        {verificationTarget ? (
+          <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-page)] p-4 text-sm text-[var(--color-muted-foreground)]">
+            <p><span className="font-semibold text-[var(--color-primary)]">Event:</span> {verificationTarget.event.title}</p>
+            <p className="mt-2"><span className="font-semibold text-[var(--color-primary)]">User:</span> {verificationTarget.user?.email ?? verificationTarget.snapshotEmail ?? "No email"}</p>
+            <p className="mt-2 break-all"><span className="font-semibold text-[var(--color-primary)]">Checkout:</span> {verificationTarget.stripeCheckoutSessionId ?? "Not available"}</p>
+          </div>
+        ) : null}
+      </WarningConfirmModal>
     </>
   );
 }
-
