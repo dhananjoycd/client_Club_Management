@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { FormActions } from "@/components/forms/form-actions";
@@ -29,7 +30,8 @@ export function LoginForm() {
   const loginMutation = useMutation({
     mutationFn: authService.login,
     onSuccess: async (response) => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.auth.session });
+      queryClient.setQueryData(queryKeys.auth.session, response);
+      await queryClient.refetchQueries({ queryKey: queryKeys.auth.session, type: "active" });
       toast.success(response.message ?? "Login successful.");
       const user = response.data?.user;
       const fallback = user?.role === "USER" || user?.role === "MEMBER" ? "/account" : "/admin";
@@ -38,6 +40,13 @@ export function LoginForm() {
   });
 
   const currentUser = sessionQuery.data?.data?.user;
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const fallback = currentUser.role === "USER" || currentUser.role === "MEMBER" ? "/account" : "/admin";
+    router.replace(redirectTo || fallback);
+  }, [currentUser, redirectTo, router]);
 
   const handleLogin = (values: LoginPayload) => {
     loginMutation.mutate(values, {
@@ -106,3 +115,7 @@ export function LoginForm() {
     </div>
   );
 }
+
+
+
+

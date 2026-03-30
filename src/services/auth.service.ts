@@ -24,7 +24,16 @@ export const authService = {
   },
 
   async getSession() {
-    const { data } = await api.get<ApiResponse<AuthSession>>("/auth/session");
+    const { data } = await api.get<ApiResponse<AuthSession>>("/auth/session", {
+      params: {
+        _t: Date.now(),
+      },
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    });
     return data;
   },
 
@@ -57,3 +66,5 @@ export const authService = {
     return data;
   },
 };
+
+
