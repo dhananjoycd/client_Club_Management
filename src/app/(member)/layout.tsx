@@ -1,7 +1,20 @@
+import dynamic from "next/dynamic";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { ProtectedArea } from "@/components/layout/protected-area";
-import { PublicFooter } from "@/components/layout/public-footer";
-import { PublicNavbar } from "@/components/layout/public-navbar";
+
+const PublicNavbar = dynamic(
+  () => import("@/components/layout/public-navbar").then((mod) => mod.PublicNavbar),
+  {
+    loading: () => <div className="sticky top-0 z-40 h-[4.75rem] border-b border-[var(--color-border)] bg-[rgba(249,251,254,0.78)] backdrop-blur-xl" />,
+  },
+);
+
+const PublicFooter = dynamic(
+  () => import("@/components/layout/public-footer").then((mod) => mod.PublicFooter),
+  {
+    loading: () => <div className="h-32 border-t border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,#091429,#071020)]" />,
+  },
+);
 
 type MemberLayoutProps = Readonly<{
   children: React.ReactNode;
