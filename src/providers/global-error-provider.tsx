@@ -17,12 +17,36 @@ const AUTH_PAGE_PREFIXES = [
   "/verify-email",
 ];
 
+const IGNORED_WINDOW_ERROR_MESSAGES = [
+  "script error",
+  "resizeobserver loop",
+  "non-error promise rejection captured",
+  "the message port closed before a response was received",
+  "listener indicated an asynchronous response",
+  "loading chunk",
+  "chunkloaderror",
+];
+
 let hasPendingSessionRedirect = false;
 
 const isAuthPage = (pathname: string) =>
   AUTH_PAGE_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 
 const isAuthRequest = (url?: string) => typeof url === "string" && url.includes("/auth/");
+
+const shouldIgnoreWindowError = (event: ErrorEvent) => {
+  const message = [event.message, event.error instanceof Error ? event.error.message : ""]
+    .filter(Boolean)
+    .join(" ")
+    .trim()
+    .toLowerCase();
+
+  if (!message) {
+    return true;
+  }
+
+  return IGNORED_WINDOW_ERROR_MESSAGES.some((item) => message.includes(item));
+};
 
 const getPageContext = (pathname: string) => {
   if (pathname.startsWith("/admin")) {
@@ -112,7 +136,7 @@ export function GlobalErrorProvider({ children }: GlobalErrorProviderProps) {
     };
 
     const handleWindowError = (event: ErrorEvent) => {
-      if (!event.error) {
+      if (shouldIgnoreWindowError(event)) {
         return;
       }
 

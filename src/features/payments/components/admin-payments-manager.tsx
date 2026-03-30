@@ -221,7 +221,7 @@ export function AdminPaymentsManager() {
                                   disabled={verifyPaymentMutation.isPending}
                                   className="primary-button h-10 px-4 text-sm disabled:cursor-not-allowed disabled:opacity-60"
                                 >
-                                  Verify Payment
+                                  Verify 
                                 </button>
                               ) : null}
                             </div>

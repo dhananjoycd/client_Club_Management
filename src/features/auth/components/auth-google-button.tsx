@@ -40,7 +40,7 @@ export function AuthGoogleButton({
 
   const handleGoogleSignIn = async () => {
     if (isUnavailable || isRedirecting) {
-      toast.error("Google login is not available right now.");
+      toast.error("Google sign-in is not ready right now. Please try again in a moment.");
       return;
     }
 
@@ -104,16 +104,16 @@ export function AuthGoogleButton({
         return;
       }
 
-      throw new Error("Unable to start Google login.");
+      throw new Error("Unable to start Google sign-in.");
     } catch (error) {
       console.error(error);
-      toast.error("Google login could not be started.");
+      toast.error("Google sign-in could not be started. Please try again.");
       setIsRedirecting(false);
     }
   };
 
   return (
-    <div>
+    <div className="grid gap-3">
       <button
         type="button"
         onClick={() => {
@@ -122,11 +122,25 @@ export function AuthGoogleButton({
         disabled={disabled || isRedirecting || isUnavailable}
         className="inline-flex h-11 w-full items-center justify-center gap-3 rounded-2xl border border-[var(--color-border)] bg-white px-4 text-sm font-semibold text-[var(--color-primary-strong)] transition hover:border-[var(--color-accent)] hover:bg-[var(--color-page)] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-page)] text-xs font-bold text-[var(--color-primary)]">
-          G
-        </span>
-        {isRedirecting ? "Redirecting..." : label}
+        {isRedirecting ? (
+          <span className="relative inline-flex h-6 w-6 items-center justify-center" aria-hidden="true">
+            <span className="absolute inset-0 animate-ping rounded-full bg-[var(--color-primary-soft)]" />
+            <span className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--color-primary)]/25 border-t-[var(--color-primary)]" />
+          </span>
+        ) : (
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-page)] text-xs font-bold text-[var(--color-primary)]">
+            G
+          </span>
+        )}
+        {isRedirecting ? "Connecting to Google..." : label}
       </button>
+
+      {isRedirecting ? (
+        <div className="flex items-start gap-2 rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-page)] px-4 py-3 text-sm text-[var(--color-muted-foreground)]">
+          <span className="mt-1 h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-[var(--color-secondary)]" aria-hidden="true" />
+          <p>Opening the secure Google sign-in flow and preparing your account access.</p>
+        </div>
+      ) : null}
     </div>
   );
 }

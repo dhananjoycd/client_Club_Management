@@ -32,7 +32,7 @@ export function LoginForm() {
     onSuccess: async (response) => {
       queryClient.setQueryData(queryKeys.auth.session, response);
       await queryClient.refetchQueries({ queryKey: queryKeys.auth.session, type: "active" });
-      toast.success(response.message ?? "Login successful.");
+      toast.success("Welcome back. Your account is ready.");
       const user = response.data?.user;
       const fallback = user?.role === "USER" || user?.role === "MEMBER" ? "/account" : "/admin";
       router.push(redirectTo || fallback);
@@ -54,12 +54,12 @@ export function LoginForm() {
         const message = getApiErrorMessage(error, "Login failed. Please try again.");
 
         if (/EMAIL_NOT_VERIFIED|verify/i.test(message)) {
-          toast.error(message);
+          toast.error("Your email is not verified yet. Please verify it first to continue.");
           router.push(`/verify-email?email=${encodeURIComponent(values.email)}`);
           return;
         }
 
-        toast.error(message);
+        toast.error(getApiErrorMessage(error, "We could not sign you in right now. Check your email and password, then try again."));
       },
     });
   };
@@ -90,6 +90,7 @@ export function LoginForm() {
           isSubmitting={loginMutation.isPending}
           submitLabel="Sign in"
           submittingLabel="Signing you in..."
+          submittingHint="Checking your account details and preparing your dashboard access. This usually takes a moment."
           helperText="Sign in to access your dashboard, registrations, and account updates."
           secondaryAction={
             currentUser ? (
@@ -115,6 +116,8 @@ export function LoginForm() {
     </div>
   );
 }
+
+
 
 
 

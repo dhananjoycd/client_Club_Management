@@ -5,9 +5,9 @@ export default function PublicRouteLoading() {
     <main className="px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-7xl">
         <RouteLoadingShell
-          badge="Public Page"
-          title="Loading club stories, events, and updates"
-          description="Preparing the next public section with the latest XYZ Tech Club content, notices, and featured highlights."
+          badge="Homepage Loading"
+          title="Loading the club home page"
+          description="Bringing in the latest hero content, featured events, notices, testimonials, and public updates for XYZ Tech Club."
         />
       </div>
     </main>

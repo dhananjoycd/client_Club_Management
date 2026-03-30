@@ -33,10 +33,10 @@ export function RegisterForm() {
     mutationFn: authService.register,
     onSuccess: async (_response, variables) => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.auth.session });
-      toast.success("Account created. Check your email to verify your address.");
+      toast.success("Your account has been created. Check your inbox to verify your email.");
       router.push(`/verify-email?email=${encodeURIComponent(variables.email)}&sent=1`);
     },
-    onError: (error) => toast.error(getApiErrorMessage(error, "Registration failed. Please try again.")),
+    onError: (error) => toast.error(getApiErrorMessage(error, "We could not create your account right now. Please try again in a moment.")),
   });
 
   const currentUser = sessionQuery.data?.data?.user;
@@ -71,6 +71,7 @@ export function RegisterForm() {
           isSubmitting={registerMutation.isPending}
           submitLabel="Create account"
           submittingLabel="Creating your account..."
+          submittingHint="Saving your account securely and preparing the verification email for your inbox."
           helperText="Create your account first, then verify your email before signing in and joining member features."
           secondaryAction={
             <div className="grid gap-4 pt-2">
@@ -88,3 +89,5 @@ export function RegisterForm() {
     </div>
   );
 }
+
+
