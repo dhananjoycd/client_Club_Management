@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Facebook, Github, Linkedin } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-keys";
 import { authService } from "@/services/auth.service";
@@ -18,6 +19,12 @@ const socialLabels = Object.keys(socialConfig) as Array<keyof typeof socialConfi
 export function PublicFooter() {
   const settingsQuery = useQuery({ queryKey: queryKeys.settings.detail, queryFn: settingsService.getSettings, retry: false });
   const sessionQuery = useQuery({ queryKey: queryKeys.auth.session, queryFn: authService.getSession, retry: false });
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
+
   const settings = settingsQuery.data?.data;
   const organizationName = settings?.organizationName?.trim() || "XYZ Tech Club";
   const email = settings?.contactEmail?.trim() || "hello@xyztechclub.org";
@@ -28,12 +35,6 @@ export function PublicFooter() {
   const activeSocialLinks = socialLabels
     .map((label) => [label, socialLinks[label]] as const)
     .filter(([, href]) => typeof href === "string" && href.trim().length > 0);
-  const today = new Date();
-  const footerDate = today.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
 
   return (
     <footer className="mt-12 border-t border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,#091429,#071020)] text-[rgba(237,244,255,0.92)] sm:mt-16">
@@ -109,7 +110,7 @@ export function PublicFooter() {
 
       <div className="border-t border-white/8">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-2 px-4 py-4 text-center text-sm text-[rgba(226,232,240,0.64)] sm:px-6 lg:px-8">
-          <p>&copy; {today.getFullYear()} {organizationName}. Built for student communities.</p>
+          <p>&copy; {currentYear ?? ""} {organizationName}. Built for student communities.</p>
           <p>
             Developed by{" "}
             <a
