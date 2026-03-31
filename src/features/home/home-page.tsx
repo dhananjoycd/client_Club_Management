@@ -346,7 +346,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
             animate={{ opacity: 1, x: 0, y: 0 }}
             transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
           >
-            <motion.div className="surface-card grid gap-4 rounded-[2rem] p-4 sm:grid-cols-2 sm:p-6" animate={{ y: [0, -6, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}>
+            <motion.div className="surface-card grid grid-cols-1 gap-4 rounded-[2rem] p-3 sm:grid-cols-2 sm:p-6" animate={{ y: [0, -6, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}>
               <div className="relative overflow-hidden rounded-[1.75rem] shadow-[0_24px_48px_rgba(15,76,189,0.18)] sm:col-span-2">
                 <div className="relative aspect-[16/10] min-h-[280px]">
                   <AnimatePresence mode="wait">
@@ -367,13 +367,13 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
                     initial={{ opacity: 0, y: 22 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.45, ease: "easeOut", delay: 0.1 }}
-                    className="absolute inset-x-0 bottom-0 p-5 sm:p-6"
+                    className="absolute inset-x-0 bottom-0 p-4 sm:p-6"
                   >
                     <span className="inline-flex rounded-full border border-white/16 bg-white/12 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/88">
                       {currentSlide.tag}
                     </span>
-                    <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">{currentSlide.title}</h2>
-                    <p className="mt-3 max-w-xl text-sm leading-7 text-white/82">{currentSlide.description}</p>
+                    <h2 className="mt-3 text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl">{currentSlide.title}</h2>
+                    <p className="mt-3 max-w-xl text-sm leading-6 text-white/82 sm:leading-7">{currentSlide.description}</p>
                   </motion.div>
                 </div>
                 <div className="absolute left-4 top-4 flex gap-2">
@@ -678,14 +678,14 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
           )}
         </SectionWrapper>
 
-        <section id="committee" className="grid grid-cols-1 gap-6 lg:grid-cols-[1.16fr_0.84fr]">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:order-1">
+        <section id="committee" className="grid grid-cols-1 gap-6 lg:grid-cols-[0.84fr_1.16fr]">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:order-2">
             {displayCommitteeMembers.slice(0, 4).map((member) => (
               <CommitteeMemberCard key={`${member.name}-${member.role}`} member={member} compact />
             ))}
           </div>
 
-          <div className="relative overflow-hidden rounded-[2rem] border border-[rgba(125,211,252,0.22)] bg-[linear-gradient(145deg,#08275a_0%,#0b3b88_52%,#0ea5b7_100%)] p-6 text-white shadow-[0_24px_60px_rgba(8,39,90,0.24)] sm:p-8 lg:order-2">
+          <div className="relative overflow-hidden rounded-[2rem] border border-[rgba(125,211,252,0.22)] bg-[linear-gradient(145deg,#08275a_0%,#0b3b88_52%,#0ea5b7_100%)] p-6 text-white shadow-[0_24px_60px_rgba(8,39,90,0.24)] sm:p-8 lg:order-1">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(34,199,214,0.14),transparent_24%)]" />
             <div className="relative flex h-full flex-col justify-between gap-6">
               <div className="space-y-3">
@@ -749,6 +749,9 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
     </>
   );
 }
+
+
+
 
 
 
