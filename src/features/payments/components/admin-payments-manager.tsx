@@ -242,7 +242,7 @@ export function AdminPaymentsManager() {
       </SectionWrapper>
 
       {detailsPayment ? (
-        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-950/55 px-4 py-6 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] overflow-auto bg-slate-950/55 px-4 py-6 backdrop-blur-sm">
           <div className="flex min-h-full items-center justify-center">
             <div className="surface-card w-full max-w-4xl rounded-[2rem] p-6 shadow-[0_24px_80px_rgba(15,23,42,0.28)] sm:p-7">
               <div className="flex flex-wrap items-start justify-between gap-4">

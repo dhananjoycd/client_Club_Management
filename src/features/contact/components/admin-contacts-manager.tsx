@@ -144,20 +144,13 @@ export function AdminContactsManager() {
           </div>
 
           <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-page)] p-4 sm:p-5">
-            <div className="grid gap-4 lg:grid-cols-[1.2fr_0.4fr_0.4fr]">
+            <div className="grid gap-4 lg:grid-cols-[1.4fr_0.6fr]">
               <label className="grid gap-2">
                 <span className="text-sm font-medium text-[var(--color-primary-strong)]">Search messages</span>
                 <div className="relative">
                   <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-muted-foreground)]" />
                   <input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search by sender, email, subject, or message" className="input-base h-12 w-full pl-11 pr-4 text-sm" />
                 </div>
-              </label>
-              <label className="grid gap-2">
-                <span className="text-sm font-medium text-[var(--color-primary-strong)]">Status</span>
-                <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as ContactMessageStatus | "ALL")} className="input-base h-12 px-4 text-sm">
-                  <option value="ALL">All statuses</option>
-                  {contactStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-                </select>
               </label>
               <label className="grid gap-2">
                 <span className="text-sm font-medium text-[var(--color-primary-strong)]">Category</span>
@@ -223,8 +216,8 @@ export function AdminContactsManager() {
       </SectionWrapper>
 
       {selected ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-6" role="dialog" aria-modal="true">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-page)] p-5 shadow-[0_28px_70px_rgba(8,22,49,0.24)] sm:p-6">
+        <div className="fixed inset-0 z-50 overflow-auto bg-slate-950/45 px-4 py-6" role="dialog" aria-modal="true">
+          <div className="mx-auto my-auto max-h-[90vh] w-full max-w-3xl overflow-auto rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-page)] p-5 shadow-[0_28px_70px_rgba(8,22,49,0.24)] sm:p-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-secondary)]">Contact details</p>

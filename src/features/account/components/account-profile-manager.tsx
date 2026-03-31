@@ -182,7 +182,7 @@ export function AccountProfileManager({ showRegistrations = true }: AccountProfi
 
 
       {isEditModalOpen ? (
-        <div className="fixed inset-0 z-[110] overflow-y-auto bg-slate-950/55 px-3 py-4 backdrop-blur-sm sm:px-4 sm:py-6">
+        <div className="fixed inset-0 z-[110] overflow-auto bg-slate-950/55 px-3 py-4 backdrop-blur-sm sm:px-4 sm:py-6">
           <div className="flex min-h-full items-center justify-center">
             <div className="surface-card w-full max-w-4xl rounded-[2rem] border border-white/60 p-4 sm:p-6 lg:p-7">
               <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-page)] p-4 sm:p-5">

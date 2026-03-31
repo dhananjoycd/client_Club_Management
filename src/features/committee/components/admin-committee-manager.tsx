@@ -199,8 +199,8 @@ export function AdminCommitteeManager() {
 
 
       {editingSession ? (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/55 px-4 py-6 backdrop-blur-sm">
-          <div className="surface-card w-full max-w-3xl rounded-[2rem] p-5 sm:p-6">
+        <div className="fixed inset-0 z-[110] overflow-auto bg-slate-950/55 px-4 py-6 backdrop-blur-sm">
+          <div className="surface-card mx-auto my-auto w-full max-w-3xl rounded-[2rem] p-5 sm:p-6">
             <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[var(--color-border)] pb-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-secondary)]">Edit committee session</p>

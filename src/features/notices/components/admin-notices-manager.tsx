@@ -320,8 +320,8 @@ export function AdminNoticesManager() {
       </div>
 
       {editingNotice ? (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/55 px-4 backdrop-blur-sm">
-          <div className="surface-card w-full max-w-2xl rounded-[2rem] p-6 shadow-[0_24px_80px_rgba(15,23,42,0.28)] sm:p-7">
+        <div className="fixed inset-0 z-[100] overflow-auto bg-slate-950/55 px-4 py-6 backdrop-blur-sm">
+          <div className="surface-card mx-auto my-auto w-full max-w-2xl rounded-[2rem] p-6 shadow-[0_24px_80px_rgba(15,23,42,0.28)] sm:p-7">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-medium uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">Edit notice</p>

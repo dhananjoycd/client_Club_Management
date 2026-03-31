@@ -194,8 +194,8 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
   return (
     <>
       {showWelcomePopup ? (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/55 px-4 py-6 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="home-welcome-popup-title">
-          <div className="relative w-full max-w-2xl overflow-hidden rounded-[2rem] border border-[rgba(125,211,252,0.24)] bg-[linear-gradient(160deg,rgba(255,255,255,0.98),rgba(240,249,255,0.98))] shadow-[0_30px_80px_rgba(8,39,90,0.28)]">
+        <div className="fixed inset-0 z-[120] overflow-auto bg-slate-950/55 px-4 py-6 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="home-welcome-popup-title">
+          <div className="relative mx-auto my-auto w-full max-w-2xl overflow-hidden rounded-[2rem] border border-[rgba(125,211,252,0.24)] bg-[linear-gradient(160deg,rgba(255,255,255,0.98),rgba(240,249,255,0.98))] shadow-[0_30px_80px_rgba(8,39,90,0.28)]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.18),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(15,76,189,0.12),transparent_24%)]" />
             <div className="relative p-6 sm:p-8">
               <div className="flex items-start justify-between gap-4">
