@@ -28,7 +28,7 @@ const memberLinks = [
 
 export default function MemberLayout({ children }: MemberLayoutProps) {
   return (
-    <ProtectedArea allowedRoles={["USER", "MEMBER", "ADMIN", "SUPER_ADMIN", "EVENT_MANAGER"]}>
+    <ProtectedArea allowedRoles={["USER", "MEMBER"]}>
       <div className="min-h-screen bg-[var(--color-page)]">
         <PublicNavbar />
         <div className="mt-2">
@@ -46,3 +46,4 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
     </ProtectedArea>
   );
 }
+

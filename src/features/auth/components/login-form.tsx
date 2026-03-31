@@ -35,7 +35,8 @@ export function LoginForm() {
       toast.success("Welcome back. Your account is ready.");
       const user = response.data?.user;
       const fallback = user?.role === "USER" || user?.role === "MEMBER" ? "/account" : "/admin";
-      router.push(redirectTo || fallback);
+      const nextPath = user?.role === "USER" || user?.role === "MEMBER" ? (redirectTo || fallback) : "/admin";
+      router.push(nextPath);
     },
   });
 
@@ -45,7 +46,8 @@ export function LoginForm() {
     if (!currentUser) return;
 
     const fallback = currentUser.role === "USER" || currentUser.role === "MEMBER" ? "/account" : "/admin";
-    router.replace(redirectTo || fallback);
+    const nextPath = currentUser.role === "USER" || currentUser.role === "MEMBER" ? (redirectTo || fallback) : "/admin";
+    router.replace(nextPath);
   }, [currentUser, redirectTo, router]);
 
   const handleLogin = (values: LoginPayload) => {
@@ -116,6 +118,10 @@ export function LoginForm() {
     </div>
   );
 }
+
+
+
+
 
 
 
