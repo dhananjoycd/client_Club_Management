@@ -303,12 +303,12 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
               </span>
               <div className="space-y-4">
                 <motion.p variants={heroItemVariants} className="text-sm font-semibold uppercase tracking-[0.28em] text-[var(--color-secondary)]">{organizationName}</motion.p>
-                <motion.h1 variants={heroItemVariants} className="max-w-4xl text-3xl font-semibold tracking-tight text-[var(--color-primary-strong)] sm:text-5xl lg:text-[4.5rem] lg:leading-[0.95]">
-                  Build, manage, and grow XYZ Tech Club with one connected digital platform.
+                <motion.h1 variants={heroItemVariants} className="max-w-3xl text-3xl font-semibold tracking-tight text-[var(--color-primary-strong)] sm:text-5xl lg:text-[3.9rem] lg:leading-[0.98]">
+                  XYZ Tech Club Portal
                 </motion.h1>
               </div>
               <motion.p variants={heroItemVariants} className="max-w-2xl text-base leading-8 text-[var(--color-muted-foreground)] sm:text-lg">
-                XYZ Tech Club can use this platform to publish notices, manage events, review member applications, and keep students, members, and admins connected through one organized system.
+                A streamlined platform for managing members, events, notices, applications, and the day-to-day rhythm of club operations.
               </motion.p>
             </motion.div>
 
@@ -628,7 +628,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
             <div className="grid grid-cols-1 gap-5 xl:grid-cols-[0.95fr_1.05fr]">
               <div className="relative overflow-hidden rounded-[1.75rem] border border-[rgba(125,211,252,0.26)] bg-[linear-gradient(145deg,#08275a_0%,#0b3b88_52%,#0ea5b7_100%)] p-6 text-white shadow-[0_24px_60px_rgba(8,39,90,0.2)] sm:p-8">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(34,199,214,0.18),transparent_26%)]" />
-                <div className="relative flex h-full flex-col justify-between gap-6">
+                <div className="relative flex h-full flex-col gap-6">
                   <div>
                     <p className="text-sm font-medium uppercase tracking-[0.22em] text-[rgba(214,240,255,0.82)]">Member voices</p>
                     <p className="mt-5 text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl">
@@ -678,42 +678,48 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
           )}
         </SectionWrapper>
 
-        <section id="committee" className="grid grid-cols-1 gap-6 lg:grid-cols-[0.84fr_1.16fr]">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:order-2">
-            {displayCommitteeMembers.slice(0, 4).map((member) => (
-              <CommitteeMemberCard key={`${member.name}-${member.role}`} member={member} compact />
-            ))}
+        <section id="committee" className="space-y-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[0.84fr_1.16fr]">
+            <div className="relative overflow-hidden rounded-[2rem] border border-[rgba(125,211,252,0.22)] bg-[linear-gradient(145deg,#08275a_0%,#0b3b88_52%,#0ea5b7_100%)] p-6 text-white shadow-[0_24px_60px_rgba(8,39,90,0.24)] sm:p-8 lg:order-1">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(34,199,214,0.14),transparent_24%)]" />
+              <div className="relative flex h-full flex-col gap-6">
+                <div className="max-w-xl space-y-4">
+                  <p className="text-sm font-medium uppercase tracking-[0.24em] text-[rgba(214,240,255,0.82)]">Club Leadership</p>
+                  <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-[2.35rem] sm:leading-[1.08]">Meet the executive team shaping the direction of {organizationName}.</h2>
+                  <p className="text-sm leading-7 text-[rgba(236,244,255,0.86)] sm:text-[15px]">From planning flagship events to coordinating members, communication, and operations, this team helps keep {organizationName} active, organized, and moving forward throughout the academic year.</p>
+                  <p className="text-sm leading-7 text-[rgba(214,240,255,0.72)]">Each role contributes to building a stronger club culture rooted in collaboration, consistency, and meaningful student engagement.</p>
+                </div>
+                <motion.div
+                  className="relative overflow-hidden rounded-[1.5rem] border border-white/14 bg-white/8 shadow-[0_18px_40px_rgba(7,16,32,0.2)]"
+                  animate={{ y: [0, -8, 0], scale: [1, 1.015, 1] }}
+                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <div className="relative aspect-[16/10] w-full">
+                    <Image
+                      src={committeeGroupPhotoUrl}
+                      alt={`${organizationName} committee group photo`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 100vw, 32vw"
+                    />
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,18,40,0.02),rgba(6,18,40,0.22))]" />
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:order-2">
+              {displayCommitteeMembers.slice(0, 4).map((member) => (
+                <CommitteeMemberCard key={`${member.name}-${member.role}`} member={member} compact />
+              ))}
+            </div>
           </div>
 
-          <div className="relative overflow-hidden rounded-[2rem] border border-[rgba(125,211,252,0.22)] bg-[linear-gradient(145deg,#08275a_0%,#0b3b88_52%,#0ea5b7_100%)] p-6 text-white shadow-[0_24px_60px_rgba(8,39,90,0.24)] sm:p-8 lg:order-1">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(34,199,214,0.14),transparent_24%)]" />
-            <div className="relative flex h-full flex-col justify-between gap-6">
-              <div className="space-y-3">
-                <p className="text-sm font-medium uppercase tracking-[0.22em] text-[rgba(214,240,255,0.82)]">Executive Committee</p>
-                <h2 className="text-3xl font-semibold tracking-tight text-white">Meet the people leading {organizationName}.</h2>
-                <p className="max-w-md text-sm leading-7 text-[rgba(236,244,255,0.84)]">Leadership and coordinators of {organizationName}.</p>
-              </div>
-              <motion.div
-                className="relative overflow-hidden rounded-[1.5rem] border border-white/14 bg-white/8 shadow-[0_18px_40px_rgba(7,16,32,0.2)]"
-                animate={{ y: [0, -8, 0], scale: [1, 1.015, 1] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <div className="relative aspect-[16/10] w-full">
-                  <Image
-                    src={committeeGroupPhotoUrl}
-                    alt={`${organizationName} committee group photo`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 1024px) 100vw, 32vw"
-                  />
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,18,40,0.02),rgba(6,18,40,0.22))]" />
-                </div>
-              </motion.div>
-              <Link href="/committee" className="secondary-button inline-flex h-11 items-center gap-2 self-start border-white/18 bg-white/12 px-5 text-sm text-white shadow-[0_16px_36px_rgba(8,39,90,0.22)] backdrop-blur hover:border-white/26 hover:bg-white/18 hover:text-white">
-                See Full Committee Members
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
+          <div className="flex w-full justify-center">
+            <Link href="/committee" className="inline-flex h-12 w-full max-w-lg items-center justify-center gap-2 rounded-full border border-[rgba(148,163,184,0.22)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.92))] px-6 text-sm font-semibold tracking-[0.01em] text-[var(--color-primary-strong)] shadow-[0_16px_34px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-[rgba(14,165,233,0.3)] hover:text-[var(--color-secondary)] hover:shadow-[0_20px_38px_rgba(15,23,42,0.1)]">
+              Meet the Full Leadership Team
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </section>
 

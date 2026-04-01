@@ -5,7 +5,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { cn } from "@/lib/utils";
 import { queryKeys } from "@/lib/query-keys";
 import { authService } from "@/services/auth.service";
@@ -37,6 +39,7 @@ export function PublicNavbar() {
   const [activeHash, setActiveHash] = useState("");
   const pathname = usePathname();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const sessionQuery = useQuery({ queryKey: queryKeys.auth.session, queryFn: authService.getSession, retry: false });
   const settingsQuery = useQuery({ queryKey: queryKeys.settings.detail, queryFn: settingsService.getSettings, retry: false });
   const user = sessionQuery.data?.data?.user;
@@ -74,6 +77,19 @@ export function PublicNavbar() {
     [accountProfile?.memberProfile?.profilePhoto, user?.image],
   );
   const avatarInitials = getInitials(accountProfile?.name ?? user?.name, user?.email);
+  const logoutMutation = useMutation({
+    mutationFn: authService.logout,
+    onSuccess: async (response) => {
+      toast.success(response.message ?? "Logged out successfully.");
+      setIsOpen(false);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.auth.session }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.account.profile }),
+      ]);
+      router.push("/");
+    },
+    onError: (error) => toast.error(getApiErrorMessage(error, "Logout failed.")),
+  });
 
   useEffect(() => {
     const updateHash = () => setActiveHash(window.location.hash);
@@ -160,7 +176,16 @@ export function PublicNavbar() {
               {!user ? <Link href="/login" className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Login</Link> : null}
               {!user ? <Link href="/register" className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Register</Link> : null}
               {showJoinNow ? <Link href="/apply" className="primary-button h-11 whitespace-nowrap px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(37,99,235,0.28)]">Join Now</Link> : null}
-              {user ? <Link href="/notices" className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Notices</Link> : null}
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => logoutMutation.mutate()}
+                  disabled={logoutMutation.isPending}
+                  className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {logoutMutation.isPending ? "Logging out..." : "Logout"}
+                </button>
+              ) : null}
             </>
           )}
         </div>
@@ -244,9 +269,14 @@ export function PublicNavbar() {
                           Profile
                         </Link>
                       ) : null}
-                      <Link href="/notices" onClick={() => setIsOpen(false)} className="secondary-button h-10 px-4 text-sm">
-                        Notices
-                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => logoutMutation.mutate()}
+                        disabled={logoutMutation.isPending}
+                        className="secondary-button h-10 px-4 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {logoutMutation.isPending ? "Logging out..." : "Logout"}
+                      </button>
                     </div>
                   ) : (
                     <div className="grid gap-2 sm:grid-cols-2">
