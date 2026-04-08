@@ -156,7 +156,7 @@ export function AdminTestimonialsManager() {
             <>
               <div className="grid gap-4 xl:grid-cols-2">
                 {data.result.map((item) => (
-                  <article key={item.id} className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/80 p-5 transition hover:border-[var(--color-accent)] hover:bg-white">
+                  <article key={item.id} className="rounded-[1.5rem] app-card-subtle p-5 transition hover:border-[var(--color-accent)] hover:bg-white">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
@@ -216,21 +216,21 @@ export function AdminTestimonialsManager() {
             </div>
 
             <div className="mt-5 grid gap-4 sm:grid-cols-3">
-              <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white/80 p-4">
+              <div className="rounded-[1.25rem] app-card-subtle p-4">
                 <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">Context</p>
                 <p className="mt-2 text-sm font-medium text-[var(--color-primary-strong)]">{selected.meta}</p>
               </div>
-              <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white/80 p-4">
+              <div className="rounded-[1.25rem] app-card-subtle p-4">
                 <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">Display order</p>
                 <p className="mt-2 text-sm font-medium text-[var(--color-primary-strong)]">{displayOrder}</p>
               </div>
-              <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white/80 p-4">
+              <div className="rounded-[1.25rem] app-card-subtle p-4">
                 <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">Submitted</p>
                 <p className="mt-2 text-sm font-medium text-[var(--color-primary-strong)]">{new Date(selected.createdAt).toLocaleDateString("en-GB")}</p>
               </div>
             </div>
 
-            <div className="mt-5 rounded-[1.5rem] border border-[var(--color-border)] bg-white/80 p-5">
+            <div className="mt-5 rounded-[1.5rem] app-card-subtle p-5">
               <p className="text-sm leading-8 text-[var(--color-foreground)]">&ldquo;{selected.quote}&rdquo;</p>
             </div>
 
@@ -253,7 +253,7 @@ export function AdminTestimonialsManager() {
                 <span className="text-sm font-medium text-[var(--color-primary-strong)]">Display order</span>
                 <input value={displayOrder} onChange={(event) => setDisplayOrder(String(Math.max(1, Number.parseInt(event.target.value || "1", 10) || 1)))} className="input-base h-12 px-4 text-sm" inputMode="numeric" min="1" />
               </label>
-              <label className="flex items-center gap-3 rounded-[1rem] border border-[var(--color-border)] bg-white/80 px-4 py-3 text-sm text-[var(--color-primary-strong)]">
+              <label className="flex items-center gap-3 rounded-[1rem] app-card-subtle px-4 py-3 text-sm text-[var(--color-primary-strong)]">
                 <input type="checkbox" checked={isFeatured} onChange={(event) => setIsFeatured(event.target.checked)} className="h-4 w-4" />
                 Mark this testimonial as featured
               </label>
@@ -288,3 +288,4 @@ export function AdminTestimonialsManager() {
     </>
   );
 }
+

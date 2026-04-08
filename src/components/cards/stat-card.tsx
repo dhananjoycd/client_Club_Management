@@ -12,7 +12,7 @@ type StatCardProps = {
 export function StatCard({ label, value, description, icon, className }: StatCardProps) {
   return (
     <MotionReveal className={className}>
-      <div className="surface-card h-full rounded-[1.5rem] p-4 sm:p-5 transition-transform duration-300 ease-out hover:-translate-y-1">
+      <div className="surface-card h-full rounded-[1.5rem] p-4 transition-transform duration-300 ease-out hover:-translate-y-1 sm:p-5">
         <div className="flex items-start justify-between gap-3 sm:gap-4">
           <div className="min-w-0 flex-1 space-y-2">
             <p className="text-sm font-medium text-[var(--color-muted-foreground)]">{label}</p>

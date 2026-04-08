@@ -125,18 +125,18 @@ export function PublicCommitteeView({ sessions, initialSessionId }: PublicCommit
               </div>
               {selectedSession ? (
                 <div className="mt-6 grid gap-6">
-                  <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-white/60 p-5 sm:p-6">
+                  <div className="rounded-[1.75rem] app-card-soft p-5 sm:p-6">
                     <div className="flex flex-wrap items-center justify-between gap-4">
                       <div>
                         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-secondary)]">Committee term</p>
                         <h2 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--color-primary-strong)]">{selectedSession.title || `Committee ${selectedSession.label}`}</h2>
                         {selectedSession.description ? <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--color-muted-foreground)]">{selectedSession.description}</p> : null}
                       </div>
-                      {selectedSession.isActive ? <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Current committee</span> : null}
+                      {selectedSession.isActive ? <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-500/15 dark:text-emerald-200">Current committee</span> : null}
                     </div>
                   </div>
-                  <div className="overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] bg-white/60 p-3">
-                    <div className="relative aspect-[16/7] overflow-hidden rounded-[1.25rem] bg-[var(--color-page)]">
+                  <div className="overflow-hidden rounded-[1.75rem] app-card-soft p-3">
+                    <div className="relative aspect-[16/7] overflow-hidden rounded-[1.25rem] app-card-page">
                       <Image src={selectedSession.coverImageUrl || defaultCommitteeGroupPhotoUrl} alt={`${selectedSession.label} committee group`} fill className="object-cover" sizes="(max-width: 1280px) 100vw, 72rem" unoptimized />
                     </div>
                   </div>
@@ -163,3 +163,4 @@ export function PublicCommitteeView({ sessions, initialSessionId }: PublicCommit
     </main>
   );
 }
+

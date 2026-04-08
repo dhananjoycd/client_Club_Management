@@ -95,15 +95,15 @@ export function PublicContactView() {
         <div className="grid gap-4 md:grid-cols-3">
           <SectionWrapper className="md:col-span-1" title="Support flow" description="Each message stays attached to your account for easier review.">
             <div className="grid gap-3 text-sm text-[var(--color-muted-foreground)]">
-              <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white/70 p-4">
+              <div className="rounded-[1.25rem] app-card-soft p-4">
                 <div className="flex items-center gap-3 text-[var(--color-primary-strong)]"><Mail className="h-4 w-4" /><span className="font-medium">Contact email</span></div>
                 <p className="mt-2 break-all">{supportEmail}</p>
               </div>
-              <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white/70 p-4">
+              <div className="rounded-[1.25rem] app-card-soft p-4">
                 <div className="flex items-center gap-3 text-[var(--color-primary-strong)]"><ShieldCheck className="h-4 w-4" /><span className="font-medium">Admin visibility</span></div>
                 <p className="mt-2">Admins and super admins can review, reply with a note, and mark your request as resolved.</p>
               </div>
-              <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white/70 p-4">
+              <div className="rounded-[1.25rem] app-card-soft p-4">
                 <div className="flex items-center gap-3 text-[var(--color-primary-strong)]"><MessageSquareText className="h-4 w-4" /><span className="font-medium">Latest resolution</span></div>
                 <p className="mt-2">{latestResolvedNote ?? "Resolved admin notes will appear here once one of your messages is closed."}</p>
               </div>
@@ -112,7 +112,7 @@ export function PublicContactView() {
 
           <SectionWrapper className="md:col-span-2" title="Send a contact request" description="Use a clear subject and enough detail so the admin team can help without follow-up delay.">
             {!user ? (
-              <div className="grid gap-4 rounded-[1.5rem] border border-[var(--color-border)] bg-white/70 p-5">
+              <div className="grid gap-4 rounded-[1.5rem] app-card-soft p-5">
                 <p className="text-sm leading-7 text-[var(--color-muted-foreground)]">Sign in first to send a tracked contact request to the admin team. Your message history and admin notes will stay linked to your account.</p>
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <Link href="/login" className="primary-button h-11 px-5 text-sm">Login</Link>
@@ -179,3 +179,4 @@ export function PublicContactView() {
     </main>
   );
 }
+

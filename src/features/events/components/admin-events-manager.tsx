@@ -126,16 +126,16 @@ function EventFormFields({
       ) : null}
       <FormField label="Event image URL" error={errors.imageUrl} disabled={disabled} {...register("imageUrl")} />
       <div className="grid gap-3 sm:grid-cols-2">
-        <label className="flex items-center gap-3 rounded-[1rem] border border-[var(--color-border)] bg-white/70 px-4 py-3 text-sm font-medium text-[var(--color-primary-strong)]">
+        <label className="flex items-center gap-3 rounded-[1rem] app-card-soft px-4 py-3 text-sm font-medium text-[var(--color-primary-strong)]">
           <input type="checkbox" className="h-4 w-4" disabled={disabled} {...register("isFeatured")} />
           Mark as featured event
         </label>
-        <label className="flex items-center gap-3 rounded-[1rem] border border-[var(--color-border)] bg-white/70 px-4 py-3 text-sm font-medium text-[var(--color-primary-strong)]">
+        <label className="flex items-center gap-3 rounded-[1rem] app-card-soft px-4 py-3 text-sm font-medium text-[var(--color-primary-strong)]">
           <input type="checkbox" className="h-4 w-4" disabled={disabled} {...register("isRegistrationOpen")} />
           Registration open
         </label>
       </div>
-      <label className="flex items-start gap-3 rounded-[1rem] border border-[var(--color-border)] bg-white/70 px-4 py-3 text-sm text-[var(--color-muted-foreground)]">
+      <label className="flex items-start gap-3 rounded-[1rem] app-card-soft px-4 py-3 text-sm text-[var(--color-muted-foreground)]">
         <input type="checkbox" className="mt-1 h-4 w-4" disabled={disabled} {...register("sendEmail")} />
         <span>
           <span className="block font-medium text-[var(--color-primary-strong)]">Send this event by email</span>
@@ -276,7 +276,7 @@ export function AdminEventsManager() {
                 <p className="text-sm font-semibold text-[var(--color-primary-strong)]">Open event form</p>
                 <p className="mt-1 text-sm leading-6 text-[var(--color-muted-foreground)]">{isCreateOpen ? "Hide the event form once you are done creating activities." : "Open the event form to publish a new XYZ Tech Club activity."}</p>
               </div>
-              <span className="inline-flex h-11 min-w-11 items-center justify-center rounded-full border border-[var(--color-border)] bg-white/80 px-4 text-base font-semibold text-[var(--color-primary)]">
+              <span className="inline-flex h-11 min-w-11 items-center justify-center rounded-full app-card-subtle px-4 text-base font-semibold text-[var(--color-primary)]">
                 {isCreateOpen ? "-" : "+"}
               </span>
             </button>
@@ -490,3 +490,4 @@ export function AdminEventsManager() {
     </>
   );
 }
+

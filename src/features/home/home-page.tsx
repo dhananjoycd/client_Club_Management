@@ -206,7 +206,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
                   </span>
                   <div className="flex flex-wrap items-center gap-3">
                     <h2 id="home-welcome-popup-title" className="text-2xl font-semibold tracking-tight text-[var(--color-primary-strong)] sm:text-3xl">Welcome to XYZ Tech Club</h2>
-                    <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-primary)]">
+                    <span className="inline-flex items-center gap-2 rounded-full app-card-subtle px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-primary)]">
                       <ShieldCheck className="h-3.5 w-3.5" />
                       Version {HOME_POPUP_VERSION}
                     </span>
@@ -216,7 +216,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
                 <button
                   type="button"
                   onClick={dismissWelcomePopup}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-white/80 text-[var(--color-primary)] transition hover:border-[var(--color-accent)] hover:bg-white"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl app-card-subtle text-[var(--color-primary)] transition hover:border-[var(--color-accent)] hover:bg-white"
                   aria-label="Close welcome popup"
                 >
                   <X className="h-5 w-5" />
@@ -228,7 +228,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
                   const Icon = item.icon;
 
                   return (
-                    <div key={item.text} className="flex items-start gap-3 rounded-[1.25rem] border border-[var(--color-border)] bg-white/70 px-4 py-3">
+                    <div key={item.text} className="flex items-start gap-3 rounded-[1.25rem] app-card-soft px-4 py-3">
                       <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-accent-soft)] text-[var(--color-secondary)]">
                         <Icon className="h-5 w-5" />
                       </div>
@@ -426,9 +426,9 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
                   icon={<Users className="h-5 w-5" />}
                 />
               </motion.div>
-              <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.46, ease: "easeOut" }} className="rounded-[1.5rem] border border-[var(--color-border)] bg-[linear-gradient(180deg,#eff7ff,#f8fcff)] p-5 sm:col-span-2">
+              <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.46, ease: "easeOut" }} className="rounded-[1.5rem] app-card-soft p-5 sm:col-span-2 dark:border-[rgba(148,163,184,0.22)] dark:bg-[linear-gradient(180deg,rgba(12,27,43,0.94),rgba(8,19,32,0.98))]">
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-secondary)]">Why it works</p>
-                <ul className="mt-4 grid grid-cols-1 gap-3 text-sm leading-6 text-[var(--color-foreground)] sm:grid-cols-2">
+                <ul className="mt-4 grid grid-cols-1 gap-3 text-sm leading-6 text-[var(--color-foreground)] sm:grid-cols-2 dark:text-[var(--color-primary-strong)]">
                   {trustItems.map((item) => (
                     <motion.li key={item} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, ease: "easeOut" }} className="flex items-start gap-3">
                       <span className="mt-2 h-2.5 w-2.5 rounded-full bg-[var(--color-accent)]" />
@@ -442,10 +442,10 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
         </div>
       </section>
 
-      <section className="border-y border-[var(--color-border)] bg-white/58 backdrop-blur">
+      <section className="border-y border-[var(--color-border)] bg-white/58 backdrop-blur dark:bg-[linear-gradient(180deg,rgba(12,27,43,0.94),rgba(8,19,32,0.98))]">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--color-secondary)]">Trusted campus collaboration</p>
-          <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm font-semibold text-[var(--color-primary)]">
+          <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm font-semibold text-[var(--color-primary)] dark:text-[var(--color-accent)]">
             <span>University community</span>
             <span>Student leaders</span>
             <span>Workshop mentors</span>
@@ -464,7 +464,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
               <p className="mt-4 max-w-2xl text-base leading-8 text-[rgba(236,244,255,0.88)]">{aboutText || "XYZ Tech Club helps students learn practical skills, join workshops, participate in events, collaborate on projects, and grow through an active campus tech community."}</p>
               {aboutSectionPhotoUrl ? (
                 <motion.div
-                  className="mt-6 overflow-hidden rounded-[1.5rem] border border-white/14 bg-white/8 shadow-[0_18px_40px_rgba(7,16,32,0.2)]"
+                  className="mt-6 overflow-hidden rounded-[1.5rem] border border-white/14 bg-white/8 shadow-[0_18px_40px_rgba(7,16,32,0.2)] dark:bg-white/10"
                   animate={{ y: [0, -6, 0], scale: [1, 1.012, 1] }}
                   transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
                 >
@@ -496,7 +496,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
                 const Icon = item.icon;
 
                 return (
-                  <div key={item.title} className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/60 p-5">
+                  <div key={item.title} className="rounded-[1.5rem] app-card p-5 transition duration-300 hover:-translate-y-0.5 hover:shadow-sm dark:border-[rgba(148,163,184,0.22)] dark:bg-[linear-gradient(180deg,rgba(14,30,47,0.94),rgba(10,22,36,0.98))] dark:shadow-[0_18px_40px_rgba(2,8,23,0.24)]">
                     <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-accent-soft)] text-[var(--color-secondary)]">
                       <Icon className="h-5 w-5" />
                     </div>
@@ -518,7 +518,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
               const Icon = item.icon;
 
               return (
-                <div key={item.title} className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/60 p-5 transition hover:-translate-y-0.5 hover:shadow-sm">
+                <div key={item.title} className="rounded-[1.5rem] app-card p-5 transition duration-300 hover:-translate-y-0.5 hover:shadow-sm dark:border-[rgba(148,163,184,0.22)] dark:bg-[linear-gradient(180deg,rgba(14,30,47,0.94),rgba(10,22,36,0.98))] dark:shadow-[0_18px_40px_rgba(2,8,23,0.24)]">
                   <div className="flex items-center gap-3">
                     <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-accent-soft)] text-[var(--color-secondary)]">
                       <Icon className="h-5 w-5" />
@@ -543,8 +543,8 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
                   A strong club should create consistent learning, responsible teamwork, and a clear path from first participation to real contribution.
                 </p>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-[var(--color-border)] bg-white/60 px-4 py-3 text-sm font-medium text-[var(--color-primary-strong)]">Weekly sessions and workshops</div>
-                  <div className="rounded-2xl border border-[var(--color-border)] bg-white/60 px-4 py-3 text-sm font-medium text-[var(--color-primary-strong)]">Projects, teamwork, and mentorship</div>
+                  <div className="rounded-2xl app-card px-4 py-3 text-sm font-medium text-[var(--color-primary-strong)] dark:border-[rgba(148,163,184,0.22)] dark:bg-[linear-gradient(180deg,rgba(14,30,47,0.94),rgba(10,22,36,0.98))]">Weekly sessions and workshops</div>
+                  <div className="rounded-2xl app-card px-4 py-3 text-sm font-medium text-[var(--color-primary-strong)] dark:border-[rgba(148,163,184,0.22)] dark:bg-[linear-gradient(180deg,rgba(14,30,47,0.94),rgba(10,22,36,0.98))]">Projects, teamwork, and mentorship</div>
                 </div>
               </div>
               <MembershipApplyCta
@@ -578,7 +578,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             {featuredEvents.length > 0 ? (
               featuredEvents.map((event) => (
-                <article key={event.id} className="rounded-[1.75rem] border border-[var(--color-border)] bg-white/60 p-5">
+                <article key={event.id} className="rounded-[1.75rem] app-card p-5 transition duration-300 hover:-translate-y-0.5 hover:shadow-sm dark:border-[rgba(148,163,184,0.22)] dark:bg-[linear-gradient(180deg,rgba(14,30,47,0.94),rgba(10,22,36,0.98))] dark:shadow-[0_18px_40px_rgba(2,8,23,0.24)]">
                   <div className="flex items-center justify-between gap-3">
                     <span className="rounded-full bg-[var(--color-primary-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-primary-strong)]">
                       Upcoming
@@ -604,7 +604,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
                 </article>
               ))
             ) : (
-              <div className="rounded-[1.75rem] border border-dashed border-[var(--color-border)] bg-white/60 p-8 lg:col-span-3">
+              <div className="rounded-[1.75rem] border border-dashed border-[var(--color-border)] app-card-soft p-8 lg:col-span-3 dark:bg-[rgba(12,26,41,0.72)]">
                 <h3 className="text-lg font-semibold text-[var(--color-primary-strong)]">Featured events will appear here</h3>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-muted-foreground)]">
                   Once event data is published from the admin dashboard, this section will automatically show the latest upcoming sessions.
@@ -652,7 +652,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
                     </div>
                   </article>
                 ))}
-                <div className="rounded-[1.75rem] border border-dashed border-[var(--color-border)] bg-white/55 p-5 sm:p-6 md:col-span-2">
+                <div className="rounded-[1.75rem] border border-dashed border-[var(--color-border)] app-card-soft p-5 sm:p-6 md:col-span-2 dark:bg-[rgba(12,26,41,0.72)]">
                   <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-secondary)]">Why this matters</p>
                   <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-muted-foreground)] sm:text-base">
                     Testimonials give social proof. They help new visitors understand that XYZ Tech Club is active, useful, and trusted by real students and mentors.
@@ -665,7 +665,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
               </div>
             </div>
           ) : (
-            <div className="rounded-[1.75rem] border border-dashed border-[var(--color-border)] bg-white/55 p-6 sm:p-8">
+            <div className="rounded-[1.75rem] border border-dashed border-[var(--color-border)] app-card-soft p-6 sm:p-8 dark:bg-[rgba(12,26,41,0.72)]">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-secondary)]">Approved testimonials</p>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-muted-foreground)] sm:text-base">
                 This section will update automatically once admins approve the first community testimonial submission.
@@ -690,7 +690,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
                   <p className="text-sm leading-7 text-[rgba(214,240,255,0.72)]">Each role contributes to building a stronger club culture rooted in collaboration, consistency, and meaningful student engagement.</p>
                 </div>
                 <motion.div
-                  className="relative overflow-hidden rounded-[1.5rem] border border-white/14 bg-white/8 shadow-[0_18px_40px_rgba(7,16,32,0.2)]"
+                  className="relative overflow-hidden rounded-[1.5rem] border border-white/14 bg-white/8 shadow-[0_18px_40px_rgba(7,16,32,0.2)] dark:bg-white/10"
                   animate={{ y: [0, -8, 0], scale: [1, 1.015, 1] }}
                   transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                 >
@@ -716,7 +716,7 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
           </div>
 
           <div className="flex w-full justify-center">
-            <Link href="/committee" className="inline-flex h-12 w-full max-w-lg items-center justify-center gap-2 rounded-full border border-[rgba(148,163,184,0.22)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.92))] px-6 text-sm font-semibold tracking-[0.01em] text-[var(--color-primary-strong)] shadow-[0_16px_34px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-[rgba(14,165,233,0.3)] hover:text-[var(--color-secondary)] hover:shadow-[0_20px_38px_rgba(15,23,42,0.1)]">
+            <Link href="/committee" className="inline-flex h-12 w-full max-w-lg items-center justify-center gap-2 rounded-full border border-[rgba(148,163,184,0.22)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.92))] px-6 text-sm font-semibold tracking-[0.01em] text-[var(--color-primary-strong)] shadow-[0_16px_34px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-[rgba(14,165,233,0.3)] hover:text-[var(--color-secondary)] hover:shadow-[0_20px_38px_rgba(15,23,42,0.1)] dark:border-[rgba(148,163,184,0.26)] dark:bg-[linear-gradient(180deg,rgba(15,31,48,0.98),rgba(10,22,36,1))] dark:text-[var(--color-primary-strong)] dark:shadow-[0_18px_42px_rgba(2,8,23,0.28)] dark:hover:border-[rgba(79,225,233,0.38)] dark:hover:bg-[linear-gradient(180deg,rgba(18,38,58,1),rgba(12,27,43,1))] dark:hover:text-[var(--color-accent)]">
               Meet the Full Leadership Team
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -755,6 +755,11 @@ export function HomePageView({ settings, featuredEvents, latestNotices, testimon
     </>
   );
 }
+
+
+
+
+
 
 
 

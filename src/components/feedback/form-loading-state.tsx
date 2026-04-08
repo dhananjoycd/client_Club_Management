@@ -13,7 +13,7 @@ export function FormLoadingState({
     <div className="surface-card overflow-hidden rounded-[2rem] p-6 sm:p-8">
       <div className="flex flex-col gap-5 border-b border-[var(--color-border)] pb-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-3">
-          <div className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-white/80 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--color-secondary)]">
+          <div className="inline-flex items-center rounded-full app-card-subtle px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--color-secondary)]">
             Editor form
           </div>
           <h2 className="text-2xl font-semibold tracking-tight text-[var(--color-primary)] sm:text-3xl">{title}</h2>
@@ -38,3 +38,4 @@ export function FormLoadingState({
     </div>
   );
 }
+

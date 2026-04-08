@@ -84,7 +84,7 @@ export default async function AboutPage() {
           </SectionWrapper>
 
           <MotionReveal className="h-full">
-            <div className="h-full overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-white/60 p-3 shadow-[0_24px_60px_rgba(8,39,90,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(8,39,90,0.12)]">
+            <div className="h-full overflow-hidden rounded-[2rem] app-card p-3 shadow-[0_24px_60px_rgba(8,39,90,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(8,39,90,0.12)]">
               <div className="relative aspect-[16/10] overflow-hidden rounded-[1.5rem]">
                 <Image
                   src={aboutSectionPhotoUrl}
@@ -136,7 +136,7 @@ export default async function AboutPage() {
               const Icon = item.icon;
 
               return (
-                <MotionReveal key={item.title} className="h-full"><div className="h-full rounded-[1.5rem] border border-[var(--color-border)] bg-white/60 p-5 transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(8,39,90,0.08)]">
+                <MotionReveal key={item.title} className="h-full"><div className="h-full rounded-[1.5rem] app-card p-5 transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(8,39,90,0.08)]">
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-accent-soft)] text-[var(--color-secondary)]">
                     <Icon className="h-5 w-5" />
                   </div>
@@ -161,7 +161,7 @@ export default async function AboutPage() {
                 "Opportunities to organize events and build leadership confidence",
                 "Exposure to mentors, seniors, and active campus tech culture",
               ].map((item) => (
-                <MotionReveal key={item} className="h-full"><div className="flex h-full items-center rounded-[1.5rem] border border-[var(--color-border)] bg-white/60 px-5 py-4 text-sm font-medium text-[var(--color-primary-strong)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(8,39,90,0.08)]">
+                <MotionReveal key={item} className="h-full"><div className="flex h-full items-center rounded-[1.5rem] app-card px-5 py-4 text-sm font-medium text-[var(--color-primary-strong)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(8,39,90,0.08)]">
                   {item}
                 </div></MotionReveal>
               ))}
@@ -175,7 +175,7 @@ export default async function AboutPage() {
           >
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {impactItems.map((item) => (
-                <MotionReveal key={item.label} className="h-full"><div className="flex h-full flex-col items-center justify-center rounded-[1.5rem] border border-[var(--color-border)] bg-white/60 p-5 text-center transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(8,39,90,0.08)]">
+                <MotionReveal key={item.label} className="h-full"><div className="flex h-full flex-col items-center justify-center rounded-[1.5rem] app-card p-5 text-center transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(8,39,90,0.08)]">
                   <p className="text-3xl font-semibold tracking-tight text-[var(--color-primary-strong)]">{item.value}+</p>
                   <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">{item.label}</p>
                 </div></MotionReveal>
@@ -224,3 +224,4 @@ export default async function AboutPage() {
     </main>
   );
 }
+

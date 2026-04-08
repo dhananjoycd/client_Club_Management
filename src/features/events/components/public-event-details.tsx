@@ -332,7 +332,7 @@ export function PublicEventDetails({ eventId }: PublicEventDetailsProps) {
                 { label: "Type", value: event.eventType === "PAID" ? `${event.price ?? 0} BDT` : "Free" },
                 { label: "Registration", value: isRegistrationOpen ? "Open" : "Closed" },
               ].map((item) => (
-                <div key={item.label} className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/60 p-5 text-center">
+                <div key={item.label} className="rounded-[1.5rem] app-card p-5 text-center">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-secondary)]">{item.label}</p>
                   <p className="mt-3 text-lg font-semibold text-[var(--color-primary-strong)]">{item.value}</p>
                 </div>
@@ -354,3 +354,4 @@ export function PublicEventDetails({ eventId }: PublicEventDetailsProps) {
     </main>
   );
 }
+

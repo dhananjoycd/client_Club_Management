@@ -222,7 +222,7 @@ export function ApplicationForm() {
                 ["Department", profile.department ?? "Not provided"],
                 ["Student ID", profile.studentId ?? "Not provided"],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-[1.25rem] border border-[var(--color-border)] bg-white/80 p-4">
+                <div key={label} className="rounded-[1.25rem] app-card-subtle p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-foreground)]">{label}</p>
                   <p className="mt-2 text-sm font-semibold text-[var(--color-primary)]">{String(value)}</p>
                 </div>
@@ -244,3 +244,4 @@ export function ApplicationForm() {
     </div>
   );
 }
+

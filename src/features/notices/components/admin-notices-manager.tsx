@@ -168,7 +168,7 @@ export function AdminNoticesManager() {
                 <p className="text-sm font-semibold text-[var(--color-primary-strong)]">Open notice form</p>
                 <p className="mt-1 text-sm leading-6 text-[var(--color-muted-foreground)]">{isCreateOpen ? "Hide the notice form once you are done creating updates." : "Open the notice form to publish a fresh update for the selected audience."}</p>
               </div>
-              <span className="inline-flex h-11 min-w-11 items-center justify-center rounded-full border border-[var(--color-border)] bg-white/80 px-4 text-base font-semibold text-[var(--color-primary)]">
+              <span className="inline-flex h-11 min-w-11 items-center justify-center rounded-full app-card-subtle px-4 text-base font-semibold text-[var(--color-primary)]">
                 {isCreateOpen ? "-" : "+"}
               </span>
             </button>
@@ -418,3 +418,4 @@ export function AdminNoticesManager() {
     </>
   );
 }
+

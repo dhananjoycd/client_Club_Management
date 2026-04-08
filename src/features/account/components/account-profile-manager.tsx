@@ -132,7 +132,7 @@ export function AccountProfileManager({ showRegistrations = true }: AccountProfi
             </div>
           ))}
         </div>
-        <div className="mt-5 rounded-[1.5rem] border border-[var(--color-border)] bg-white/70 p-5">
+        <div className="mt-5 rounded-[1.5rem] app-card-soft p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-sm font-medium text-[var(--color-muted-foreground)]">Membership</p>
@@ -202,15 +202,15 @@ export function AccountProfileManager({ showRegistrations = true }: AccountProfi
                 </div>
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  <div className="rounded-[1.35rem] border border-[var(--color-border)] bg-white/80 p-4">
+                  <div className="rounded-[1.35rem] app-card-subtle p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">Account</p>
                     <p className="mt-2 text-sm font-semibold text-[var(--color-primary)] break-words">{profile.email}</p>
                   </div>
-                  <div className="rounded-[1.35rem] border border-[var(--color-border)] bg-white/80 p-4">
+                  <div className="rounded-[1.35rem] app-card-subtle p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">Role</p>
                     <p className="mt-2 text-sm font-semibold text-[var(--color-primary)]">{roleLabel}</p>
                   </div>
-                  <div className="rounded-[1.35rem] border border-[var(--color-border)] bg-white/80 p-4 sm:col-span-2 xl:col-span-1">
+                  <div className="rounded-[1.35rem] app-card-subtle p-4 sm:col-span-2 xl:col-span-1">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">Membership fields</p>
                     <p className="mt-2 text-sm font-semibold text-[var(--color-primary)]">{membershipFieldsLocked ? "Locked" : "Editable"}</p>
                   </div>
@@ -314,3 +314,4 @@ export function AccountProfileManager({ showRegistrations = true }: AccountProfi
     </div>
   );
 }
+

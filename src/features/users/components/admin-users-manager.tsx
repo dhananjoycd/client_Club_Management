@@ -156,20 +156,20 @@ export function AdminUsersManager() {
                 <button
                   type="button"
                   onClick={() => setIsAdvancedOpen((current) => !current)}
-                  className="flex w-full items-center justify-between gap-4 rounded-[1.5rem] border border-[var(--color-border)] bg-white/80 px-5 py-4 text-left transition hover:border-[var(--color-accent)] hover:bg-white"
+                  className="flex w-full items-center justify-between gap-4 rounded-[1.5rem] app-card-subtle px-5 py-4 text-left transition hover:border-[var(--color-accent)] hover:bg-white"
                   aria-expanded={isAdvancedOpen}
                 >
                   <div>
                     <p className="text-sm font-semibold text-[var(--color-primary-strong)]">Advanced search</p>
                     <p className="mt-1 text-sm leading-6 text-[var(--color-muted-foreground)]">{isAdvancedOpen ? "Hide the role and status filters once your search looks right." : "Open role and status filters to narrow the users table more precisely."}</p>
                   </div>
-                  <span className="inline-flex h-11 min-w-11 items-center justify-center rounded-full border border-[var(--color-border)] bg-white/80 px-4 text-base font-semibold text-[var(--color-primary)]">
+                  <span className="inline-flex h-11 min-w-11 items-center justify-center rounded-full app-card-subtle px-4 text-base font-semibold text-[var(--color-primary)]">
                     {isAdvancedOpen ? "-" : "+"}
                   </span>
                 </button>
 
                 {isAdvancedOpen ? (
-                  <div className="grid gap-4 rounded-[1.5rem] border border-[var(--color-border)] bg-white/80 p-4 sm:p-5">
+                  <div className="grid gap-4 rounded-[1.5rem] app-card-subtle p-4 sm:p-5">
                     <div className="grid gap-2">
                       <span className="text-sm font-medium text-[var(--color-primary-strong)]">Role</span>
                       <div className="flex flex-wrap gap-2">
@@ -382,7 +382,7 @@ export function AdminUsersManager() {
                       <p className="text-sm font-semibold text-[var(--color-primary-strong)]">Profile data</p>
                       <div className="mt-4 grid gap-3 sm:grid-cols-2">
                         {[['Phone', detailsUser.phone ?? 'Not provided'], ['Academic session', detailsUser.academicSession ?? 'Not provided'], ['Department', detailsUser.department ?? 'Not provided'], ['Student ID', detailsUser.studentId ?? 'Not provided'], ['District', detailsUser.district ?? 'Not provided'], ['Updated', format(new Date(detailsUser.updatedAt), 'dd MMM yyyy, hh:mm a')]].map(([label, value]) => (
-                          <div key={label} className="rounded-[1.25rem] border border-[var(--color-border)] bg-white/80 p-4">
+                          <div key={label} className="rounded-[1.25rem] app-card-subtle p-4">
                             <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">{label}</p>
                             <p className="mt-2 text-sm font-semibold text-[var(--color-primary)] break-words">{value}</p>
                           </div>
@@ -424,7 +424,7 @@ export function AdminUsersManager() {
                       <p className="text-sm font-semibold text-[var(--color-primary-strong)]">Application history</p>
                       <div className="mt-4 grid gap-3">
                         {detailsUser.applications.length ? detailsUser.applications.map((application) => (
-                          <div key={application.id} className="rounded-[1.25rem] border border-[var(--color-border)] bg-white/80 p-4">
+                          <div key={application.id} className="rounded-[1.25rem] app-card-subtle p-4">
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <p className="text-sm font-semibold text-[var(--color-primary)]">{application.department} - {application.session}</p>
                               <StatusBadge label={roleLabel(application.status)} variant={statusVariant(application.status)} />
@@ -441,7 +441,7 @@ export function AdminUsersManager() {
                       <p className="text-sm font-semibold text-[var(--color-primary-strong)]">Recent registrations</p>
                       <div className="mt-4 grid gap-3">
                         {detailsUser.registrations.length ? detailsUser.registrations.slice(0, 5).map((registration) => (
-                          <div key={registration.id} className="rounded-[1.25rem] border border-[var(--color-border)] bg-white/80 p-4">
+                          <div key={registration.id} className="rounded-[1.25rem] app-card-subtle p-4">
                             <p className="text-sm font-semibold text-[var(--color-primary)]">{registration.event.title}</p>
                             <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">{registration.event.location}</p>
                             <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">{format(new Date(registration.event.eventDate), 'dd MMM yyyy, hh:mm a')}</p>
@@ -463,3 +463,4 @@ export function AdminUsersManager() {
     </>
   );
 }
+

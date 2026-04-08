@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { RouteProgressBar } from "@/components/feedback/route-progress-bar";
 import { GlobalErrorProvider } from "@/providers/global-error-provider";
 import { QueryProvider } from "@/providers/query-provider";
+import { ThemeProvider } from "@/providers/theme-provider";
 import { ToasterProvider } from "@/providers/toaster-provider";
 import "./globals.css";
 
@@ -30,15 +31,29 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${bodyFont.variable} ${displayFont.variable}`}>
-        <QueryProvider>
-          <GlobalErrorProvider>
-            <Suspense fallback={null}>
-              <RouteProgressBar />
-            </Suspense>
-            {children}
-            <ToasterProvider />
-          </GlobalErrorProvider>
-        </QueryProvider>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(() => {
+              try {
+                const stored = localStorage.getItem("client-club-theme");
+                const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+                const theme = stored === "dark" || stored === "light" ? stored : (systemDark ? "dark" : "light");
+                document.documentElement.dataset.theme = theme;
+              } catch (_) {}
+            })();`,
+          }}
+        />
+        <ThemeProvider>
+          <QueryProvider>
+            <GlobalErrorProvider>
+              <Suspense fallback={null}>
+                <RouteProgressBar />
+              </Suspense>
+              {children}
+              <ToasterProvider />
+            </GlobalErrorProvider>
+          </QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

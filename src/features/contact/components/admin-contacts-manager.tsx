@@ -171,7 +171,7 @@ export function AdminContactsManager() {
             <>
               <div className="grid gap-4 xl:grid-cols-2">
                 {data.result.map((item) => (
-                  <article key={item.id} className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/80 p-5 transition hover:border-[var(--color-accent)] hover:bg-white">
+                  <article key={item.id} className="rounded-[1.5rem] app-card-subtle p-5 transition hover:border-[var(--color-accent)] hover:bg-white">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <p className="text-lg font-semibold text-[var(--color-primary)]">{item.subject}</p>
@@ -222,7 +222,7 @@ export function AdminContactsManager() {
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-secondary)]">Contact details</p>
                 <h2 className="mt-2 text-3xl font-semibold text-[var(--color-primary-strong)]">{selected.subject}</h2>
-                <div className="mt-3 flex flex-wrap gap-2"><span className="inline-flex rounded-full border border-[var(--color-border)] bg-white/80 px-3 py-1 text-xs font-medium text-[var(--color-primary-strong)]">{selected.senderName}</span><span className="inline-flex rounded-full border border-[var(--color-border)] bg-white/80 px-3 py-1 text-xs font-medium text-[var(--color-muted-foreground)]">{selected.senderEmail}</span></div>
+                <div className="mt-3 flex flex-wrap gap-2"><span className="inline-flex rounded-full app-card-subtle px-3 py-1 text-xs font-medium text-[var(--color-primary-strong)]">{selected.senderName}</span><span className="inline-flex rounded-full app-card-subtle px-3 py-1 text-xs font-medium text-[var(--color-muted-foreground)]">{selected.senderEmail}</span></div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge label={contactStatusLabels[selected.status]} variant={statusVariant(selected.status)} />
@@ -231,32 +231,32 @@ export function AdminContactsManager() {
             </div>
 
             <div className="mt-5 grid gap-4 sm:grid-cols-3">
-              <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white/80 p-4">
+              <div className="rounded-[1.25rem] app-card-subtle p-4">
                 <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">Category</p>
                 <p className="mt-2 text-sm font-medium text-[var(--color-primary-strong)]">{contactCategoryLabels[selected.category]}</p>
               </div>
-              <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white/80 p-4">
+              <div className="rounded-[1.25rem] app-card-subtle p-4">
                 <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">Phone</p>
                 <p className="mt-2 text-sm font-medium text-[var(--color-primary-strong)]">{selected.senderPhone || "Not provided"}</p>
               </div>
-              <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white/80 p-4">
+              <div className="rounded-[1.25rem] app-card-subtle p-4">
                 <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">Created</p>
                 <p className="mt-2 text-sm font-medium text-[var(--color-primary-strong)]">{new Date(selected.createdAt).toLocaleDateString("en-GB")}</p>
               </div>
             </div>
 
-            <div className="mt-5 rounded-[1.5rem] border border-[var(--color-border)] bg-white/80 p-5">
+            <div className="mt-5 rounded-[1.5rem] app-card-subtle p-5">
               <p className="text-sm leading-8 text-[var(--color-foreground)]">{selected.message}</p>
             </div>
 
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white/80 p-4">
+              <div className="rounded-[1.25rem] app-card-subtle p-4">
                 <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">Current status</p>
                 <div className="mt-2">
                   <StatusBadge label={contactStatusLabels[selected.status]} variant={statusVariant(selected.status)} />
                 </div>
               </div>
-              <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white/80 p-4">
+              <div className="rounded-[1.25rem] app-card-subtle p-4">
                 <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">Admin note</p>
                 <p className="mt-2 text-sm leading-7 text-[var(--color-muted-foreground)]">{selected.adminNote || "No admin note has been added yet."}</p>
               </div>
@@ -286,3 +286,4 @@ export function AdminContactsManager() {
     </>
   );
 }
+

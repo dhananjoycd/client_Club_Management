@@ -31,7 +31,7 @@ export function WarningConfirmModal({
   return (
     <div className="fixed inset-0 z-[100] overflow-auto bg-slate-950/55 px-4 py-6 backdrop-blur-sm">
       <div className="surface-card mx-auto my-auto w-full max-w-md rounded-[2rem] p-6 shadow-[0_24px_80px_rgba(15,23,42,0.28)] sm:p-7">
-        <div className="flex h-14 w-14 items-center justify-center rounded-[1.25rem] bg-amber-100 text-amber-600 shadow-[0_12px_30px_rgba(245,158,11,0.15)]">
+        <div className="flex h-14 w-14 items-center justify-center rounded-[1.25rem] bg-amber-100 text-amber-600 dark:bg-[var(--color-warning-soft)] dark:text-[var(--color-warning)] shadow-[0_12px_30px_rgba(245,158,11,0.15)]">
           <AlertTriangle className="h-6 w-6" />
         </div>
         <h3 className="mt-5 text-2xl font-semibold tracking-tight text-[var(--color-primary-strong)]">{title}</h3>
@@ -59,3 +59,4 @@ export function WarningConfirmModal({
     </div>
   );
 }
+

@@ -27,7 +27,7 @@ export function LoadingState({
             </p>
           </div>
         </div>
-        <div className="hidden min-w-[11rem] rounded-[1.5rem] border border-[var(--color-border)] bg-white/80 p-4 lg:block">
+        <div className="hidden min-w-[11rem] rounded-[1.5rem] app-card-subtle p-4 lg:block">
           <div className="space-y-3 animate-pulse">
             <div className="h-2.5 w-20 rounded-full bg-slate-200" />
             <div className="h-8 rounded-2xl bg-slate-100" />
@@ -40,7 +40,7 @@ export function LoadingState({
         {Array.from({ length: 3 }).map((_, index) => (
           <div
             key={index}
-            className="overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] bg-white/80 p-5"
+            className="overflow-hidden rounded-[1.75rem] app-card-subtle p-5"
           >
             <div className="animate-pulse space-y-4">
               <div className="flex items-center justify-between">
@@ -64,3 +64,4 @@ export function LoadingState({
     </div>
   );
 }
+

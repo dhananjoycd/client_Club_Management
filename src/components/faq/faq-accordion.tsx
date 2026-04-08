@@ -18,7 +18,7 @@ export function FaqAccordion({ items }: FaqAccordionProps) {
         const isOpen = index === openIndex;
 
         return (
-          <div key={`${item.question}-${index}`} className="overflow-hidden rounded-[1.5rem] border border-[var(--color-border)] bg-white/60">
+          <div key={`${item.question}-${index}`} className="overflow-hidden rounded-[1.5rem] app-card">
             <button
               type="button"
               onClick={() => setOpenIndex((current) => (current === index ? -1 : index))}
@@ -51,3 +51,4 @@ export function FaqAccordion({ items }: FaqAccordionProps) {
     </div>
   );
 }
+

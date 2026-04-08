@@ -281,7 +281,7 @@ export function AdminPaymentsManager() {
                       ["Department", detailsPayment.snapshotDepartment ?? "Not provided"],
                       ["Checkout reference", detailsPayment.stripeCheckoutSessionId ?? "Not available"],
                     ].map(([label, value]) => (
-                      <div key={label} className="rounded-[1.25rem] border border-[var(--color-border)] bg-white/80 p-4">
+                      <div key={label} className="rounded-[1.25rem] app-card-subtle p-4">
                         <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">{label}</p>
                         <p className="mt-2 break-words text-sm font-semibold text-[var(--color-primary)]">{value}</p>
                       </div>
@@ -300,7 +300,7 @@ export function AdminPaymentsManager() {
                       ["Listed price", `${detailsPayment.event.price ?? 0} BDT`],
                       ["Currency", (detailsPayment.paidCurrency ?? detailsPayment.event.currency ?? "BDT").toUpperCase()],
                     ].map(([label, value]) => (
-                      <div key={label} className="rounded-[1.25rem] border border-[var(--color-border)] bg-white/80 p-4">
+                      <div key={label} className="rounded-[1.25rem] app-card-subtle p-4">
                         <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">{label}</p>
                         <p className="mt-2 break-words text-sm font-semibold text-[var(--color-primary)]">{value}</p>
                       </div>
@@ -340,3 +340,4 @@ export function AdminPaymentsManager() {
     </>
   );
 }
+

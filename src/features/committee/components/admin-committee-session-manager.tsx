@@ -203,7 +203,7 @@ export function AdminCommitteeSessionManager({ sessionId }: { sessionId: string 
   return (
     <>
       <SectionWrapper title="Committee workspace" description={session.description || `Manage the ${session.label} committee session from one dedicated workspace.`}>
-        <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/80 p-5">
+        <div className="rounded-[1.5rem] app-card-subtle p-5">
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-2xl font-semibold text-[var(--color-primary-strong)]">{session.label}</h2>
             {session.isActive ? <StatusBadge label="Active" variant="active" /> : <StatusBadge label="Archived" variant="default" />}
@@ -246,7 +246,7 @@ export function AdminCommitteeSessionManager({ sessionId }: { sessionId: string 
                 createAssignmentMutation.mutate({ sessionId: session.id, memberProfileId, committeeWing: resolvedWing, positionTitle: resolvedPosition, sortOrder: selectedOrder });
               }}
             >
-              <div className="grid gap-4 rounded-[1.25rem] border border-[var(--color-border)] bg-white/80 p-4">
+              <div className="grid gap-4 rounded-[1.25rem] app-card-subtle p-4">
                 <div>
                   <p className="text-sm font-semibold text-[var(--color-primary-strong)]">Session cover image</p>
                   <p className="mt-1 text-sm leading-6 text-[var(--color-muted-foreground)]">Update the public group image shown for {session.label} on the committee page.</p>
@@ -520,6 +520,7 @@ export function AdminCommitteeSessionManager({ sessionId }: { sessionId: string 
     </>
   );
 }
+
 
 
 

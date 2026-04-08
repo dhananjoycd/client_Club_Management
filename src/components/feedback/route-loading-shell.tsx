@@ -20,7 +20,7 @@ export function RouteLoadingShell({
       <section className="surface-card overflow-hidden rounded-[2rem] p-6 sm:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-4">
-            <div className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-white/80 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--color-secondary)]">
+            <div className="inline-flex items-center rounded-full app-card-subtle px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--color-secondary)]">
               {badge}
             </div>
             <div className="space-y-3">
@@ -35,7 +35,7 @@ export function RouteLoadingShell({
               </p>
             </div>
           </div>
-          <div className="grid min-w-[14rem] gap-3 rounded-[1.75rem] border border-[var(--color-border)] bg-white/80 p-4">
+          <div className="grid min-w-[14rem] gap-3 rounded-[1.75rem] app-card-subtle p-4">
             <div className="h-3 w-24 animate-pulse rounded-full bg-slate-200" />
             <div className="h-10 animate-pulse rounded-2xl bg-slate-100" />
             <div className="h-10 animate-pulse rounded-2xl bg-slate-100" />
@@ -68,3 +68,4 @@ export function RouteLoadingShell({
     </div>
   );
 }
+

@@ -37,10 +37,10 @@ export function PublicFooter() {
     .filter(([, href]) => typeof href === "string" && href.trim().length > 0);
 
   return (
-    <footer className="mt-12 border-t border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,#091429,#071020)] text-[rgba(237,244,255,0.92)] sm:mt-16">
+    <footer className="mt-12 border-t border-[color-mix(in_srgb,var(--color-accent)_18%,var(--color-border))] bg-[linear-gradient(180deg,#091429,#071020)] text-[rgba(237,244,255,0.92)] sm:mt-16">
       <div className="mx-auto grid w-full max-w-7xl grid-cols-2 gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1.2fr_0.8fr_0.9fr] lg:px-8 lg:py-14">
         <div className="col-span-2 space-y-4 lg:col-span-1">
-          <div className="inline-flex items-center rounded-full border border-[rgba(125,211,252,0.28)] bg-[rgba(125,211,252,0.08)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--color-accent)]">
+          <div className="inline-flex items-center rounded-full border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--color-accent)]">
             Club Portal
           </div>
           <div className="space-y-3">
@@ -117,7 +117,7 @@ export function PublicFooter() {
               href="https://github.com/dhananjoycd"
               target="_blank"
               rel="noreferrer noopener"
-              className="font-semibold text-[#7dd3fc] transition hover:text-[#bae6fd]"
+              className="font-semibold text-[var(--color-accent)] transition hover:text-white"
             >
               Dhananjoy
             </a>

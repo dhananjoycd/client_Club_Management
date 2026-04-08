@@ -23,3 +23,4 @@ export function SectionWrapper({ title, description, children, className }: Sect
     </MotionReveal>
   );
 }
+

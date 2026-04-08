@@ -324,11 +324,11 @@ export function PublicEventsBrowser() {
               />
             </label>
             <div className="grid grid-cols-2 gap-3 xl:flex">
-              <div className="min-w-[120px] rounded-[1rem] border border-[var(--color-border)] bg-white/70 px-4 py-3 text-center">
+              <div className="min-w-[120px] rounded-[1rem] app-card-soft px-4 py-3 text-center">
                 <p className="text-xl font-semibold text-[var(--color-primary-strong)]">{upcomingEvents.length}</p>
                 <p className="mt-1 text-xs uppercase tracking-[0.16em] text-[var(--color-muted-foreground)]">Upcoming</p>
               </div>
-              <div className="min-w-[120px] rounded-[1rem] border border-[var(--color-border)] bg-white/70 px-4 py-3 text-center">
+              <div className="min-w-[120px] rounded-[1rem] app-card-soft px-4 py-3 text-center">
                 <p className="text-xl font-semibold text-[var(--color-primary-strong)]">{pastEvents.length}</p>
                 <p className="mt-1 text-xs uppercase tracking-[0.16em] text-[var(--color-muted-foreground)]">Past</p>
               </div>
@@ -525,3 +525,4 @@ export function PublicEventsBrowser() {
     </div>
   );
 }
+

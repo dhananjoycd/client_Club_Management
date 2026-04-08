@@ -377,7 +377,7 @@ export function AdminSettingsManager() {
       <SettingsSection title="Homepage hero" usage="Home" description="Control the image, title, and short copy for the public hero slider." open={openSections.hero} onToggle={() => toggleSection("hero")}>
         <div className="grid gap-6">
           {([1, 2, 3] as const).map((number) => (
-            <div key={number} className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/70 p-4 sm:p-5">
+            <div key={number} className="rounded-[1.5rem] app-card-soft p-4 sm:p-5">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-secondary)]">Slide {number}</p>
               <div className="mt-4 grid gap-4">
                 <FormField label="Image URL" error={renderFieldError(errors, `heroSlide${number}Image` as keyof SettingsSchema)} disabled={saveMutation.isPending} {...register(`heroSlide${number}Image` as const)} />
@@ -412,7 +412,7 @@ export function AdminSettingsManager() {
       <SettingsSection title="FAQ" usage="Home" description="Public question-answer items for visitors, applicants, and members." open={openSections.faq} onToggle={() => toggleSection("faq")}>
         <div className="grid gap-4">
           {faqFieldArray.fields.map((field, index) => (
-            <div key={field.id} className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/70 p-4 sm:p-5">
+            <div key={field.id} className="rounded-[1.5rem] app-card-soft p-4 sm:p-5">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-secondary)]">FAQ {index + 1}</p>
                 <button type="button" onClick={() => setFaqIndexToDelete(index)} disabled={faqFieldArray.fields.length === 1 || saveMutation.isPending} className="inline-flex h-10 items-center gap-2 rounded-full border border-rose-200 px-4 text-sm font-medium text-rose-600 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50">
@@ -459,6 +459,7 @@ export function AdminSettingsManager() {
     </form>
   );
 }
+
 
 
 

@@ -14,6 +14,7 @@ import { authService } from "@/services/auth.service";
 import { accountService } from "@/services/account.service";
 import { applicationService } from "@/services/application.service";
 import { settingsService } from "@/services/settings.service";
+import { ThemeToggle } from "./theme-toggle";
 
 const publicLinks = [
   { href: "/", label: "Home" },
@@ -107,7 +108,7 @@ export function PublicNavbar() {
         setIsOpen(false);
         router.push(dashboardHref);
       }}
-      className="inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-[var(--color-border)] bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+      className="inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-[var(--color-border)] bg-white dark:bg-[var(--color-surface-strong)] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
       aria-label="Go to dashboard"
       title="Go to dashboard"
     >
@@ -122,7 +123,7 @@ export function PublicNavbar() {
   ) : null;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[rgba(249,251,254,0.78)] backdrop-blur-xl supports-[backdrop-filter]:bg-[rgba(249,251,254,0.68)]">
+    <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[rgba(249,251,254,0.78)] backdrop-blur-xl supports-[backdrop-filter]:bg-[rgba(249,251,254,0.68)] dark:bg-[color-mix(in_srgb,var(--color-page)_82%,transparent)] dark:supports-[backdrop-filter]:bg-[color-mix(in_srgb,var(--color-page)_72%,transparent)]">
       <div className="mx-auto flex min-h-[4.75rem] w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-3 text-[var(--color-primary-strong)] transition-transform duration-200 hover:scale-[1.01]">
           <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-[linear-gradient(135deg,var(--color-primary-strong),var(--color-primary))] text-sm font-semibold text-white shadow-[0_16px_32px_rgba(15,76,189,0.24)]">
@@ -166,12 +167,13 @@ export function PublicNavbar() {
         <div className="hidden items-center gap-3 md:flex">
           {isNavbarAuthLoading ? (
             <div className="flex items-center gap-3" aria-hidden="true">
-              <div className="h-11 w-11 animate-pulse rounded-full border border-[var(--color-border)] bg-white/80" />
-              <div className="h-11 w-24 animate-pulse rounded-full border border-[var(--color-border)] bg-white/80" />
+              <div className="h-11 w-11 animate-pulse rounded-full border border-[var(--color-border)] bg-[var(--color-surface-strong)]" />
+              <div className="h-11 w-24 animate-pulse rounded-full border border-[var(--color-border)] bg-[var(--color-surface-strong)]" />
               <div className="h-11 w-28 animate-pulse rounded-full bg-[var(--color-primary-soft)]" />
             </div>
           ) : (
             <>
+              <ThemeToggle />
               {avatarButton}
               {!user ? <Link href="/login" className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Login</Link> : null}
               {!user ? <Link href="/register" className="secondary-button h-11 px-5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">Register</Link> : null}
@@ -195,16 +197,16 @@ export function PublicNavbar() {
           aria-label={isOpen ? "Close navigation" : "Open navigation"}
           aria-expanded={isOpen}
           onClick={() => setIsOpen((current) => !current)}
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--color-border)] bg-white/80 text-[var(--color-primary-strong)] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-primary-soft)] hover:shadow-md md:hidden"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface-strong)] text-[var(--color-primary-strong)] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-primary-soft)] hover:shadow-md md:hidden"
         >
           {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
       {isOpen ? (
-        <div className="border-t border-[var(--color-border)] bg-[rgba(249,251,254,0.96)] md:hidden">
+        <div className="border-t border-[var(--color-border)] bg-[rgba(249,251,254,0.96)] dark:bg-[color-mix(in_srgb,var(--color-page)_92%,transparent)] md:hidden">
           <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-4 sm:px-6">
-            <nav className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/80 p-2">
+            <nav className="rounded-[var(--radius-panel)] app-card-subtle dark:bg-[var(--color-surface-strong)] p-2">
               <div className="grid gap-1.5">
                 {publicLinks.map((link) => {
                   const isAnchorLink = link.href.startsWith("/#");
@@ -231,19 +233,22 @@ export function PublicNavbar() {
             </nav>
 
             {isNavbarAuthLoading ? (
-              <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/80 p-4" aria-hidden="true">
+              <div className="rounded-[var(--radius-panel)] app-card-subtle dark:bg-[var(--color-surface-strong)] p-4" aria-hidden="true">
                 <div className="flex items-center gap-3">
-                  <div className="h-11 w-11 animate-pulse rounded-full border border-[var(--color-border)] bg-white/80" />
-                  <div className="h-11 flex-1 animate-pulse rounded-2xl border border-[var(--color-border)] bg-white/80" />
+                  <div className="h-11 w-11 animate-pulse rounded-full border border-[var(--color-border)] bg-[var(--color-surface-strong)]" />
+                  <div className="h-11 flex-1 animate-pulse rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-strong)]" />
                 </div>
               </div>
             ) : (
-              <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-white/80 p-4">
+              <div className="rounded-[var(--radius-panel)] app-card-subtle dark:bg-[var(--color-surface-strong)] p-4">
+                <div className="mb-4 flex justify-end">
+                  <ThemeToggle />
+                </div>
                 <div className="flex items-center gap-3">
                   {avatarButton ? (
                     avatarButton
                   ) : (
-                    <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--color-border)] bg-white text-sm font-semibold text-[var(--color-primary-strong)]">
+                    <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface-strong)] text-sm font-semibold text-[var(--color-primary-strong)]">
                       {organizationName.slice(0, 2).toUpperCase()}
                     </div>
                   )}
@@ -302,8 +307,5 @@ export function PublicNavbar() {
     </header>
   );
 }
-
-
-
 
 
