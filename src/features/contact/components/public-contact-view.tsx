@@ -2,15 +2,16 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Mail, MessageSquareText, ShieldCheck } from "lucide-react";
+import { ChevronDown, Mail, MessageSquareText, ShieldCheck, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { FormActions } from "@/components/forms/form-actions";
-import { FormField, FormTextarea } from "@/components/forms/form-field";
+import { AiHelpAssistant } from "@/components/ai/ai-help-assistant";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { LoadingState } from "@/components/feedback/loading-state";
+import { FormActions } from "@/components/forms/form-actions";
+import { FormField, FormTextarea } from "@/components/forms/form-field";
 import { MembershipApplyCta } from "@/components/shared/membership-apply-cta";
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
@@ -28,6 +29,7 @@ const statusVariant = (status: string) => status === "RESOLVED" ? "active" as co
 
 export function PublicContactView() {
   const queryClient = useQueryClient();
+  const [isManualSupportOpen, setIsManualSupportOpen] = useState(false);
   const form = useForm<ContactSchema>({
     resolver: zodResolver(contactSchema),
     defaultValues: { category: "GENERAL", phone: "", subject: "", message: "" },
@@ -74,6 +76,18 @@ export function PublicContactView() {
     }
   }, [contactPhone, form, user]);
 
+  useEffect(() => {
+    const syncManualSupportFromHash = () => {
+      if (window.location.hash === "#manual-support") {
+        setIsManualSupportOpen(true);
+      }
+    };
+
+    syncManualSupportFromHash();
+    window.addEventListener("hashchange", syncManualSupportFromHash);
+    return () => window.removeEventListener("hashchange", syncManualSupportFromHash);
+  }, []);
+
   if (settingsQuery.isLoading || sessionQuery.isLoading || (user && profileQuery.isLoading)) {
     return <LoadingState title="Loading contact page" description="Preparing support details and your message workspace." />;
   }
@@ -88,64 +102,115 @@ export function PublicContactView() {
         <PageHeader
           eyebrow="Contact"
           title="Reach the admin team through one tracked support channel."
-          description="Signed-in users can send structured contact requests that go directly to the admin dashboard for review and follow-up."
+          description="Start with the AI assistant for quick help. If it cannot fully solve your issue, you can contact the admin team manually right below."
           actions={<MembershipApplyCta label="Join the Club" className="primary-button h-11 px-5 text-sm" />}
         />
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <SectionWrapper className="md:col-span-1" title="Support flow" description="Each message stays attached to your account for easier review.">
-            <div className="grid gap-3 text-sm text-[var(--color-muted-foreground)]">
-              <div className="rounded-[1.25rem] app-card-soft p-4">
-                <div className="flex items-center gap-3 text-[var(--color-primary-strong)]"><Mail className="h-4 w-4" /><span className="font-medium">Contact email</span></div>
-                <p className="mt-2 break-all">{supportEmail}</p>
-              </div>
-              <div className="rounded-[1.25rem] app-card-soft p-4">
-                <div className="flex items-center gap-3 text-[var(--color-primary-strong)]"><ShieldCheck className="h-4 w-4" /><span className="font-medium">Admin visibility</span></div>
-                <p className="mt-2">Admins and super admins can review, reply with a note, and mark your request as resolved.</p>
-              </div>
-              <div className="rounded-[1.25rem] app-card-soft p-4">
-                <div className="flex items-center gap-3 text-[var(--color-primary-strong)]"><MessageSquareText className="h-4 w-4" /><span className="font-medium">Latest resolution</span></div>
-                <p className="mt-2">{latestResolvedNote ?? "Resolved admin notes will appear here once one of your messages is closed."}</p>
-              </div>
+        <div className="app-card rounded-4xl p-5 sm:p-6">
+          <div className="flex items-start gap-3">
+            <div className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)]">
+              <Sparkles className="h-5 w-5" />
             </div>
-          </SectionWrapper>
+            <div className="space-y-1">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-secondary)]">AI-first support</p>
+              <h2 className="text-xl font-semibold tracking-tight text-[var(--color-primary-strong)] sm:text-2xl">Try the AI assistant before sending a manual contact request</h2>
+              <p className="max-w-3xl text-sm leading-7 text-[var(--color-muted-foreground)]">Ask about events, notices, membership, payments, or event manager access. If the assistant cannot fully help, open the manual support section and contact the admin team directly.</p>
+            </div>
+          </div>
+        </div>
 
-          <SectionWrapper className="md:col-span-2" title="Send a contact request" description="Use a clear subject and enough detail so the admin team can help without follow-up delay.">
-            {!user ? (
-              <div className="grid gap-4 rounded-[1.5rem] app-card-soft p-5">
-                <p className="text-sm leading-7 text-[var(--color-muted-foreground)]">Sign in first to send a tracked contact request to the admin team. Your message history and admin notes will stay linked to your account.</p>
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <Link href="/login" className="primary-button h-11 px-5 text-sm">Login</Link>
-                  <Link href="/register" className="secondary-button h-11 px-5 text-sm">Create account</Link>
+        <SectionWrapper
+          title="AI help assistant"
+          description="Ask quick project questions about events, notices, membership, payment flow, or event manager access before sending a support request."
+        >
+          <AiHelpAssistant />
+        </SectionWrapper>
+
+        <SectionWrapper
+          title="Manual support and contact"
+          description="Open the manual support section if you want to contact the admin team directly or review how manual follow-up works."
+        >
+          <div id="manual-support" className="overflow-hidden rounded-[1.5rem] app-card scroll-mt-28">
+            <button
+              type="button"
+              onClick={() => setIsManualSupportOpen((current) => !current)}
+              className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left sm:px-6 sm:py-5"
+            >
+              <div className="space-y-1">
+                <p className="text-base font-semibold text-[var(--color-primary-strong)] sm:text-lg">Need manual support instead?</p>
+                <p className="text-sm leading-6 text-[var(--color-muted-foreground)]">If AI cannot fully solve it, open this section to contact admins directly.</p>
+              </div>
+              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-accent-soft)] text-[var(--color-secondary)]">
+                <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${isManualSupportOpen ? "rotate-180" : "rotate-0"}`} />
+              </span>
+            </button>
+
+            {isManualSupportOpen ? (
+              <div className="border-t border-[var(--color-border)] px-5 py-5 sm:px-6 sm:py-6">
+                <p className="text-sm leading-7 text-[var(--color-muted-foreground)]">
+                  You can contact the admin team at {supportEmail}. Your request stays attached to your account so replies and resolution notes remain trackable.
+                </p>
+
+                <div className="mt-6 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+                  <div className="grid gap-3 text-sm text-[var(--color-muted-foreground)]">
+                    <div className="rounded-[1.25rem] app-card-soft p-4">
+                      <div className="flex items-center gap-3 text-[var(--color-primary-strong)]"><Mail className="h-4 w-4" /><span className="font-medium">Contact email</span></div>
+                      <p className="mt-2 break-all">{supportEmail}</p>
+                    </div>
+                    <div className="rounded-[1.25rem] app-card-soft p-4">
+                      <div className="flex items-center gap-3 text-[var(--color-primary-strong)]"><ShieldCheck className="h-4 w-4" /><span className="font-medium">Admin visibility</span></div>
+                      <p className="mt-2">Admins and super admins can review, reply with a note, and mark your request as resolved.</p>
+                    </div>
+                    <div className="rounded-[1.25rem] app-card-soft p-4">
+                      <div className="flex items-center gap-3 text-[var(--color-primary-strong)]"><MessageSquareText className="h-4 w-4" /><span className="font-medium">Latest resolution</span></div>
+                      <p className="mt-2">{latestResolvedNote ?? "Resolved admin notes will appear here once one of your messages is closed."}</p>
+                    </div>
+                  </div>
+
+                  <div className="rounded-[1.5rem] app-card p-5">
+                    <div className="mb-5 space-y-2">
+                      <h3 className="text-xl font-semibold tracking-tight text-[var(--color-primary-strong)]">Send a manual contact request</h3>
+                      <p className="text-sm leading-7 text-[var(--color-muted-foreground)]">Use a clear subject and enough detail so the admin team can help without follow-up delay.</p>
+                    </div>
+                    {!user ? (
+                      <div className="grid gap-4 rounded-[1.5rem] app-card-soft p-5">
+                        <p className="text-sm leading-7 text-[var(--color-muted-foreground)]">Sign in first to send a tracked contact request to the admin team. Your message history and admin notes will stay linked to your account.</p>
+                        <div className="flex flex-col gap-3 sm:flex-row">
+                          <Link href="/login" className="primary-button h-11 px-5 text-sm">Login</Link>
+                          <Link href="/register" className="secondary-button h-11 px-5 text-sm">Create account</Link>
+                        </div>
+                      </div>
+                    ) : (
+                      <form className="grid gap-4" onSubmit={form.handleSubmit((values) => sendMutation.mutate(values))} noValidate>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <FormField label="Full name" value={contactName} readOnly disabled className="cursor-not-allowed bg-[var(--color-page)] text-[var(--color-muted-foreground)]" />
+                          <FormField label="Email" value={contactEmail} readOnly disabled className="cursor-not-allowed bg-[var(--color-page)] text-[var(--color-muted-foreground)]" />
+                        </div>
+                        <div className="grid gap-4 sm:grid-cols-[0.9fr_1.1fr]">
+                          <label className="grid gap-2">
+                            <span className="text-sm font-medium text-[var(--color-primary-strong)]">Category</span>
+                            <select className="input-base h-12 px-4 text-sm" disabled={sendMutation.isPending} {...form.register("category")}>
+                              {contactCategoryOptions.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                            {form.formState.errors.category ? <span className="text-sm text-rose-600">{form.formState.errors.category.message}</span> : null}
+                          </label>
+                          <FormField label="Phone" error={form.formState.errors.phone} disabled={sendMutation.isPending} placeholder="Add your contact phone number" {...form.register("phone")} />
+                        </div>
+                        <FormField label="Subject" error={form.formState.errors.subject} disabled={sendMutation.isPending} {...form.register("subject")} />
+                        <FormTextarea label="Message" error={form.formState.errors.message} disabled={sendMutation.isPending} rows={7} {...form.register("message")} />
+                        <FormActions isSubmitting={sendMutation.isPending} submitLabel="Send message" />
+                      </form>
+                    )}
+                  </div>
                 </div>
               </div>
-            ) : (
-              <form className="grid gap-4" onSubmit={form.handleSubmit((values) => sendMutation.mutate(values))} noValidate>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <FormField label="Full name" value={contactName} readOnly disabled className="cursor-not-allowed bg-slate-50 text-[var(--color-muted-foreground)]" />
-                  <FormField label="Email" value={contactEmail} readOnly disabled className="cursor-not-allowed bg-slate-50 text-[var(--color-muted-foreground)]" />
-                </div>
-                <div className="grid gap-4 sm:grid-cols-[0.9fr_1.1fr]">
-                  <label className="grid gap-2">
-                    <span className="text-sm font-medium text-[var(--color-primary-strong)]">Category</span>
-                    <select className="input-base h-12 px-4 text-sm" disabled={sendMutation.isPending} {...form.register("category")}>
-                      {contactCategoryOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                    {form.formState.errors.category ? <span className="text-sm text-rose-600">{form.formState.errors.category.message}</span> : null}
-                  </label>
-                  <FormField label="Phone" error={form.formState.errors.phone} disabled={sendMutation.isPending} placeholder="Add your contact phone number" {...form.register("phone")} />
-                </div>
-                <FormField label="Subject" error={form.formState.errors.subject} disabled={sendMutation.isPending} {...form.register("subject")} />
-                <FormTextarea label="Message" error={form.formState.errors.message} disabled={sendMutation.isPending} rows={7} {...form.register("message")} />
-                <FormActions isSubmitting={sendMutation.isPending} submitLabel="Send message" />
-              </form>
-            )}
-          </SectionWrapper>
-        </div>
+            ) : null}
+          </div>
+        </SectionWrapper>
 
         <SectionWrapper title="Your recent contact requests" description="Track status changes and admin notes without leaving the platform.">
           {!user ? (
@@ -179,4 +244,3 @@ export function PublicContactView() {
     </main>
   );
 }
-

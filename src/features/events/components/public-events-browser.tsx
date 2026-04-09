@@ -17,6 +17,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { WarningConfirmModal } from "@/components/shared/warning-confirm-modal";
 import { PaginationControls } from "@/components/shared/pagination-controls";
 import { MembershipApplyCta } from "@/components/shared/membership-apply-cta";
+import { AiSuggestionPanel } from "@/components/ai/ai-suggestion-panel";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { queryKeys } from "@/lib/query-keys";
 import { truncateText } from "@/lib/text";
@@ -25,6 +26,7 @@ import { accountService } from "@/services/account.service";
 import { eventService } from "@/services/event.service";
 import { registrationService } from "@/services/registration.service";
 import { EventItem } from "@/types/event.types";
+import { AiSearchItem } from "@/lib/ai/types";
 import { RegistrationStatus } from "@/types/registration.types";
 
 function getRegistrationCount(event: EventItem) {
@@ -54,6 +56,7 @@ export function PublicEventsBrowser() {
   const pathname = usePathname();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "upcoming" | "past" | "free" | "paid">("all");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [pendingEvent, setPendingEvent] = useState<EventItem | null>(null);
   const [upcomingPage, setUpcomingPage] = useState(1);
   const [pastPage, setPastPage] = useState(1);
@@ -87,8 +90,15 @@ export function PublicEventsBrowser() {
     mutationFn: eventService.registerForEvent,
   });
 
-  const allEvents = eventsQuery.data?.data.result ?? [];
+  const allEvents = useMemo(() => eventsQuery.data?.data.result ?? [], [eventsQuery.data]);
+  const aiSearchItems = useMemo<AiSearchItem[]>(() => allEvents.map((event) => ({
+    title: event.title,
+    summary: `${event.location} ${event.description}`.trim(),
+    keywords: [event.category ?? "", event.eventType ?? "FREE", event.isFeatured ? "featured" : "", event.isRegistrationOpen === false ? "registration closed" : "registration open"].filter(Boolean),
+    href: `/events/${event.id}`,
+  })), [allEvents]);
   const normalizedSearch = searchTerm.trim().toLowerCase();
+  const isHighlightedEvent = (event: EventItem) => normalizedSearch.length >= 3 && [event.title, event.location, event.description, event.category ?? ""].some((value) => value.toLowerCase().includes(normalizedSearch));
   const filteredEvents = allEvents.filter((event) => {
     const status = getEventStatus(event);
     const eventType = (event.eventType ?? "FREE").toLowerCase();
@@ -330,15 +340,32 @@ export function PublicEventsBrowser() {
             </div>
           </div>
           <div className="mt-5 grid gap-3 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center">
-            <label className="relative block">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-muted-foreground)]" />
-              <input
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Search by event title, location, or topic"
-                className="input-base h-12 pl-11 pr-4 text-sm"
+            <div className="grid gap-3">
+              <label className="relative block">
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-muted-foreground)]" />
+                <input
+                  value={searchTerm}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => window.setTimeout(() => setIsSearchFocused(false), 120)}
+                  onChange={(event) => {
+                    setSearchTerm(event.target.value);
+                    setIsSearchFocused(true);
+                  }}
+                  placeholder="Search by event title, location, or topic"
+                  className="input-base h-12 pl-11 pr-4 text-sm"
+                />
+              </label>
+              <AiSuggestionPanel
+                query={searchTerm}
+                scope="events"
+                items={aiSearchItems}
+                active={isSearchFocused}
+                onSelect={(value) => {
+                  setSearchTerm(value);
+                  setIsSearchFocused(false);
+                }}
               />
-            </label>
+            </div>
             <div className="grid grid-cols-2 gap-3 xl:flex">
               <div className="min-w-[120px] rounded-[1rem] app-card-soft px-4 py-3 text-center">
                 <p className="text-xl font-semibold text-[var(--color-primary-strong)]">{upcomingEvents.length}</p>
@@ -412,7 +439,7 @@ export function PublicEventsBrowser() {
           {upcomingEvents.length ? (
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
               {paginatedUpcomingEvents.map((event) => (
-                <article key={event.id} className="flex h-full flex-col rounded-[1.75rem] border border-[rgba(148,163,184,0.18)] bg-white/72 p-5 backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-[rgba(37,99,235,0.18)] hover:bg-white hover:shadow-[0_18px_36px_rgba(37,99,235,0.10)] sm:p-6">
+                <article key={event.id} className={`flex h-full flex-col rounded-[1.75rem] border p-5 backdrop-blur-sm transition duration-300 sm:p-6 ${isHighlightedEvent(event) ? "app-card-soft border-[rgba(37,99,235,0.36)] shadow-[0_18px_36px_rgba(37,99,235,0.12)]" : "app-card hover:-translate-y-1 hover:border-[rgba(37,99,235,0.18)] hover:shadow-[0_18px_36px_rgba(37,99,235,0.10)]"}`}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <StatusBadge label="Upcoming" variant="info" className="text-[10px]" />
@@ -478,7 +505,7 @@ export function PublicEventsBrowser() {
           {pastEvents.length ? (
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {paginatedPastEvents.map((event) => (
-                <article key={event.id} className="flex h-full flex-col rounded-[1.5rem] border border-[rgba(148,163,184,0.16)] bg-white/68 p-5 backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-[rgba(37,99,235,0.16)] hover:bg-white hover:shadow-[0_16px_32px_rgba(37,99,235,0.08)]">
+                <article key={event.id} className={`flex h-full flex-col rounded-[1.5rem] border p-5 backdrop-blur-sm transition duration-300 ${isHighlightedEvent(event) ? "app-card-soft border-[rgba(37,99,235,0.32)] shadow-[0_16px_32px_rgba(37,99,235,0.10)]" : "app-card hover:-translate-y-1 hover:border-[rgba(37,99,235,0.16)] hover:shadow-[0_16px_32px_rgba(37,99,235,0.08)]"}`}>
                   <div className="flex items-start justify-between gap-3">
                     <h3 className="text-lg font-semibold text-[var(--color-primary-strong)]">{event.title}</h3>
                     <div className="flex flex-wrap items-center gap-2">

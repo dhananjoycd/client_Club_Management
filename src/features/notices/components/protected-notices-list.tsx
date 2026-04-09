@@ -7,8 +7,10 @@ import { format } from "date-fns";
 import { BellRing, PencilLine, Search } from "lucide-react";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { LoadingState } from "@/components/feedback/loading-state";
+import { AiSuggestionPanel } from "@/components/ai/ai-suggestion-panel";
 import { PaginationControls } from "@/components/shared/pagination-controls";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { AiSearchItem } from "@/lib/ai/types";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { queryKeys } from "@/lib/query-keys";
 import { authService } from "@/services/auth.service";
@@ -30,6 +32,7 @@ const isEditedNotice = (createdAt: string, updatedAt: string) => new Date(update
 export function ProtectedNoticesList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const sessionQuery = useQuery({
     queryKey: queryKeys.auth.session,
@@ -42,6 +45,14 @@ export function ProtectedNoticesList() {
     queryFn: () => noticeService.getNotices({ limit: PUBLIC_NOTICE_FETCH_LIMIT, page: 1 }),
     enabled: Boolean(sessionQuery.data?.data?.user),
   });
+
+  const allNotices = useMemo(() => noticesQuery.data?.data.result ?? [], [noticesQuery.data]);
+  const aiSearchItems = useMemo<AiSearchItem[]>(() => allNotices.map((notice) => ({
+    title: notice.title,
+    summary: notice.content,
+    keywords: [audienceLabels[notice.audience] ?? notice.audience, "notice", "announcement"],
+    href: "/notices",
+  })), [allNotices]);
 
   useEffect(() => {
     setPage(1);
@@ -75,8 +86,8 @@ export function ProtectedNoticesList() {
     return <EmptyState title="Unable to load notices" description={getApiErrorMessage(noticesQuery.error, "Please try again later.")} />;
   }
 
-  const allNotices = noticesQuery.data?.data.result ?? [];
   const normalizedSearch = searchTerm.trim().toLowerCase();
+  const isHighlightedNotice = (title: string, content: string) => normalizedSearch.length >= 3 && [title, content].some((value) => value.toLowerCase().includes(normalizedSearch));
   const filteredNotices = allNotices.filter((notice) => {
     if (!normalizedSearch) return true;
     return [notice.title, notice.content].some((value) => value.toLowerCase().includes(normalizedSearch));
@@ -88,19 +99,36 @@ export function ProtectedNoticesList() {
   return (
     <div className="grid gap-5">
       <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-page)] p-4 sm:p-5">
-        <label className="grid gap-2">
-          <span className="text-sm font-medium text-[var(--color-primary-strong)]">Search notices</span>
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-muted-foreground)]" />
-            <input
-              name="notice-search"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Search by title or content"
-              className="input-base h-12 w-full pl-11 pr-4 text-sm"
-            />
-          </div>
-        </label>
+        <div className="grid gap-3">
+          <label className="grid gap-2">
+            <span className="text-sm font-medium text-[var(--color-primary-strong)]">Search notices</span>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-muted-foreground)]" />
+              <input
+                name="notice-search"
+                value={searchTerm}
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => window.setTimeout(() => setIsSearchFocused(false), 120)}
+                onChange={(event) => {
+                  setSearchTerm(event.target.value);
+                  setIsSearchFocused(true);
+                }}
+                placeholder="Search by title or content"
+                className="input-base h-12 w-full pl-11 pr-4 text-sm"
+              />
+            </div>
+          </label>
+          <AiSuggestionPanel
+            query={searchTerm}
+            scope="notices"
+            items={aiSearchItems}
+            active={isSearchFocused}
+            onSelect={(value) => {
+              setSearchTerm(value);
+              setIsSearchFocused(false);
+            }}
+          />
+        </div>
       </div>
 
       {!notices.length ? (
@@ -119,7 +147,7 @@ export function ProtectedNoticesList() {
               const edited = isEditedNotice(notice.createdAt, notice.updatedAt);
 
               return (
-                <article key={notice.id} className="rounded-[1.5rem] border border-[var(--color-border)] bg-white p-5 shadow-sm">
+                <article key={notice.id} className={`rounded-[1.5rem] border p-5 shadow-sm transition ${isHighlightedNotice(notice.title, notice.content) ? "app-card-soft border-[rgba(37,99,235,0.32)] shadow-[0_16px_32px_rgba(37,99,235,0.08)]" : "app-card"}`}>
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="space-y-2">
                       <div className="inline-flex rounded-2xl bg-[var(--color-primary-soft)] p-2 text-[var(--color-primary)]">
