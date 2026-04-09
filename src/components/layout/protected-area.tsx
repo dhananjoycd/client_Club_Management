@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { LoadingState } from "@/components/feedback/loading-state";
 import { queryKeys } from "@/lib/query-keys";
+import { getDashboardRouteForRole } from "@/lib/dashboard-route";
 import { authService } from "@/services/auth.service";
 
 type ProtectedAreaProps = {
@@ -41,7 +42,7 @@ function ProtectedAreaContent({ children, allowedRoles }: ProtectedAreaProps) {
     }
 
     if (!allowedRoles.includes(user.role)) {
-      const fallback = user.role === "USER" || user.role === "MEMBER" ? "/account" : "/admin";
+      const fallback = getDashboardRouteForRole(user.role) ?? "/";
       router.replace(fallback);
     }
   }, [allowedRoles, pathname, router, search, sessionQuery.data, sessionQuery.isLoading]);

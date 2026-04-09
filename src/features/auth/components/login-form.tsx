@@ -4,13 +4,15 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { FormActions } from "@/components/forms/form-actions";
 import { FormField } from "@/components/forms/form-field";
 import { PasswordField } from "@/components/forms/password-field";
 import { getApiErrorMessage } from "@/lib/api-error";
+import { getDemoLoginCredentials } from "@/lib/demo-login";
+import { getDashboardRouteForRole } from "@/lib/dashboard-route";
 import { queryKeys } from "@/lib/query-keys";
 import { loginSchema } from "@/schemas/auth.schema";
 import { authService } from "@/services/auth.service";
@@ -25,7 +27,7 @@ export function LoginForm() {
   const resetStatus = searchParams.get("reset");
   const socialStatus = searchParams.get("social");
   const sessionQuery = useQuery({ queryKey: queryKeys.auth.session, queryFn: authService.getSession, retry: false });
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginPayload>({ resolver: zodResolver(loginSchema), defaultValues: { email: "", password: "", rememberMe: false } });
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<LoginPayload>({ resolver: zodResolver(loginSchema), defaultValues: { email: "", password: "", rememberMe: false } });
 
   const loginMutation = useMutation({
     mutationFn: authService.login,
@@ -34,21 +36,29 @@ export function LoginForm() {
       await queryClient.refetchQueries({ queryKey: queryKeys.auth.session, type: "active" });
       toast.success("Welcome back. Your account is ready.");
       const user = response.data?.user;
-      const fallback = user?.role === "USER" || user?.role === "MEMBER" ? "/account" : "/admin";
-      const nextPath = user?.role === "USER" || user?.role === "MEMBER" ? (redirectTo || fallback) : "/admin";
+      const fallback = getDashboardRouteForRole(user?.role) ?? "/";
+      const nextPath = user?.role === "USER" || user?.role === "MEMBER" ? (redirectTo || fallback) : fallback;
       router.push(nextPath);
     },
   });
 
   const currentUser = sessionQuery.data?.data?.user;
+  const demoCredentials = useMemo(() => getDemoLoginCredentials(), []);
 
   useEffect(() => {
     if (!currentUser) return;
 
-    const fallback = currentUser.role === "USER" || currentUser.role === "MEMBER" ? "/account" : "/admin";
-    const nextPath = currentUser.role === "USER" || currentUser.role === "MEMBER" ? (redirectTo || fallback) : "/admin";
+    const fallback = getDashboardRouteForRole(currentUser.role) ?? "/";
+    const nextPath = currentUser.role === "USER" || currentUser.role === "MEMBER" ? (redirectTo || fallback) : fallback;
     router.replace(nextPath);
   }, [currentUser, redirectTo, router]);
+
+  const handleDemoFill = (email: string, password: string) => {
+    setValue("email", email, { shouldDirty: true, shouldTouch: true, shouldValidate: true });
+    setValue("password", password, { shouldDirty: true, shouldTouch: true, shouldValidate: true });
+    setValue("rememberMe", true, { shouldDirty: true, shouldTouch: true });
+    toast.success("Demo credentials filled in. You can sign in now.");
+  };
 
   const handleLogin = (values: LoginPayload) => {
     loginMutation.mutate(values, {
@@ -87,6 +97,31 @@ export function LoginForm() {
       <form className="grid gap-5" onSubmit={handleSubmit(handleLogin)} noValidate>
         <FormField label="Email address" type="email" placeholder="member@example.com" autoComplete="email" disabled={loginMutation.isPending} error={errors.email} {...register("email")} />
         <PasswordField label="Password" placeholder="Enter your password" autoComplete="current-password" disabled={loginMutation.isPending} error={errors.password} {...register("password")} />
+        {demoCredentials.length ? (
+          <div className="grid gap-3 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-page)] p-4">
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-[var(--color-primary)]">Demo login</p>
+              <p className="text-sm text-[var(--color-muted-foreground)]">Use role-based demo accounts for review, testing, or presentation. These buttons only appear when demo credentials are configured.</p>
+            </div>
+            <div className="grid gap-2">
+              {demoCredentials.map((credential) => (
+                <button
+                  key={credential.role}
+                  type="button"
+                  onClick={() => handleDemoFill(credential.email, credential.password)}
+                  disabled={loginMutation.isPending}
+                  className="flex items-start justify-between gap-3 rounded-[1.25rem] border border-[var(--color-border)] bg-white px-4 py-3 text-left transition hover:border-[var(--color-accent)] hover:bg-[var(--color-background)] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <span className="grid gap-1">
+                    <span className="text-sm font-semibold text-[var(--color-primary)]">{credential.label}</span>
+                    <span className="text-xs leading-5 text-[var(--color-muted-foreground)]">{credential.description}</span>
+                  </span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-secondary)]">Auto fill</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
         <label className="flex items-center gap-3 text-sm text-[var(--color-muted-foreground)]"><input type="checkbox" className="h-4 w-4" disabled={loginMutation.isPending} {...register("rememberMe")} /><span>Keep me signed in</span></label>
         <FormActions
           isSubmitting={loginMutation.isPending}

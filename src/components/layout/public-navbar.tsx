@@ -9,6 +9,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { cn } from "@/lib/utils";
+import { getDashboardRouteForRole } from "@/lib/dashboard-route";
 import { queryKeys } from "@/lib/query-keys";
 import { authService } from "@/services/auth.service";
 import { accountService } from "@/services/account.service";
@@ -62,7 +63,7 @@ export function PublicNavbar() {
   const isNavbarAuthLoading = sessionQuery.isLoading || (shouldLoadMemberData && (accountProfileQuery.isLoading || applicationQuery.isLoading));
   const organizationName = settings?.organizationName?.trim() || "XYZ Tech Club";
   const logoImage = settings?.logoUrl?.trim() || null;
-  const dashboardHref = user?.role === "USER" || user?.role === "MEMBER" ? "/account" : user ? "/admin" : null;
+  const dashboardHref = getDashboardRouteForRole(user?.role);
   const restrictedRoles = new Set(["MEMBER", "ADMIN", "SUPER_ADMIN", "EVENT_MANAGER"]);
   const latestApplication = [...(applicationQuery.data?.data?.result ?? [])]
     .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())[0];

@@ -11,6 +11,7 @@ import { FormField } from "@/components/forms/form-field";
 import { PasswordField } from "@/components/forms/password-field";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { queryKeys } from "@/lib/query-keys";
+import { getDashboardRouteForRole } from "@/lib/dashboard-route";
 import { registerSchema } from "@/schemas/auth.schema";
 import { authService } from "@/services/auth.service";
 import { RegisterPayload } from "@/types/auth.types";
@@ -40,7 +41,7 @@ export function RegisterForm() {
   });
 
   const currentUser = sessionQuery.data?.data?.user;
-  const dashboardHref = currentUser?.role === "USER" || currentUser?.role === "MEMBER" ? "/account" : "/admin";
+  const dashboardHref = getDashboardRouteForRole(currentUser?.role) ?? "/";
 
   if (currentUser) {
     return (
