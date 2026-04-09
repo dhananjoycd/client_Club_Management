@@ -144,10 +144,11 @@ export async function generateGeminiAssistantReply(
     confidence?: "high" | "medium" | "low";
   } | null;
 
-  const answer = result?.answer?.trim();
-  if (!answer) {
+  if (!result?.answer?.trim()) {
     return null;
   }
+
+  const answer = result.answer.trim();
 
   return {
     answer,
