@@ -42,6 +42,7 @@ function getEventStatus(event: EventItem) {
 function getRegistrationLabel(status?: RegistrationStatus) {
   if (status === "WAITLISTED") return "Waitlisted";
   if (status === "REGISTERED") return "Registered";
+  if (status === "CANCELLED") return "Register Again";
   return null;
 }
 
@@ -198,6 +199,7 @@ export function PublicEventsBrowser() {
     const isPast = getEventStatus(event) === "past";
     const isFull = getRegistrationCount(event) >= event.capacity;
     const isRegistrationOpen = event.isRegistrationOpen !== false;
+    const isCancelledRegistration = registration?.status === "CANCELLED";
 
     if (registration?.paymentVerificationStatus === "PENDING_VERIFICATION") {
       return (
@@ -219,6 +221,21 @@ export function PublicEventsBrowser() {
         <button type="button" disabled className="secondary-button h-11 w-full cursor-not-allowed px-5 text-sm opacity-70 sm:w-auto">
           {registrationLabel}
         </button>
+      );
+    }
+
+    if (isCancelledRegistration) {
+      return (
+        <div className="flex w-full flex-col gap-2 sm:w-auto">
+          <button type="button" onClick={() => openRegistrationWarning(event)} disabled={registerMutation.isPending && registerMutation.variables === event.id} className="primary-button h-11 w-full px-5 text-sm sm:w-auto">
+            {registerMutation.isPending && registerMutation.variables === event.id
+              ? "Registering..."
+              : event.eventType === "PAID"
+                ? `Register Again - Pay ${event.price ?? 0} BDT`
+                : "Register Again"}
+          </button>
+          <p className="text-xs leading-5 text-[var(--color-muted-foreground)]">Your previous registration was cancelled, so you can submit a new one from here.</p>
+        </div>
       );
     }
 
@@ -281,7 +298,6 @@ export function PublicEventsBrowser() {
       </button>
     );
   };
-
   return (
     <div className="grid gap-6">
       <MotionReveal>

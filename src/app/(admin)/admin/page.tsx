@@ -3,7 +3,7 @@ import { AdminDashboardOverview } from "@/features/dashboard/components/admin-da
 
 export default function AdminOverviewPage() {
   return (
-    <ProtectedArea allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
+    <ProtectedArea allowedRoles={["ADMIN", "SUPER_ADMIN", "EVENT_MANAGER"]}>
       <AdminDashboardOverview />
     </ProtectedArea>
   );

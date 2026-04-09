@@ -150,14 +150,17 @@ export function PublicEventDetails({ eventId }: PublicEventDetailsProps) {
   const registrationCount = getActiveRegistrationCount(event._count?.registrations, event.registrations);
   const isFull = registrationCount >= event.capacity;
   const isRegistrationOpen = event.isRegistrationOpen !== false;
+  const isReRegistering = currentRegistration?.status === "CANCELLED";
 
   const warningContent = {
-    title: event.eventType === "PAID" ? "Review payment before continuing" : "Confirm your registration",
+    title: isReRegistering ? "Confirm your new registration" : event.eventType === "PAID" ? "Review payment before continuing" : "Confirm your registration",
     description:
-      event.eventType === "PAID"
-        ? `You are about to continue to Stripe to pay ${event.price ?? 0} BDT for this event. Please confirm that your profile details are correct before proceeding.`
-        : "You are about to register for this event using your saved profile details. Please confirm that everything is correct before continuing.",
-    confirmLabel: event.eventType === "PAID" ? "Continue to Stripe" : isFull ? "Join Waitlist" : "Confirm Registration",
+      isReRegistering
+        ? "Your previous registration was cancelled. You can submit a fresh registration now using your saved profile details. Please confirm that everything is correct before continuing."
+        : event.eventType === "PAID"
+          ? `You are about to continue to Stripe to pay ${event.price ?? 0} BDT for this event. Please confirm that your profile details are correct before proceeding.`
+          : "You are about to register for this event using your saved profile details. Please confirm that everything is correct before continuing.",
+    confirmLabel: isReRegistering ? "Register Again" : event.eventType === "PAID" ? "Continue to Stripe" : isFull ? "Join Waitlist" : "Confirm Registration",
   };
 
   const openRegistrationWarning = () => setIsWarningOpen(true);
@@ -216,6 +219,22 @@ export function PublicEventDetails({ eventId }: PublicEventDetailsProps) {
       );
     }
 
+    if (currentRegistration?.status === "CANCELLED") {
+      return (
+        <div className="flex w-full flex-col gap-2 sm:w-auto">
+          <button
+            type="button"
+            onClick={openRegistrationWarning}
+            disabled={registerMutation.isPending}
+            className="primary-button h-12 w-full px-6 text-sm sm:w-auto"
+          >
+            {registerMutation.isPending ? "Registering..." : event.eventType === "PAID" ? `Register Again - Pay ${event.price ?? 0} BDT` : "Register Again"}
+          </button>
+          <p className="text-xs leading-5 text-[var(--color-muted-foreground)]">Your previous registration was cancelled. You can register again with the same account.</p>
+        </div>
+      );
+    }
+
     if (!user) {
       return (
         <Link href="/login" className="secondary-button h-12 w-full px-6 text-sm sm:w-auto">
@@ -265,7 +284,7 @@ export function PublicEventDetails({ eventId }: PublicEventDetailsProps) {
         disabled={registerMutation.isPending}
         className="primary-button h-12 w-full px-6 text-sm sm:w-auto"
       >
-        {registerMutation.isPending ? "Registering..." : event.eventType === "PAID" ? `Pay ${event.price ?? 0} BDT` : isFull ? "Join Waitlist" : "Register Now"}
+          {registerMutation.isPending ? "Registering..." : event.eventType === "PAID" ? `Pay ${event.price ?? 0} BDT` : isFull ? "Join Waitlist" : "Register Now"}
       </button>
     );
   };
@@ -315,6 +334,9 @@ export function PublicEventDetails({ eventId }: PublicEventDetailsProps) {
                   {renderRegisterAction()}
                   <Link href="/events" className="secondary-button h-12 w-full px-6 text-sm">Back to Events</Link>
                 </div>
+                {currentRegistration?.status === "CANCELLED" ? (
+                  <p className="mt-3 text-xs leading-5 text-[var(--color-muted-foreground)]">Cancelled registrations stay in history, but they do not block a new registration.</p>
+                ) : null}
               </div>
             </div>
           </section>

@@ -10,9 +10,20 @@ export type EventRegistrationResponse = {
   registration?: RegistrationItem | null;
 };
 
+export type SendEventEnrollmentEmailPayload = {
+  registrationIds: string[];
+  subject: string;
+  message: string;
+};
+
 export const eventService = {
-  async getEvents(params?: Record<string, string | number | boolean | undefined>) {
-    const { data } = await api.get<ApiResponse<ApiListData<EventItem>>>("/events", { params });
+  async getEvents(
+    params?: Record<string, string | number | boolean | undefined>,
+  ) {
+    const { data } = await api.get<ApiResponse<ApiListData<EventItem>>>(
+      "/events",
+      { params },
+    );
     return data;
   },
 
@@ -22,12 +33,16 @@ export const eventService = {
   },
 
   async registerForEvent(id: string) {
-    const { data } = await api.post<ApiResponse<EventRegistrationResponse>>(`/events/${id}/register`);
+    const { data } = await api.post<ApiResponse<EventRegistrationResponse>>(
+      `/events/${id}/register`,
+    );
     return data;
   },
 
   async markPaymentVerificationFailed(id: string) {
-    const { data } = await api.post<ApiResponse<RegistrationItem | null>>(`/events/${id}/payment-failed`);
+    const { data } = await api.post<ApiResponse<RegistrationItem | null>>(
+      `/events/${id}/payment-failed`,
+    );
     return data;
   },
 
@@ -40,25 +55,48 @@ export const eventService = {
       currency: payload.eventType === "PAID" ? "bdt" : undefined,
       price: payload.eventType === "PAID" ? payload.price : undefined,
     };
-    const { data } = await api.post<ApiResponse<EventItem>>("/events", normalizedPayload);
+    const { data } = await api.post<ApiResponse<EventItem>>(
+      "/events",
+      normalizedPayload,
+    );
     return data;
   },
 
   async updateEvent(id: string, payload: Partial<EventSchema>) {
     const normalizedPayload = {
       ...payload,
-      ...(payload.eventDate ? { eventDate: new Date(payload.eventDate).toISOString() } : {}),
-      ...(payload.imageUrl !== undefined ? { imageUrl: payload.imageUrl || undefined } : {}),
-      ...(payload.category !== undefined ? { category: payload.category || undefined } : {}),
+      ...(payload.eventDate
+        ? { eventDate: new Date(payload.eventDate).toISOString() }
+        : {}),
+      ...(payload.imageUrl !== undefined
+        ? { imageUrl: payload.imageUrl || undefined }
+        : {}),
+      ...(payload.category !== undefined
+        ? { category: payload.category || undefined }
+        : {}),
       ...(payload.currency !== undefined ? { currency: "bdt" } : {}),
       ...(payload.price !== undefined ? { price: payload.price } : {}),
     };
-    const { data } = await api.patch<ApiResponse<EventItem>>(`/events/${id}`, normalizedPayload);
+    const { data } = await api.patch<ApiResponse<EventItem>>(
+      `/events/${id}`,
+      normalizedPayload,
+    );
     return data;
   },
 
   async deleteEvent(id: string) {
     const { data } = await api.delete<ApiResponse<null>>(`/events/${id}`);
+    return data;
+  },
+
+  async sendEventEnrollmentEmail(
+    id: string,
+    payload: SendEventEnrollmentEmailPayload,
+  ) {
+    const { data } = await api.post<ApiResponse<null>>(
+      `/events/${id}/enrollment-emails`,
+      payload,
+    );
     return data;
   },
 };
