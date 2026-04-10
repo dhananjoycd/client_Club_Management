@@ -83,6 +83,14 @@ The system is designed for a university tech club or student organization where:
 - committee assignment workspace
 - site settings management
 
+#### AI Features
+
+- AI help assistant on the contact page for quick club support
+- AI-assisted event search suggestions
+- AI-assisted notice search suggestions
+- Gemini-powered responses with local fallback mode
+- contextual event recommendations and follow-up prompt suggestions
+
 ### Frontend Routes
 
 #### Public Routes
@@ -141,7 +149,10 @@ src/
     (auth)/
     (member)/
     (admin)/
+    api/
+      ai/
   components/
+    ai/
   features/
     account/
     applications/
@@ -162,6 +173,7 @@ src/
   schemas/
   providers/
   lib/
+    ai/
   types/
 ```
 
@@ -171,6 +183,11 @@ Create a `.env.local` file in the project root:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+
+# Optional AI assistant configuration
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini-2.5-flash-lite
+GEMINI_MODELS=gemini-2.5-flash-lite,gemini-2.5-flash,gemini-2.5-pro
 ```
 
 ### Frontend Scripts
