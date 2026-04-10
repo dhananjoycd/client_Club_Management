@@ -1,5 +1,6 @@
 import { aiQuickPrompts, knowledgeSections } from "@/lib/ai/knowledge-base";
 import {
+  AiAssistantLink,
   AiAssistantMessage,
   AiAssistantResponse,
   AiSearchItem,
@@ -88,6 +89,11 @@ export function createLocalSearchSuggestions(
 export function createLocalAssistantReply(
   message: string,
   history: AiAssistantMessage[] = [],
+  options?: {
+    preferredSectionIds?: string[];
+    dynamicSummary?: string[];
+    additionalLinks?: AiAssistantLink[];
+  },
 ): AiAssistantResponse {
   const tokens = tokenize(
     `${history.map((item) => item.content).join(" ")} ${message}`,
@@ -104,7 +110,7 @@ export function createLocalAssistantReply(
           return total + 3;
         if (section.body.toLowerCase().includes(token)) return total + 2;
         return total;
-      }, 0);
+      }, 0) + (options?.preferredSectionIds?.includes(section.id) ? 4 : 0);
       return { section, score };
     })
     .sort((a, b) => b.score - a.score);
@@ -142,8 +148,15 @@ export function createLocalAssistantReply(
     )
     .join("\n\n");
 
+  const dynamicSummary = (options?.dynamicSummary ?? [])
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("\n\n");
+
   const relatedLinks = sectionsToUse
     .flatMap(({ section }) => section.links)
+    .concat(options?.additionalLinks ?? [])
     .filter(
       (link, index, list) =>
         list.findIndex((item) => item.href === link.href) === index,
@@ -154,7 +167,7 @@ export function createLocalAssistantReply(
     .slice(0, 3);
 
   return {
-    answer,
+    answer: dynamicSummary ? `${dynamicSummary}\n\n${answer}` : answer,
     relatedLinks,
     recommendedEvents: [],
     suggestedPrompts,

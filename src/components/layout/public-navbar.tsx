@@ -126,8 +126,8 @@ export function PublicNavbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[rgba(249,251,254,0.78)] backdrop-blur-xl supports-[backdrop-filter]:bg-[rgba(249,251,254,0.68)] dark:bg-[color-mix(in_srgb,var(--color-page)_82%,transparent)] dark:supports-[backdrop-filter]:bg-[color-mix(in_srgb,var(--color-page)_72%,transparent)]">
       <div className="mx-auto flex min-h-[4.75rem] w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-3 text-[var(--color-primary-strong)] transition-transform duration-200 hover:scale-[1.01]">
-          <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-[linear-gradient(135deg,var(--color-primary-strong),var(--color-primary))] text-sm font-semibold text-white shadow-[0_16px_32px_rgba(15,76,189,0.24)]">
+        <Link href="/" className="flex min-w-0 items-center gap-2.5 text-[var(--color-primary-strong)] transition-transform duration-200 hover:scale-[1.01] sm:gap-3">
+          <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl border border-white/30 bg-[linear-gradient(135deg,var(--color-primary-strong),var(--color-primary))] text-sm font-semibold text-white shadow-[0_16px_32px_rgba(15,76,189,0.24)] dark:border-white/10 dark:shadow-[0_14px_30px_rgba(2,8,23,0.5)]">
             {logoImage ? (
               <span className="relative block h-full w-full">
                 <Image src={logoImage} alt={`${organizationName} logo`} fill className="object-cover" sizes="44px" unoptimized />
@@ -136,13 +136,17 @@ export function PublicNavbar() {
               organizationName.slice(0, 2).toUpperCase()
             )}
           </span>
-          <span className="hidden min-w-0 text-left sm:block">
-            <span className="block text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--color-secondary)]">Build / Learn / Lead</span>
-            <span className="block truncate text-xl font-semibold tracking-tight text-[var(--color-primary-strong)]">{organizationName}</span>
+          <span className="min-w-0 max-w-[9.5rem] text-left leading-tight sm:max-w-[14.5rem] md:max-w-[18rem]">
+            <span className="block whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--color-secondary)]">
+              Build • Learn • Lead
+            </span>
+            <span className="mt-0.5 block truncate text-[1.28rem] font-semibold tracking-[-0.012em] text-[var(--color-primary-strong)]">
+              {organizationName}
+            </span>
           </span>
         </Link>
 
-        <nav className="surface-card hidden items-center gap-1 rounded-full px-2 py-2 md:flex">
+        <nav className="surface-card hidden items-center gap-1 rounded-full px-2 py-2 lg:flex">
           {publicLinks.map((link) => {
             const isAnchorLink = link.href.startsWith("/#");
             const linkHash = isAnchorLink ? link.href.slice(1) : "";
@@ -165,7 +169,7 @@ export function PublicNavbar() {
           })}
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-3 lg:flex">
           {isNavbarAuthLoading ? (
             <div className="flex items-center gap-3" aria-hidden="true">
               <div className="h-11 w-11 animate-pulse rounded-full border border-[var(--color-border)] bg-[var(--color-surface-strong)]" />
@@ -198,14 +202,14 @@ export function PublicNavbar() {
           aria-label={isOpen ? "Close navigation" : "Open navigation"}
           aria-expanded={isOpen}
           onClick={() => setIsOpen((current) => !current)}
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface-strong)] text-[var(--color-primary-strong)] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-primary-soft)] hover:shadow-md md:hidden"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface-strong)] text-[var(--color-primary-strong)] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-primary-soft)] hover:shadow-md lg:hidden"
         >
           {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
       {isOpen ? (
-        <div className="border-t border-[var(--color-border)] bg-[rgba(249,251,254,0.96)] dark:bg-[color-mix(in_srgb,var(--color-page)_92%,transparent)] md:hidden">
+        <div className="border-t border-[var(--color-border)] bg-[rgba(249,251,254,0.96)] dark:bg-[color-mix(in_srgb,var(--color-page)_92%,transparent)] lg:hidden">
           <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-4 sm:px-6">
             <nav className="rounded-[var(--radius-panel)] app-card-subtle dark:bg-[var(--color-surface-strong)] p-2">
               <div className="grid gap-1.5">

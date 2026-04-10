@@ -120,7 +120,7 @@ export function PublicContactView() {
         </div>
 
         <SectionWrapper
-          title="AI help assistant"
+          title="AI assistant for quick help"
           description="Ask quick project questions about events, notices, membership, payment flow, or event manager access before sending a support request."
         >
           <AiHelpAssistant />
